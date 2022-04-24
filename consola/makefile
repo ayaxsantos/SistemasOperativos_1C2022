@@ -2,7 +2,7 @@
 LIBRARIES=commons pthread
 # Include custom library paths here
 SHARED_LIBRARY_PATHS=
-STATIC_LIBRARY_PATHS=
+STATIC_LIBRARY_PATHS=../carpisLib
 
 # ==============================================================================================================
 

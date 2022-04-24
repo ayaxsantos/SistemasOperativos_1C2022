@@ -10,14 +10,18 @@
 #include <commons/string.h>
 #include <commons/collections/list.h>
 #include <commons/config.h>
-#include "utils/clienteutils.h"
-#include "utils/serverutils.h"
+#include "../utils/clienteutils.h"
+#include "../utils/serverutils.h"
 
 #define ERROR -1
 #define UNDEFINED -100
 
 typedef enum
 {   
+	INSTRUCCIONES,
+	HANDSHAKE,
+	FIN_PROCESO,
+	MSJ
     /*A definir*/
 }func_code;
 
@@ -27,6 +31,11 @@ typedef struct
 	t_buffer* buffer;
 } t_funcion;
 
+typedef struct
+{
+	t_list *instrucciones;
+	int tamanio;
+} t_consola;
 /**
  * @name habilitar_log
  * 
@@ -35,6 +44,6 @@ typedef struct
  */
 void habilitar_log(t_log *log, int habilitacion_log);
 
-#include "utils/utilslib.h"
+#include "../utils/utilslib.h"
 
 #endif

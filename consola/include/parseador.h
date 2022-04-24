@@ -1,0 +1,4 @@
+#ifndef PARSEADOR_H_INCLUDED
+#define PARSEADOR_H_INCLUDED
+
+#endif
