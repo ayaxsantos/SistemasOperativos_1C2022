@@ -4,8 +4,10 @@ int main(void)
 {
     iniciar_logger();
     iniciar_config();
+
     conexion();
 
+    liberar_memoria();
     return EXIT_SUCCESS;
 }
 
@@ -37,5 +39,11 @@ void iniciar_config()
     una_config_kernel.grado_multiprogramacion = config_get_int_value(una_config,"GRADO_MULTIPROGRAMACION");
     una_config_kernel.tiempo_max_bloqueado = config_get_int_value(una_config,"TIEMPO_MAXIMO_BLOQUEADO");
 
-    free(una_config);
+    config_destroy(una_config);
+}
+
+void liberar_memoria()
+{
+    //Ir agregando mas adelante los free/destroy necesarios!
+    log_destroy(un_logger);
 }
