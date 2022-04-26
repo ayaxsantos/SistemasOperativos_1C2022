@@ -14,18 +14,19 @@ int main(void)
 void iniciar_logger()
 {
     t_log_level nivel_log = LOG_LEVEL_INFO;
-    un_logger = log_create("../kernel.log","kernel",true,nivel_log);
+    un_logger = log_create("kernel.log","kernel",true,nivel_log);
 
     if(un_logger == NULL)
     {
         write(0,"ERROR -> No se pudo crear el log \n",30);
         exit(EXIT_FAILURE);
     }
+    log_info(un_logger,"---------------- Log modulo KERNEL ----------------");
 }
 
 void iniciar_config()
 {
-    t_config *una_config = config_create("../kernel.config");
+    t_config *una_config = config_create("./kernel.config");
 
     una_config_kernel.ip_memoria = config_get_string_value(una_config,"IP_MEMORIA");
     una_config_kernel.puerto_memoria = config_get_string_value(una_config,"PUERTO_MEMORIA");

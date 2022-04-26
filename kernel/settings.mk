@@ -1,9 +1,9 @@
 # Libraries
-LIBS= commons pthread
+LIBS= carpisLib commons pthread
 
 # Custom libraries' paths
 SHARED_LIBPATHS=
-STATIC_LIBPATHS=../carpisLib
+STATIC_LIBPATHS= ../carpisLib
 
 # Compiler flags
 CDEBUG=-g -Wall -DDEBUG

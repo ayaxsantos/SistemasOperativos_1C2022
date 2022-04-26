@@ -1,0 +1,20 @@
+[INFO] 02:32:56:011 kernel/(5811:5811): ---------------- Log modulo KERNEL ----------------
+[INFO] 03:11:46:086 kernel/(12234:12234): ---------------- Log modulo KERNEL ----------------
+[INFO] 03:11:46:103 kernel/(12234:12234): Kernel a la espera de conexiones ... 
+
+[ERROR] 03:12:50:323 kernel/(12234:12234): Mensaje no entendidoooo!!!
+[INFO] 03:13:55:881 kernel/(12740:12740): ---------------- Log modulo KERNEL ----------------
+[INFO] 03:13:55:888 kernel/(12740:12740): Kernel a la espera de conexiones ... 
+
+[ERROR] 03:14:05:322 kernel/(12740:12740): Mensaje no entendidoooo!!!
+[INFO] 03:17:13:106 kernel/(13197:13197): ---------------- Log modulo KERNEL ----------------
+[INFO] 03:17:13:137 kernel/(13197:13197): Kernel a la espera de conexiones ... 
+
+[INFO] 03:18:24:938 kernel/(13447:13447): ---------------- Log modulo KERNEL ----------------
+[INFO] 03:18:24:944 kernel/(13447:13447): Kernel a la espera de conexiones ... 
+
+[INFO] 03:18:32:304 kernel/(13447:13447): Se conecto un proceso!! 😂
+[INFO] 03:19:33:697 kernel/(13620:13620): ---------------- Log modulo KERNEL ----------------
+[INFO] 03:19:33:704 kernel/(13620:13620): Kernel a la espera de conexiones ... 
+
+[INFO] 03:19:46:292 kernel/(13620:13620): Se conecto un proceso!! 😂

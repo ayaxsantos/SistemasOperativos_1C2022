@@ -2,6 +2,7 @@
 #define MAIN_H_INCLUDED
 
 #include <general/carpisLib.h>
+#include <utils/serverutils.h>
 #include <conexion.h>
 
 ///////////////////////////////////////////
