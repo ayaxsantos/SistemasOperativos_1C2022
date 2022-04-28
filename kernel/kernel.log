@@ -18,3 +18,7 @@
 [INFO] 03:19:33:704 kernel/(13620:13620): Kernel a la espera de conexiones ... 
 
 [INFO] 03:19:46:292 kernel/(13620:13620): Se conecto un proceso!! 😂
+[INFO] 03:30:06:566 kernel/(14899:14899): ---------------- Log modulo KERNEL ----------------
+[INFO] 03:30:06:651 kernel/(14899:14899): Kernel a la espera de conexiones ... 
+
+[INFO] 03:30:24:619 kernel/(14899:14899): Se conecto un proceso!! 😂

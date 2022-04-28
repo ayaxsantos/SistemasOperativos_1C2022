@@ -1,12 +1,15 @@
 #ifndef KERNEL_CONEXION_H
 #define KERNEL_CONEXION_H
 
-#include "./main.h"
+#include "main.h"
 
 ///////////////////////////////////////////
 
 int conexion(void);
 void gestionar_comunicacion_con_proceso(int);
+
+void responder_handshake(int);
+void inicializar_proceso(int);
 
 ///////////////////////////////////////////
 

@@ -43,8 +43,22 @@ void iniciar_config()
     config_destroy(una_config);
 }
 
+void iniciar_estructuras()
+{
+    procesos_en_new = list_create();
+    procesos_en_ready = list_create();
+    procesos_en_bloq = list_create();
+    procesos_en_exit = list_create();
+}
+
 void liberar_memoria()
 {
     //Ir agregando mas adelante los free/destroy necesarios!
+
+    list_destroy(procesos_en_new);
+    list_destroy(procesos_en_ready);
+    list_destroy(procesos_en_bloq);
+    list_destroy(procesos_en_exit);
+
     log_destroy(un_logger);
 }
