@@ -33,12 +33,6 @@ typedef struct config_kernel
     int tiempo_max_bloqueado;
 } t_config_kernel;
 
-typedef struct proceso
-{
-    estado un_estado;
-    t_pcb un_pcb;
-} t_proceso;
-
 typedef struct pcb
 {
     int pid;
@@ -50,6 +44,12 @@ typedef struct pcb
 
     int una_estimacion;
 } t_pcb;
+
+typedef struct proceso
+{
+    estado un_estado;
+    t_pcb un_pcb;
+} t_proceso;
 
 ///////////////////////////////////////////
 
