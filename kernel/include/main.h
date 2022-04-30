@@ -3,7 +3,7 @@
 
 #include <general/carpisLib.h>
 #include <utils/serverutils.h>
-#include <conexion.h>
+#include <pthread.h>
 
 ///////////////////////////////////////////
 
@@ -37,18 +37,18 @@ typedef struct pcb
 {
     int pid;
     unsigned int tamanio;
-    t_list unas_instrucciones;
+    t_list *unas_instrucciones;
     unsigned int program_counter;
 
     // Tabla de páginas
 
     int una_estimacion;
+    estado un_estado;
 } t_pcb;
 
 typedef struct proceso
 {
-    estado un_estado;
-    t_pcb un_pcb;
+    t_pcb *un_pcb;
 } t_proceso;
 
 ///////////////////////////////////////////
@@ -71,5 +71,7 @@ void iniciar_estructuras();
 void liberar_memoria();
 
 ///////////////////////////////////////////
+
+#include <conexion.h>
 
 #endif
