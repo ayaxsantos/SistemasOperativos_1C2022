@@ -4,6 +4,7 @@ int main(void)
 {
     iniciar_logger();
     iniciar_config();
+    iniciar_mutex();
 
     conexion();
 
@@ -26,7 +27,7 @@ void iniciar_logger()
 
 void iniciar_config()
 {
-    t_config *una_config = config_create("../kernel.config");
+    t_config *una_config = config_create("kernel.config");
 
     una_config_kernel.ip_memoria = config_get_string_value(una_config,"IP_MEMORIA");
     una_config_kernel.puerto_memoria = config_get_string_value(una_config,"PUERTO_MEMORIA");
@@ -49,6 +50,11 @@ void iniciar_estructuras()
     procesos_en_ready = list_create();
     procesos_en_bloq = list_create();
     procesos_en_exit = list_create();
+}
+
+void iniciar_mutex()
+{
+    pthread_mutex_init(&mutex_log,NULL);
 }
 
 void liberar_memoria()

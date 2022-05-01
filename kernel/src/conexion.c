@@ -3,7 +3,6 @@
 void conexion(void)
 {
     int socket_kernel_serv = iniciar_servidor("127.0.0.1", "25655");
-    int socket_proceso = 0;
     log_info(un_logger, "Kernel a la espera de conexiones ... \n");
 
     // Aca tendriamos que conectarnos con MEMORIA y CPU
@@ -11,7 +10,8 @@ void conexion(void)
 
     while(true)
     {
-        socket_proceso = esperar_cliente(socket_kernel_serv);
+        int *socket_proceso = malloc(sizeof(int));
+        *socket_proceso = esperar_cliente(socket_kernel_serv);
 
         pthread_t *hilo_proceso = malloc(sizeof(pthread_t));
 
@@ -22,23 +22,44 @@ void conexion(void)
 
 void *gestionar_comunicacion_con_proceso(void* socket_proceso_param)
 {
-    int *socket_proceso = (int*) socket_proceso_param;      //Casteo necesario por los argumentos, tambien necesario por pthread
-    func_code un_codigo = (func_code) recibir_operacion(*socket_proceso);
+    int socket_proceso = *((int*) socket_proceso_param);                 //Casteo necesario por los argumentos, tambien necesario por pthread_create
+    realizar_handshake(socket_proceso);
+
+    func_code un_codigo = (func_code) recibir_operacion(socket_proceso);
     switch(un_codigo)
     {
-        case HANDSHAKE:
-            log_info(un_logger,"Se conecto un proceso!! 😂");
-            responder_handshake(*socket_proceso);
-            break;
         case INSTRUCCIONES:
+            pthread_mutex_lock(&mutex_log);
             log_info(un_logger,"Recibi unas instrucciones!! 😁");
-            inicializar_proceso(*socket_proceso);
+            pthread_mutex_unlock(&mutex_log);
+            inicializar_proceso(socket_proceso);
             break;
         default:
+            pthread_mutex_lock(&mutex_log);
             log_error(un_logger,"Mensaje no entendidoooo!!!");
+            pthread_mutex_unlock(&mutex_log);
             break;
     }
     return NULL;
+}
+
+void realizar_handshake(int socket_proceso)
+{
+    func_code un_codigo = (func_code) recibir_operacion(socket_proceso);
+    if(un_codigo == HANDSHAKE)
+    {
+        pthread_mutex_lock(&mutex_log);
+        log_info(un_logger,"Se conecto un proceso!! 😂");
+        pthread_mutex_unlock(&mutex_log);
+        responder_handshake(socket_proceso);
+    }
+    else
+    {
+        pthread_mutex_lock(&mutex_log);
+        log_info(un_logger,"No se pudo realizar el handshake :c");
+        pthread_mutex_unlock(&mutex_log);
+        pthread_exit(NULL);     //Preguntar si podemos usar esto... creo que si jeje
+    }
 }
 
 void inicializar_proceso(int socket_proceso)
@@ -86,6 +107,17 @@ unsigned int obtener_id_hilo()
 void responder_handshake(int socket_proceso)
 {
     func_code un_codigo_funcion = HANDSHAKE;
+    responder_un_func_code(socket_proceso,un_codigo_funcion);
+}
+
+void responder_fin_proceso(int socket_proceso)
+{
+    func_code un_codigo_funcion = FIN_PROCESO;
+    responder_un_func_code(socket_proceso,un_codigo_funcion);
+}
+
+void responder_un_func_code(int socket_proceso, func_code un_codigo_funcion)
+{
     t_funcion *una_funcion = crear_funcion(un_codigo_funcion);
     enviar_funcion(una_funcion,socket_proceso);
 

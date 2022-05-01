@@ -64,10 +64,13 @@ t_list *procesos_en_ready;
 t_list *procesos_en_bloq;
 t_list *procesos_en_exit;
 
+pthread_mutex_t mutex_log;
+
 ///////////////////////////////////////////
 
 void iniciar_logger();
 void iniciar_config();
+void iniciar_mutex();
 
 void iniciar_estructuras();
 
