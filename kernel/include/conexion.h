@@ -12,6 +12,10 @@ void responder_handshake(int);
 void inicializar_proceso(int);
 t_pcb *inicializar_pcb(int);
 
+unsigned int obtener_tamanio(int);
+t_list *obtener_instrucciones(int socket_proceso);
+unsigned int obtener_id_hilo();
+
 ///////////////////////////////////////////
 
 #endif //KERNEL_CONEXION_H

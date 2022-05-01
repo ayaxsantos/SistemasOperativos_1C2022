@@ -3,7 +3,9 @@
 
 #include <general/carpisLib.h>
 #include <utils/serverutils.h>
+#include <utils/utilslib.h>
 #include <pthread.h>
+#include <sys/syscall.h>
 
 ///////////////////////////////////////////
 
@@ -40,7 +42,7 @@ typedef struct pcb
     t_list *unas_instrucciones;
     unsigned int program_counter;
 
-    // Tabla de páginas
+    //Tabla de paginas -> Proximas iteraciones
 
     int una_estimacion;
     estado un_estado;
@@ -48,6 +50,7 @@ typedef struct pcb
 
 typedef struct proceso
 {
+    int socket_proceso;
     t_pcb *un_pcb;
 } t_proceso;
 
