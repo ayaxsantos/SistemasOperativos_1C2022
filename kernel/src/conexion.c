@@ -5,13 +5,14 @@ void conexion(void)
     int socket_kernel_serv = iniciar_servidor("127.0.0.1", "25655");
     log_info(un_logger, "Kernel a la espera de conexiones ... \n");
 
+    int socket_proceso = 0;
+
     // Aca tendriamos que conectarnos con MEMORIA y CPU
     // En caso de no poder realizar la conexion, error!! Kernel Panic (?
 
     while(true)
     {
-        int *socket_proceso = malloc(sizeof(int));
-        *socket_proceso = esperar_cliente(socket_kernel_serv);
+        socket_proceso = esperar_cliente(socket_kernel_serv);
 
         pthread_t *hilo_proceso = malloc(sizeof(pthread_t));
 
