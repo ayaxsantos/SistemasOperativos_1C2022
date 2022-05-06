@@ -1,22 +1,6 @@
 #include "../include/main.h"
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <commons/string.h>
-#include <general/carpisLib.h>
 
 #define MAX_LEN 256
-
-typedef struct instruccion{
-	char* instruc;
-	int parametro1;
-	int parametro2;
-}t_instruccion;
-
-int es_un_identificador_valido(char* instruccion);
-int cantidad_de_parametros_validos(char* instruccion);
-int es_una_instruccion_valida(char* instruccion, int cantidad_de_parametros_recibidos);
-void monitorear_colita(t_queue *colita);
 
 int main(int argc, char *argv[])
 {
@@ -27,8 +11,9 @@ int main(int argc, char *argv[])
     FILE* archivo = malloc(sizeof(FILE));
     char *path = strdup(argv[1]);
     char *tamanio_proceso = argv[2];
-    t_queue *cola_instrucciones = queue_create();
+    cola_instrucciones = queue_create();
     int i = 0;
+    int j = 0;
     archivo = fopen(path, "r");
     if (archivo == NULL) {
       printf("No se pudo leer el archivo\n");
@@ -38,50 +23,43 @@ int main(int argc, char *argv[])
     char *buffer = malloc(sizeof(char));
     while (fgets(buffer, MAX_LEN, archivo))
     {
-    	char **aux; //= malloc(sizeof(char*));
-        // Remove trailing newline
+    	char **aux;
         buffer[strcspn(buffer, "\n")] = 0;
         aux = string_split(buffer, " ");
 
         una_instruccion = malloc(sizeof(t_instruccion));
         una_instruccion->instruc = aux[0];
-        if(strcmp(una_instruccion->instruc, "EXIT") != 0) {
-            una_instruccion->parametro1 = atoi(aux[1]);
-            //una_instruccion->parametro2 = atoi(aux[2]);
-        }
-        printf("Instruccion: %s\n", una_instruccion->instruc);
-        printf("Operador 1: %d\n", una_instruccion->parametro1);
-        printf("Operador 2: %d\n",una_instruccion->parametro2);
         if(strcmp(una_instruccion->instruc, "NO_OP") == 0){
-        	//Aqui multiplicar por el numero de que diga una_instruccion->parametro1
-        	i = 0;
-            int j = una_instruccion->parametro1;
+            i = 0;
+            j = atoi(aux[1]);
+            una_instruccion->parametro1 = 0;
+            una_instruccion->parametro2 = 0;
         	while(i < j){
-        	    queue_push(cola_instrucciones, una_instruccion);
+                queue_push(cola_instrucciones, una_instruccion);
         	    i++;
         	 }
         }
-        else {
+        else{
+            if(strcmp(una_instruccion->instruc, "I/O") == 0 || strcmp(una_instruccion->instruc, "READ") == 0){
+		        una_instruccion->parametro1 = atoi(aux[1]);
+                una_instruccion->parametro2 = 0;
+	        }
+            if(strcmp(una_instruccion->instruc, "WRITE") == 0 || strcmp(una_instruccion->instruc, "COPY") == 0){
+		        una_instruccion->parametro1 = atoi(aux[1]);
+                una_instruccion->parametro2 = atoi(aux[2]);
+	        }
+            if(strcmp(una_instruccion->instruc, "EXIT") == 0) {
+               una_instruccion->parametro1 = 0;
+               una_instruccion->parametro2 = 0;
+            }
             queue_push(cola_instrucciones, una_instruccion);
         }
-        //Prueba para contar los parametros ingresados
     }
+    //free(buffer); preguntar como liberar estos dos
+    //free(una_instruccion);
     monitorear_colita(cola_instrucciones);
     fclose(archivo);
-    return 0;
-}
-
-int es_un_identificador_valido(char* instruccion) {
-	if( strcmp(instruccion, "NO_OP") == 0 ||
-		strcmp(instruccion, "I/O") == 0 ||
-		strcmp(instruccion, "READ") == 0 ||
-		strcmp(instruccion, "WRITE") == 0 ||
-		strcmp(instruccion, "COPY") == 0 ||
-		strcmp(instruccion, "EXIT") == 0) {
-		return 1;
-	} else {
-		return 0;
-	}
+    return EXIT_SUCCESS;
 }
 
 void monitorear_colita(t_queue *colita) {
