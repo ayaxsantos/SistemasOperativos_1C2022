@@ -9,6 +9,7 @@
 #include <commons/log.h>
 #include <commons/string.h>
 #include <commons/collections/list.h>
+#include <commons/collections/queue.h>
 #include <commons/config.h>
 #include "../utils/clienteutils.h"
 #include "../utils/serverutils.h"
