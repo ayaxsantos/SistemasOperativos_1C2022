@@ -1,7 +1,6 @@
 #include "../include/main.h"
 
-int main(){
-
+int main() {
     arrancar_logger();
     leer_configuracion();
     habilitar_log(logger_memoria, 1);
@@ -44,6 +43,7 @@ void leer_configuracion() {
 
 void setear_estructuras_de_memoria() {
     memoria_principal = malloc(sizeof(t_memoria));
+
     if (config_memoria.tamanio_memoria % config_memoria.tamanio_pagina == 0){
 		memoria_principal->memoria = malloc(config_memoria.tamanio_memoria);
 		memoria_principal->tamanio_frame = config_memoria.tamanio_pagina;
