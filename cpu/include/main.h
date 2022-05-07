@@ -30,6 +30,8 @@ t_algoritmo tipo_algoritmo_tlb;
 t_config_cpu config_cpu;
 t_log *logger_cpu;
 
+int socket_memoria;
+
 void leer_configuracion();
 void arrancar_logger();
 void setear_algoritmo_reemplazo_tlb();
@@ -37,3 +39,4 @@ void setear_algoritmo_reemplazo_tlb();
 void liberar_configuracion_y_log();
 
 #include "mmu.h"
+#include "cpu.h"

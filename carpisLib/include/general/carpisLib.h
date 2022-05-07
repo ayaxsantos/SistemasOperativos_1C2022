@@ -1,5 +1,5 @@
-#ifndef MATELIB_H_INCLUDED
-#define MATELIB_H_INCLUDED
+#ifndef CARPISLIB_H_INCLUDED
+#define CARPISLIB_H_INCLUDED
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -31,16 +31,23 @@ typedef enum
 typedef enum
 {   
 	INSTRUCCIONES,
-	HANDSHAKE,
+    HANDSHAKE,
 	FIN_PROCESO,
 	MSJ
     /*A definir*/
-}func_code;
+}codigo_operacion;
+
+typedef enum
+{   
+	KERNEL,
+    CPU,
+    MEMORIA
+} modulo;
 
 /*** Generales ***/
 typedef struct
 {
-	func_code codigo_funcion;
+	codigo_operacion codigo_funcion;
 	t_buffer* buffer;
 } t_funcion;
 
@@ -82,6 +89,17 @@ typedef struct
  * @param bool habilitacion_log 
  */
 void habilitar_log(t_log *log, int habilitacion_log);
+
+void enviar_handshake(int *socket, modulo modulo_solicitante);
+
+/**
+ * @DESC: recibe el handshake, se debe realizar una funcion que obtenga los datos solicitados al
+ * servidor
+ * @param int* socket 
+ * @param funcion mapeador 
+ * @return int 
+ */
+int recibir_handshake(int *socket, void(*mapeador)(int*, modulo));
 
 #include "../utils/utilslib.h"
 
