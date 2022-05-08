@@ -22,9 +22,6 @@ typedef struct instruccion{
 
 ////////////////////////////////////////////////
 
-int es_un_identificador_valido(char* instruccion);
-int cantidad_de_parametros_validos(char* instruccion);
-int es_una_instruccion_valida(char* instruccion, int cantidad_de_parametros_recibidos);
 void monitorear_colita(t_queue *colita);
 
 ////////////////////////////////////////////////

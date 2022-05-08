@@ -54,9 +54,11 @@ int main(int argc, char *argv[])
             }
             queue_push(cola_instrucciones, una_instruccion);
         }
+    //free(aux); ====> Hay que liberar aux??
     }
     //free(buffer); preguntar como liberar estos dos
     //free(una_instruccion);
+
     monitorear_colita(cola_instrucciones);
     fclose(archivo);
     return EXIT_SUCCESS;
