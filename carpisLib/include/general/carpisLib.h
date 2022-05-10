@@ -31,7 +31,7 @@ typedef enum
 
 typedef enum
 {   
-	INSTRUCCIONES,
+	T_CONSOLA,
     HANDSHAKE,
     PCB,
 	FIN_PROCESO,
@@ -46,12 +46,36 @@ typedef enum
     MEMORIA
 } modulo;
 
+typedef enum
+{
+    NO_OP,
+    IO,
+    READ,
+    WRITE,
+    COPY,
+    I_EXIT
+} instruccion;
+
 /*** Generales ***/
 typedef struct
 {
 	codigo_operacion cod_op;
 	t_buffer* buffer;
 } t_operacion;
+
+/*** Consola ***/
+
+typedef struct t_instruccion{
+    instruccion instruc;
+    int parametro1;
+    int parametro2;
+} t_instruccion;
+
+typedef struct
+{
+    t_queue *instrucciones;
+    int tamanio;
+} t_consola;
 
 /*** CPU + KERNEL ***/
 
@@ -64,25 +88,14 @@ typedef struct
 typedef struct pcb
 {
     unsigned int pid;
-    unsigned int tamanio;
-    t_list *unas_instrucciones;
     unsigned int program_counter;
-
-    //Tabla de paginas -> Proximas iteraciones
-	t_tabla_1nivel tabla;
-	
     int una_estimacion;
     estado un_estado;
+    t_consola *consola;
+
+    //Tabla de paginas -> Proximas iteraciones
+    t_tabla_1nivel tabla;
 } t_pcb;
-
-/*** Consola ***/
-typedef struct
-{
-	t_list *instrucciones;
-	int tamanio;
-} t_consola;
-
-
 
 /**
  * @name habilitar_log
@@ -102,7 +115,17 @@ void enviar_handshake(int *socket, modulo modulo_solicitante);
  * @return int 
  */
 int recibir_handshake(int *socket, void(*mapeador)(int*, modulo));
+
+void enviar_datos_consola(int socket, t_consola *consola);
+t_consola *recibir_datos_consola(int socket);
+
+void *serializar_consola(t_consola *consola, int *size);
 void serializar_pcb(t_pcb *pcb, t_operacion *operacion);
+void *serializar_instrucciones(t_queue *instrucciones, int *size_cola);
+
+t_pcb *deserializar_pcb(int socket);
+t_consola *deserializar_consola(void *buffer);
+t_queue *deserializar_instrucciones(void *buffer, int size_cola);
 #include "../utils/utilslib.h"
 
 #endif
