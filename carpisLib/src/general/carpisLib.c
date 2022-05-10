@@ -22,3 +22,27 @@ int recibir_handshake(int *socket, void(*mapeador)(int*, modulo)) {
     return ERROR;
 }
 
+void setear_operacion(t_operacion *operacion, void *valor) {
+    codigo_operacion op_code = operacion->cod_op;
+
+    switch (op_code) {
+        case PCB:
+            serializar_pcb((t_pcb *)valor, operacion);
+            break;
+    }
+}
+
+void serializar_pcb(t_pcb *pcb, t_operacion *operacion) {
+    operacion->buffer->size =  + sizeof(int)*5;
+    void *stream = malloc(operacion->buffer->size);
+    memcpy(stream + desplazamiento, &(semaforo->mate_pid), sizeof(int));
+    desplazamiento+= sizeof(int);
+    memcpy(stream + desplazamiento, &(semaforo->codigo_error), sizeof(int));
+    desplazamiento+= sizeof(int);
+    memcpy(stream + desplazamiento, &(semaforo->valorInicial), sizeof(int));
+    desplazamiento+= sizeof(int);
+    memcpy(stream + desplazamiento, &(semaforo->tamanio_nombre), sizeof(int));
+    desplazamiento+= sizeof(int);
+    memcpy(stream + desplazamiento, semaforo->nombre, semaforo->tamanio_nombre);
+    funcion->buffer->stream = stream;
+}

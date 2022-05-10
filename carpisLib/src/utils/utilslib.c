@@ -14,28 +14,28 @@ void enviar_funcion(t_funcion* funcion, int socket_cliente) {
 	free(a_enviar);
 }
 
-void *serializar_funcion(t_funcion* funcion, int bytes) {
+void *serializar_operacion(t_operacion *operacion, int bytes) {
 	void * magic = malloc(bytes);
 	int desplazamiento = 0;
 
-	memcpy(magic + desplazamiento, &(funcion->codigo_funcion), sizeof(int));
+	memcpy(magic + desplazamiento, &(operacion->cod_op), sizeof(int));
 	desplazamiento+= sizeof(int);
-	memcpy(magic + desplazamiento, &(funcion->buffer->size), sizeof(int));
+	memcpy(magic + desplazamiento, &(operacion->buffer->size), sizeof(int));
 	desplazamiento+= sizeof(int);
-	memcpy(magic + desplazamiento, funcion->buffer->stream, funcion->buffer->size);
+	memcpy(magic + desplazamiento, operacion->buffer->stream, operacion->buffer->size);
 
 	return magic;
 }
 
-t_funcion* crear_funcion(func_code f_code)
+t_operacion * crear_operacion(codigo_operacion cod_op)
 {
-	t_funcion* funcion = malloc(sizeof(t_funcion));
-	funcion->codigo_funcion = f_code;
-	crear_buffer_funcion(funcion);
-	return funcion;
+	t_operacion *operacion = malloc(sizeof(t_operacion));
+    operacion->cod_op = cod_op;
+	crear_buffer_funcion(operacion);
+	return operacion;
 }
 
-void setear_funcion(t_funcion* funcion, void* valor)
+void setear_funcion(t_operacion * funcion, void* valor)
 {
 	int desplazamiento = 0;
 	void *stream;
@@ -44,7 +44,7 @@ void setear_funcion(t_funcion* funcion, void* valor)
 	//AUX
 	int *pid;
 
-	int f_code = funcion->codigo_funcion;
+	int f_code = funcion->cod_op;
 	switch(f_code) {
 		default:break;
 	}
@@ -52,11 +52,10 @@ void setear_funcion(t_funcion* funcion, void* valor)
 }
 
 
-void crear_buffer_funcion(t_funcion* funcion)
-{
-	funcion->buffer = malloc(sizeof(t_buffer));
-	funcion->buffer->size = 0;
-	funcion->buffer->stream = NULL;
+void crear_buffer_operacion(t_operacion *operacion) {
+    operacion->buffer = malloc(sizeof(t_buffer));
+    operacion->buffer->size = 0;
+    operacion->buffer->stream = NULL;
 }
 /*Deserializar segun los tipos*/
 /*********************************************/

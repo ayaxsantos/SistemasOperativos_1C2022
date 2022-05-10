@@ -32,6 +32,7 @@ typedef enum
 {   
 	INSTRUCCIONES,
     HANDSHAKE,
+    PCB,
 	FIN_PROCESO,
 	MSJ
     /*A definir*/
@@ -47,9 +48,9 @@ typedef enum
 /*** Generales ***/
 typedef struct
 {
-	codigo_operacion codigo_funcion;
+	codigo_operacion cod_op;
 	t_buffer* buffer;
-} t_funcion;
+} t_operacion;
 
 /*** CPU + KERNEL ***/
 
@@ -100,7 +101,7 @@ void enviar_handshake(int *socket, modulo modulo_solicitante);
  * @return int 
  */
 int recibir_handshake(int *socket, void(*mapeador)(int*, modulo));
-
+void serializar_pcb(t_pcb *pcb, t_operacion *operacion);
 #include "../utils/utilslib.h"
 
 #endif
