@@ -12,7 +12,7 @@ void enviar_handshake(int *socket, modulo modulo_solicitante) {
     send(*socket, buffer, sizeof(int)*2, 0);
 }
 
-int recibir_handshake(int *socket, void(*mapeador)(int*, modulo)) {
+int esperar_handshake(int *socket, void(*mapeador)(int*, modulo)) {
     codigo_operacion cod_op = recibir_operacion(*socket);
     if(cod_op == HANDSHAKE) {
         modulo modulo_solicitante = recibir_operacion(*socket);

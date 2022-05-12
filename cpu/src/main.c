@@ -5,7 +5,7 @@ int main() {
     arrancar_logger();
     leer_configuracion();
     //iniciar_semaforos();
-    //iniciar();
+    iniciar();
     return EXIT_SUCCESS;
 
     /*
@@ -44,6 +44,32 @@ void leer_configuracion() {
 
 }
 
+void conectar_a_memoria_y_recibir_config() {
+    log_info(logger_cpu,"Iniciando conexion con modulo MEMORIA ... ");
+    socket_memoria = crear_conexion(config_cpu.ip_memoria,config_cpu.puerto_memoria);
+    enviar_handshake(&socket_memoria, CPU);
+    int resultado = esperar_handshake(&socket_memoria, obtener_configuracion);
+    if(!resultado) {
+        log_error(logger_cpu,"No se pudo conectar con el modulo MEMORIA");
+        exit(EXIT_FAILURE);
+    }
+    log_info(logger_cpu,"MEMORIA Conectada");
+}
+
+void obtener_configuracion(int *socket, modulo modulo) {
+    if(modulo == MEMORIA) {
+        int size;
+        int desplazamiento = 0;
+        void * buffer;
+        buffer = recibir_buffer(&size, *socket);
+
+        memcpy(&(config_cpu.entradas_por_tabla), buffer, sizeof(int));
+        desplazamiento+=sizeof(int);
+        memcpy(&(config_cpu.tamanio_pagina), buffer+desplazamiento, sizeof(int));
+        free(buffer);
+    }
+}
+
 void iniciar_semaforos() {
 
 }
@@ -56,7 +82,7 @@ void setear_algoritmo_reemplazo_tlb() {
         tipo_algoritmo_tlb = LRU;
     }
     else {
-        log_error(logger_cpu,"No se pudieron setear las estructuras de memoria. Error en el archivo config.");
+        log_error(logger_cpu,"No se pudieron setear las estructuras de CPU. Error en el archivo config.");
     } 
 }
 
