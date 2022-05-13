@@ -116,10 +116,12 @@ t_consola *recibir_datos_consola(int socket);
 void *serializar_consola(t_consola *consola, int *size);
 void serializar_pcb(t_pcb *pcb, t_operacion *operacion);
 void *serializar_instrucciones(t_queue *instrucciones, int *size_cola);
+void *serializar_tabla1n(t_dictionary *tabla1n, int *size);
 
 t_pcb *deserializar_pcb(int socket);
 t_consola *deserializar_consola(void *buffer);
 t_queue *deserializar_instrucciones(void *buffer, int size_cola);
+t_dictionary *deserializar_tabla1n(void *buffer, int size_tabla);
 #include "../utils/utilslib.h"
 
 #endif
