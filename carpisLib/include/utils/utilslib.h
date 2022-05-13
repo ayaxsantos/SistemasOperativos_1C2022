@@ -3,11 +3,12 @@
 
 #include "../general/carpisLib.h"
 
-void crear_buffer_funcion(t_funcion *funcion);
-void setear_funcion(t_funcion* funcion, void *valor);
-void *serializar_funcion(t_funcion* funcion, int bytes);
-void enviar_funcion(t_funcion* funcion, int socket_cliente);
-void eliminar_funcion(t_funcion *funcion);
+t_operacion *crear_operacion(codigo_operacion cod_op);
+void crear_buffer_operacion(t_operacion *operacion);
+void setear_operacion(t_operacion *operacion, void *valor);
+void *serializar_operacion(t_operacion *operacion, int bytes);
+void enviar_operacion(t_operacion *operacion, int socket_cliente);
+void eliminar_operacion(t_operacion *operacion) ;
 
 int32_t recibir_direccion_memoria(int socket_cliente);
 
