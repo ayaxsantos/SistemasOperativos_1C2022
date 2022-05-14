@@ -14,15 +14,16 @@
 
 ////////////////////////////////////////////////
 
-typedef struct instruccion{
+/*typedef struct instruccion{
 	char* instruc;
 	int parametro1;
 	int parametro2;
-}t_instruccion;
+}T_CONSOLA;*/
 
 ////////////////////////////////////////////////
 
 void monitorear_colita(t_queue *colita);
+instruccion devolver_enum_instruccion(char* instruccion);
 
 ////////////////////////////////////////////////
 
