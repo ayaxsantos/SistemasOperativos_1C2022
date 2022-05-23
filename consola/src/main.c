@@ -3,28 +3,6 @@
 #define MAX_LEN 256
 
 ///*** Consola ***/
-/*
-typedef struct t_instruccion{
-    instruccion instruc;
-    int parametro1;
-    int parametro2;
-} t_instruccion;
-
-typedef struct
-{
-    t_queue *instrucciones;
-    int tamanio;
-} t_consola;
-typedef enum
-{
-    NO_OP, 0
-    IO, 1
-    READ, 2
-    WRITE, 3
-    COPY, 4
-    I_EXIT 5
-} instruccion;*/
-
 int main(int argc, char *argv[])
 {
     if(argc < 2) {
@@ -84,6 +62,11 @@ int main(int argc, char *argv[])
 
     monitorear_colita(cola_instrucciones);
     fclose(archivo);
+
+    leer_configuracion();
+    conectar_a_kernel();
+    enviar_informacion(tamanio_proceso);
+    esperar_mensaje_finalizacion();
     return EXIT_SUCCESS;
 }
 
@@ -110,4 +93,51 @@ instruccion devolver_enum_instruccion(char* instruccion) {
     if(strcmp(instruccion, "WRITE") == 0) return WRITE;
     if(strcmp(instruccion, "COPY") == 0) return COPY;
     if(strcmp(instruccion, "EXIT") == 0) return I_EXIT;
+    return -1;
+}
+
+void conectar_a_kernel() {
+    printf("Iniciando conexión con módulo Kernel ... \n");
+    conexion_kernel = crear_conexion(config_consola.ip_kernel,config_consola.puerto_kernel);
+    if(conexion_kernel > 0) {
+        printf("Conectado a Kernel \n");
+    }
+    else {
+        printf("No se pudo conectar Consola con el módulo Kernel.");
+        exit(EXIT_FAILURE);
+    }
+}
+
+void enviar_informacion(char *tamanio) {
+    t_consola *consola = malloc(sizeof(t_consola));
+    consola->instrucciones = cola_instrucciones;
+    consola->tamanio = atoi(tamanio);
+
+    enviar_datos_consola(conexion_kernel, consola);
+    free(consola);
+}
+
+void esperar_mensaje_finalizacion() {
+    int estado_finalizacion; // 1: FINALIZO BIEN, 0: FINALIZO MAL
+    recv(conexion_kernel, &estado_finalizacion, sizeof(int), MSG_WAITALL); //Se bloquea
+    estado_finalizacion == 1 ? liberar_memoria_y_conexiones() : printf("Error al finalizar consola");
+}
+
+void leer_configuracion() {
+    t_config *un_config;
+
+    un_config = config_create("./consola.config");
+
+    config_consola.ip_kernel = strdup(config_get_string_value(un_config,"IP_KERNEL"));
+    config_consola.puerto_kernel = strdup(config_get_string_value(un_config,"PUERTO_KERNEL"));
+    //habilitar_log(logger_consola, t_config_consola.log_habilitado); Tienen logger? Lo que deseen los chicos
+
+    config_destroy(un_config);
+}
+
+void liberar_memoria_y_conexiones() {
+    printf("Finalizando consola ... \n");
+    /**
+     * TODO
+     */
 }

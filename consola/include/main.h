@@ -7,12 +7,17 @@
 #include <pthread.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include "../../carpisLib/include/general/carpisLib.h"
 #include <string.h>
 #include <commons/string.h>
 #include <general/carpisLib.h>
 
 ////////////////////////////////////////////////
+typedef struct t_config_consola
+{
+    char* ip_kernel;
+    char* puerto_kernel;
+    int log_habilitado;
+} t_config_consola;
 
 /*typedef struct instruccion{
 	char* instruc;
@@ -24,12 +29,17 @@
 
 void monitorear_colita(t_queue *colita);
 instruccion devolver_enum_instruccion(char* instruccion);
+void leer_configuracion();
+void conectar_a_kernel();
+void enviar_informacion(char *tamanio);
+void esperar_mensaje_finalizacion();
+void liberar_memoria_y_conexiones();
 
 ////////////////////////////////////////////////
 
 t_queue *cola_instrucciones;
-
-
+t_config_consola config_consola;
+int conexion_kernel;
 
 
 #endif
