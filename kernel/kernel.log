@@ -1,0 +1,50 @@
+[INFO] 02:36:05:653 kernel/(3593:3593): ---------------- Log modulo KERNEL ----------------
+[INFO] 02:36:07:778 kernel/(3595:3595): ---------------- Log modulo KERNEL ----------------
+[INFO] 02:36:08:135 kernel/(3596:3596): ---------------- Log modulo KERNEL ----------------
+[INFO] 02:36:09:898 kernel/(3597:3597): ---------------- Log modulo KERNEL ----------------
+[INFO] 02:36:10:495 kernel/(3598:3598): ---------------- Log modulo KERNEL ----------------
+[INFO] 02:36:11:027 kernel/(3599:3599): ---------------- Log modulo KERNEL ----------------
+[INFO] 02:36:35:683 kernel/(3607:3607): ---------------- Log modulo KERNEL ----------------
+[INFO] 02:36:36:516 kernel/(3608:3608): ---------------- Log modulo KERNEL ----------------
+[INFO] 02:36:39:476 kernel/(3654:3654): ---------------- Log modulo KERNEL ----------------
+[INFO] 02:36:39:489 kernel/(3654:3654): Kernel a la espera de conexiones ... 
+
+[INFO] 02:37:11:241 kernel/(3730:3730): ---------------- Log modulo KERNEL ----------------
+[INFO] 02:37:11:277 kernel/(3730:3730): Kernel a la espera de conexiones ... 
+
+[INFO] 02:37:26:655 kernel/(3730:3730): Generico (?
+[INFO] 02:37:31:218 kernel/(3730:3735): No se pudo realizar el handshake :c
+[INFO] 02:38:01:528 kernel/(3730:3730): Generico (?
+[INFO] 02:38:06:357 kernel/(3730:3760): No se pudo realizar el handshake :c
+[INFO] 02:53:15:554 kernel/(4114:4114): ---------------- Log modulo KERNEL ----------------
+[INFO] 02:53:15:592 kernel/(4114:4114): Kernel a la espera de conexiones ... 
+
+[INFO] 02:53:18:954 kernel/(4114:4116): No se pudo realizar el handshake :c
+[INFO] 02:53:23:643 kernel/(4114:4120): No se pudo realizar el handshake :c
+[INFO] 02:58:33:374 kernel/(4218:4218): ---------------- Log modulo KERNEL ----------------
+[INFO] 02:58:33:411 kernel/(4218:4218): Kernel a la espera de conexiones ... 
+
+[INFO] 02:58:37:528 kernel/(4218:4220): No se pudo realizar el handshake :c
+[INFO] 02:58:37:531 kernel/(4218:4220): Recibi unas instrucciones!! 😁
+[INFO] 02:58:43:299 kernel/(4218:4225): No se pudo realizar el handshake :c
+[INFO] 02:58:43:300 kernel/(4218:4225): Recibi unas instrucciones!! 😁
+[INFO] 03:05:41:870 kernel/(4642:4642): ---------------- Log modulo KERNEL ----------------
+[INFO] 03:05:41:917 kernel/(4642:4642): Kernel a la espera de conexiones ... 
+
+[INFO] 03:05:47:699 kernel/(4642:4645): No se pudo realizar el handshake :c
+[INFO] 03:05:51:821 kernel/(4642:4647): No se pudo realizar el handshake :c
+[INFO] 03:07:36:732 kernel/(4892:4892): ---------------- Log modulo KERNEL ----------------
+[INFO] 03:07:36:773 kernel/(4892:4892): Kernel a la espera de conexiones ... 
+
+[INFO] 03:07:39:744 kernel/(4892:4895): No se pudo realizar el handshake :c
+[INFO] 03:07:44:973 kernel/(4892:4900): No se pudo realizar el handshake :c
+[INFO] 03:08:19:306 kernel/(4948:4948): ---------------- Log modulo KERNEL ----------------
+[INFO] 03:08:19:345 kernel/(4948:4948): Kernel a la espera de conexiones ... 
+
+[INFO] 03:08:20:704 kernel/(4948:4953): No se pudo realizar el handshake :c
+[INFO] 03:08:23:256 kernel/(4948:4955): No se pudo realizar el handshake :c
+[INFO] 03:16:46:714 kernel/(5332:5332): ---------------- Log modulo KERNEL ----------------
+[INFO] 03:16:46:718 kernel/(5332:5332): Kernel a la espera de conexiones ... 
+
+[INFO] 03:18:54:511 kernel/(5332:5382): No se pudo realizar el handshake :c
+[INFO] 03:19:10:085 kernel/(5332:5389): No se pudo realizar el handshake :c
