@@ -9,17 +9,6 @@
 
 ///////////////////////////////////////////
 
-typedef enum
-{
-    NEW,
-    READY,
-    EXEC,
-    BLOCKED,
-    SUSP_BLOCKED,
-    SUSP_READY,
-    EXIT,
-} estado;
-
 typedef struct config_kernel
 {
     char *ip_memoria;
@@ -34,19 +23,6 @@ typedef struct config_kernel
     int grado_multiprogramacion;
     int tiempo_max_bloqueado;
 } t_config_kernel;
-
-typedef struct pcb
-{
-    int pid;
-    unsigned int tamanio;
-    t_list *unas_instrucciones;
-    unsigned int program_counter;
-
-    //Tabla de paginas -> Proximas iteraciones
-
-    int una_estimacion;
-    estado un_estado;
-} t_pcb;
 
 typedef struct proceso
 {

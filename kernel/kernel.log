@@ -48,3 +48,22 @@
 
 [INFO] 03:18:54:511 kernel/(5332:5382): No se pudo realizar el handshake :c
 [INFO] 03:19:10:085 kernel/(5332:5389): No se pudo realizar el handshake :c
+[INFO] 15:00:51:014 kernel/(4624:4624): ---------------- Log modulo KERNEL ----------------
+[INFO] 15:00:51:016 kernel/(4624:4624): Kernel a la espera de conexiones ... 
+
+[INFO] 15:00:54:172 kernel/(4624:4642): Recibi unas instrucciones!! 😂
+[INFO] 15:00:54:204 kernel/(4624:4642): Se envio mensaje de finalizacion!!
+[INFO] 15:01:05:621 kernel/(4624:4699): Recibi unas instrucciones!! 😂
+[INFO] 15:01:05:638 kernel/(4624:4699): Se envio mensaje de finalizacion!!
+[INFO] 15:01:09:553 kernel/(4624:4716): Recibi unas instrucciones!! 😂
+[INFO] 15:01:09:570 kernel/(4624:4716): Se envio mensaje de finalizacion!!
+[INFO] 15:01:09:704 kernel/(4624:4721): Recibi unas instrucciones!! 😂
+[INFO] 15:01:09:723 kernel/(4624:4721): Se envio mensaje de finalizacion!!
+[INFO] 15:01:09:851 kernel/(4624:4723): Recibi unas instrucciones!! 😂
+[INFO] 15:01:09:869 kernel/(4624:4723): Se envio mensaje de finalizacion!!
+[INFO] 15:01:09:984 kernel/(4624:4725): Recibi unas instrucciones!! 😂
+[INFO] 15:01:10:001 kernel/(4624:4725): Se envio mensaje de finalizacion!!
+[INFO] 15:01:10:184 kernel/(4624:4727): Recibi unas instrucciones!! 😂
+[INFO] 15:01:10:201 kernel/(4624:4727): Se envio mensaje de finalizacion!!
+[INFO] 15:01:10:319 kernel/(4624:4729): Recibi unas instrucciones!! 😂
+[INFO] 15:01:10:336 kernel/(4624:4729): Se envio mensaje de finalizacion!!

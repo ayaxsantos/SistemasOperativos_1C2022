@@ -16,9 +16,10 @@ unsigned int obtener_tamanio(int);
 t_list *obtener_instrucciones(int socket_proceso);
 unsigned int obtener_id_hilo();
 
-void responder_un_func_code(int,func_code);
 void responder_fin_proceso(int);
 void responder_handshake(int);
+
+void mapeador(int *,modulo);
 
 ///////////////////////////////////////////
 
