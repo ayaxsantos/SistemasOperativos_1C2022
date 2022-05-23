@@ -4,6 +4,8 @@
 #include "main.h"
 
 void iniciar();
-void conectar_a_memoria_y_recibir_config(int server_cpu);
+void esperar_a_kernel(int dispatch, int interrupt);
+void *ejecutar_pcb(void *arg);
+void *ejecutar_interrupcion(void *arg);
 
 #endif /* CPU_H_INCLUDED */

@@ -12,7 +12,7 @@ void enviar_handshake(int *socket, modulo modulo_solicitante) {
     send(*socket, buffer, sizeof(int)*2, 0);
 }
 
-int recibir_handshake(int *socket, void(*mapeador)(int*, modulo)) {
+int esperar_handshake(int *socket, void(*mapeador)(int*, modulo)) {
     codigo_operacion cod_op = recibir_operacion(*socket);
     if(cod_op == HANDSHAKE) {
         modulo modulo_solicitante = recibir_operacion(*socket);
@@ -40,9 +40,10 @@ t_consola *recibir_datos_consola(int socket) {
 
 void serializar_pcb(t_pcb *pcb, t_operacion *operacion) {
     int desplazamiento = 0;
-    int size = 0;
-    void *consola_serializada = serializar_consola(pcb->consola, &size);
-    operacion->buffer->size =  size + sizeof(int)*3;
+    int size_consola = 0, size_tabla = 0;
+    void *consola_serializada = serializar_consola(pcb->consola, &size_consola);
+    void *tabla_serializada = serializar_tabla1n(pcb->tabla_1n,&size_tabla);
+    operacion->buffer->size =  size_consola + size_tabla +sizeof(int)*3;
     void *stream = malloc(operacion->buffer->size);
 
     memcpy(stream + desplazamiento, &(pcb->pid), sizeof(int));
@@ -51,7 +52,13 @@ void serializar_pcb(t_pcb *pcb, t_operacion *operacion) {
     desplazamiento+= sizeof(int);
     memcpy(stream + desplazamiento, &(pcb->un_estado), sizeof(int));
     desplazamiento+= sizeof(int);
-    memcpy(stream + desplazamiento, consola_serializada, size);
+    memcpy(stream + desplazamiento, &size_consola, sizeof(int));
+    desplazamiento+= sizeof(int);
+    memcpy(stream + desplazamiento, consola_serializada, size_consola);
+    desplazamiento+= size_consola;
+    memcpy(stream + desplazamiento, &size_tabla, sizeof(int));
+    desplazamiento+= sizeof(int);
+    memcpy(stream + desplazamiento, tabla_serializada, size_tabla);
     operacion->buffer->stream = stream;
 }
 
@@ -70,7 +77,7 @@ void *serializar_consola(t_consola *consola, int *size) {
 }
 
 void *serializar_instrucciones(t_queue *instrucciones, int *size_cola) {
-    *size_cola = queue_size(instrucciones) * 3;
+    *size_cola = queue_size(instrucciones) * 3 * sizeof(int); //Ej: 2 instrucciones * 3 componentes * 4 tamanio int
     int desplazamiento = 0;
     void *stream = malloc(*size_cola);
     t_instruccion *instruccion;
@@ -84,6 +91,26 @@ void *serializar_instrucciones(t_queue *instrucciones, int *size_cola) {
         desplazamiento+= sizeof(int);
         free(instruccion);
     }
+    //*size_cola = desplazamiento;
+    return stream;
+}
+
+void *serializar_tabla1n(t_dictionary *tabla1n, int *size) {
+    *size = dictionary_size(tabla1n) * sizeof(int); //Ej: 2 registros * Tamanio int
+    int desplazamiento = 0;
+    void *stream = malloc(*size);
+    int nro_tabla;
+    int i = 0;
+    char *index;
+    while (!dictionary_is_empty(tabla1n)) {
+        index = string_itoa(i);
+        nro_tabla = *((int *) dictionary_get(tabla1n,index));
+        memcpy(stream + desplazamiento, &nro_tabla, sizeof(int));
+        desplazamiento+= sizeof(int);
+        free(index);
+        i++;
+    }
+    //*size = desplazamiento;
     return stream;
 }
 
@@ -103,9 +130,13 @@ t_pcb *deserializar_pcb(int socket) {
     desplazamiento+=sizeof(int);
     memcpy(&(pcb->un_estado), buffer+desplazamiento, sizeof(int));
     desplazamiento+=sizeof(int);
-
+    memcpy(&size, buffer+desplazamiento, sizeof(int));
+    desplazamiento+=sizeof(int); //Size consola
     pcb->consola = deserializar_consola(buffer+desplazamiento);
-
+    desplazamiento+=size;
+    memcpy(&size, buffer+desplazamiento, sizeof(int));
+    desplazamiento+=sizeof(int); //Size tabla
+    pcb->tabla_1n = deserializar_tabla1n(buffer + desplazamiento, size);
     free(buffer);
     return pcb;
 }
@@ -138,4 +169,15 @@ t_queue *deserializar_instrucciones(void *buffer, int size_cola) {
         queue_push(instrucciones,instruccion);
     }
     return instrucciones;
+}
+
+t_dictionary *deserializar_tabla1n(void *buffer, int size_tabla) {
+    t_dictionary *tabla = dictionary_create();
+    int desplazamiento = 0;
+    int nro_tabla;
+    while(desplazamiento < size_tabla) {
+        memcpy(&nro_tabla, buffer + desplazamiento, sizeof(int));
+        desplazamiento+=sizeof(int);
+    }
+    return tabla;
 }

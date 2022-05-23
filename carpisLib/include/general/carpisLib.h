@@ -79,12 +79,6 @@ typedef struct
 
 /*** CPU + KERNEL ***/
 
-typedef struct
-{
-	unsigned int pid;
-	// TODO: Sera necesario este struct o se puede generalizar con la de segundo nivel?
-} t_tabla_1nivel;
-
 typedef struct pcb
 {
     unsigned int pid;
@@ -94,7 +88,7 @@ typedef struct pcb
     t_consola *consola;
 
     //Tabla de paginas -> Proximas iteraciones
-    t_tabla_1nivel tabla;
+    t_dictionary *tabla_1n;
 } t_pcb;
 
 /**
@@ -109,12 +103,12 @@ void enviar_handshake(int *socket, modulo modulo_solicitante);
 
 /**
  * @DESC: recibe el handshake, se debe realizar una funcion que obtenga los datos solicitados al
- * servidor
+ * servidor, GUARDA, es bloqueante
  * @param int* socket 
  * @param funcion mapeador 
  * @return int 
  */
-int recibir_handshake(int *socket, void(*mapeador)(int*, modulo));
+int esperar_handshake(int *socket, void(*mapeador)(int*, modulo));
 
 void enviar_datos_consola(int socket, t_consola *consola);
 t_consola *recibir_datos_consola(int socket);
@@ -122,10 +116,12 @@ t_consola *recibir_datos_consola(int socket);
 void *serializar_consola(t_consola *consola, int *size);
 void serializar_pcb(t_pcb *pcb, t_operacion *operacion);
 void *serializar_instrucciones(t_queue *instrucciones, int *size_cola);
+void *serializar_tabla1n(t_dictionary *tabla1n, int *size);
 
 t_pcb *deserializar_pcb(int socket);
 t_consola *deserializar_consola(void *buffer);
 t_queue *deserializar_instrucciones(void *buffer, int size_cola);
+t_dictionary *deserializar_tabla1n(void *buffer, int size_tabla);
 #include "../utils/utilslib.h"
 
 #endif
