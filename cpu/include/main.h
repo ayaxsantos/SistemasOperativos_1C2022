@@ -13,6 +13,7 @@ typedef struct
     char* puerto_escucha_interrupt;
     int entradas_por_tabla;
     int tamanio_pagina;
+    char* ip_cpu;
     int log_habilitado;
 } t_config_cpu;
 
@@ -27,6 +28,7 @@ typedef enum
     FIFO
 }t_algoritmo;
 
+/////////////////////////////////////////////////////////////
 t_list *pcbs;
 
 t_algoritmo tipo_algoritmo_tlb;
@@ -34,8 +36,8 @@ t_algoritmo tipo_algoritmo_tlb;
 t_config_cpu config_cpu;
 t_log *logger_cpu;
 
-int socket_memoria;
-
+int socket_memoria, dispatch, interrupt;
+////////////////////////////////////////////////////////////
 void leer_configuracion();
 void arrancar_logger();
 void conectar_a_memoria_y_recibir_config();

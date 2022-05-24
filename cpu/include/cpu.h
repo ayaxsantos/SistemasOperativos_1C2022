@@ -4,7 +4,7 @@
 #include "main.h"
 
 void iniciar();
-void esperar_a_kernel(int dispatch, int interrupt);
+void esperar_a_kernel();
 void *ejecutar_pcb(void *arg);
 void *ejecutar_interrupcion(void *arg);
 
