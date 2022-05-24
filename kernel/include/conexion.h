@@ -21,6 +21,11 @@ void responder_handshake(int);
 
 void mapeador(int *,modulo);
 
+/////////////// Auxiliares ////////////////
+
+void mostrar_en_pantalla(t_instruccion*);
+void probar_comunicacion_instrucciones(t_pcb*);
+
 ///////////////////////////////////////////
 
 #endif //KERNEL_CONEXION_H

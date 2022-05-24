@@ -25,9 +25,6 @@ void *gestionar_comunicacion_con_proceso(void* socket_proceso_param)
 {
     int socket_proceso = *((int*) socket_proceso_param);                 //Casteo necesario por los argumentos, tambien necesario por pthread_create
 
-    //Temporal para probar, aun falta implementar handshake en consola
-    //realizar_handshake(socket_proceso);
-
     codigo_operacion un_codigo = (codigo_operacion) recibir_operacion(socket_proceso);
     switch(un_codigo)
     {
@@ -48,6 +45,65 @@ void *gestionar_comunicacion_con_proceso(void* socket_proceso_param)
 
     return NULL;
 }
+
+void inicializar_proceso(int socket_proceso)
+{
+    t_proceso *un_proceso = malloc(sizeof (t_proceso));
+    un_proceso->un_pcb = inicializar_pcb(socket_proceso);
+    un_proceso->socket_proceso = socket_proceso;    //Cuando pasa exit, podemos responderle a la consola en particular
+}
+
+t_pcb *inicializar_pcb(int socket_proceso)
+{
+    t_consola *una_consola = recibir_datos_consola(socket_proceso);
+    t_pcb *un_pcb = malloc(sizeof(un_pcb));
+
+    un_pcb->pid = obtener_id_hilo();
+    un_pcb->program_counter = 0;
+    un_pcb->una_estimacion = una_config_kernel.estimacion_inicial;
+    un_pcb->un_estado = NEW;
+    un_pcb->consola = una_consola;
+
+    probar_comunicacion_instrucciones(un_pcb);
+    return un_pcb;
+}
+
+void mostrar_en_pantalla(t_instruccion *una_instruccion)
+{
+    pthread_mutex_lock(&mutex_log);
+    log_info(un_logger,"El valor de instruccion es: %d      | %d      | %d",una_instruccion->instruc,una_instruccion->parametro1, una_instruccion->parametro2);
+    pthread_mutex_unlock(&mutex_log);
+}
+
+void probar_comunicacion_instrucciones(t_pcb * un_pcb)
+{
+    for(int i = 0; queue_size(un_pcb->consola->instrucciones) > 0;i++)
+    {
+        t_instruccion *una_instruccion = (t_instruccion*) queue_pop(un_pcb->consola->instrucciones);
+        mostrar_en_pantalla(una_instruccion);
+    }
+}
+
+unsigned int obtener_id_hilo()
+{
+    return syscall(SYS_gettid);
+}
+
+////////////////////////////////////////////////
+
+//Funcion temporal (?
+void responder_fin_proceso(int socket_proceso)
+{
+    int estado_finalizacion = 1;
+    send(socket_proceso, &estado_finalizacion, sizeof(int), MSG_WAITALL);
+
+    pthread_mutex_lock(&mutex_log);
+    log_info(un_logger,"Se envio mensaje de finalizacion!!");
+    pthread_mutex_unlock(&mutex_log);
+}
+
+//////////////////////////////////////////////////
+// Utils handshake
 
 void realizar_handshake(int socket_proceso)
 {
@@ -70,48 +126,10 @@ void mapeador(int *un_socket,modulo un_modulo)
     return;
 }
 
-void inicializar_proceso(int socket_proceso)
-{
-    t_proceso *un_proceso = malloc(sizeof (t_proceso));
-    un_proceso->un_pcb = inicializar_pcb(socket_proceso);
-    un_proceso->socket_proceso = socket_proceso;    //Cuando pasa exit, podemos responderle a la consola en particular
-}
-
-t_pcb *inicializar_pcb(int socket_proceso)
-{
-    t_pcb *un_pcb = malloc(sizeof(t_pcb));
-
-    un_pcb->pid = obtener_id_hilo();
-    un_pcb->program_counter = 0;
-    un_pcb->un_estado = NEW;
-    un_pcb->una_estimacion = una_config_kernel.estimacion_inicial;
-
-    un_pcb->consola = recibir_datos_consola(socket_proceso);
-    un_pcb->tabla_1n = dictionary_create();
-
-    return un_pcb;
-}
-
-unsigned int obtener_id_hilo()
-{
-    return syscall(SYS_gettid);
-}
-
-////////////////////////////////////////////////
-
 void responder_handshake(int socket_proceso)
 {
     modulo id_modulo_solicitante = KERNEL;
     enviar_handshake(&socket_proceso,id_modulo_solicitante);
 }
 
-//Funcion temporal (?
-void responder_fin_proceso(int socket_proceso)
-{
-    int estado_finalizacion = 1;
-    send(socket_proceso, &estado_finalizacion, sizeof(int), MSG_WAITALL);
-
-    pthread_mutex_lock(&mutex_log);
-    log_info(un_logger,"Se envio mensaje de finalizacion!!");
-    pthread_mutex_unlock(&mutex_log);
-}
+//////////////////////////////////////////////////

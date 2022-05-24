@@ -63,7 +63,7 @@ void serializar_pcb(t_pcb *pcb, t_operacion *operacion) {
 }
 
 void *serializar_consola(t_consola *consola, int *size) {
-    int size_cola, desplazamiento = 0;
+    int size_cola = 0, desplazamiento = 0;
     void *instrucciones_serializadas = serializar_instrucciones(consola->instrucciones, &size_cola);
     *size = size_cola + sizeof(int);
     void *stream = malloc(*size);
@@ -71,7 +71,7 @@ void *serializar_consola(t_consola *consola, int *size) {
     desplazamiento+=sizeof(int);
     memcpy(stream + desplazamiento, &size_cola,  sizeof(int));
     desplazamiento+=sizeof(int);
-    memcpy(stream + desplazamiento, stream, size_cola);
+    memcpy(stream + desplazamiento, instrucciones_serializadas, size_cola);
     free(instrucciones_serializadas);
     return stream;
 }
@@ -89,7 +89,6 @@ void *serializar_instrucciones(t_queue *instrucciones, int *size_cola) {
         desplazamiento+= sizeof(int);
         memcpy(stream + desplazamiento, &(instruccion->parametro2), sizeof(int));
         desplazamiento+= sizeof(int);
-        free(instruccion);
     }
     //*size_cola = desplazamiento;
     return stream;
@@ -99,7 +98,7 @@ void *serializar_tabla1n(t_dictionary *tabla1n, int *size) {
     *size = dictionary_size(tabla1n) * sizeof(int); //Ej: 2 registros * Tamanio int
     int desplazamiento = 0;
     void *stream = malloc(*size);
-    int nro_tabla;
+    int nro_tabla = 0;
     int i = 0;
     char *index;
     while (!dictionary_is_empty(tabla1n)) {
