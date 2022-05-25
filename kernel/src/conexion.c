@@ -42,7 +42,7 @@ void *gestionar_comunicacion_con_proceso(void* socket_proceso_param)
             pthread_mutex_unlock(&mutex_log);
             break;
     }
-    
+
     responder_fin_proceso(socket_proceso);
 
     return NULL;
@@ -65,6 +65,8 @@ void pasar_proceso_a_new(t_proceso *un_proceso)
     queue_push(procesos_en_new,(void*) un_proceso);
     pthread_mutex_unlock(&mutex_procesos_en_new);
 
+    //Le avisamos al hilo de largo plazo que se encarga de pasar a ready, que
+    //Llego un proceso y asi NO puede encontrar la queue vacia!!
     sem_post(&llego_un_proceso);
 }
 

@@ -48,3 +48,22 @@ void transicionar_proceso_a_ready(t_proceso *un_proceso)
 }
 
 ////////////////////////////////////////////
+
+void finalizar_proceso_ejecutando()
+{
+    pthread_mutex_lock(&mutex_log);
+    log_info(un_logger,"Se finaliza el proceso con PID = %d",proceso_en_exec->un_pcb->pid);
+    pthread_mutex_unlock(&mutex_log);
+
+    transicionar_proceso_a_exit();
+
+    proceso_en_exec = NULL;
+    responder_fin_proceso(proceso_en_exec->socket_proceso);
+
+    sem_post(&grado_multiprog_lo_permite);
+}
+
+void transicionar_proceso_a_exit()
+{
+    list_add(procesos_en_exit,proceso_en_exec);
+}
