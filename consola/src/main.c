@@ -72,8 +72,8 @@ int main(int argc, char *argv[])
 
 void monitorear_colita(t_queue *colita) {
     bool debug;
-    debug = true;
-    //debug = false;
+    //debug = true;
+    debug = false;
     if(debug) {
         printf("\n*********************************************\n");
         t_instruccion *instruccion;
