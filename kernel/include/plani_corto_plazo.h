@@ -5,7 +5,10 @@
 
 //////////////////////////////////////
 
-int planificador_corto_plazo();
+void inicializar_plani_corto_plazo();
+void lanzar_hilo_plani_corto_plazo(void* (*)(void*));
+void *algoritmo_fifo(void*);
+void *algoritmo_sjf_con_desalojo(void*);
 
 //////////////////////////////////////
 

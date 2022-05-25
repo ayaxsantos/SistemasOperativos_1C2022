@@ -2,6 +2,12 @@
 
 ////////////////////////////////////////////
 
+void inicializar_plani_largo_plazo()
+{
+    pthread_create(hilo_largo_plazo, NULL, planificador_largo_plazo, NULL);
+    pthread_detach(*hilo_largo_plazo);
+}
+
 void* planificador_largo_plazo(void)
 {
     int valor_semaforo_multiprog = 0;

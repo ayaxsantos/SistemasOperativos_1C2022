@@ -7,8 +7,10 @@ int main(void)
     iniciar_semaforos();
     iniciar_mutex();
     iniciar_estructuras();
+    iniciar_hilos();
 
     inicializar_plani_largo_plazo();
+    inicializar_plani_corto_plazo();
 
     conexion();
 
@@ -69,12 +71,10 @@ void iniciar_mutex()
     pthread_mutex_init(&mutex_procesos_en_ready,NULL);
 }
 
-void inicializar_plani_largo_plazo()
+void iniciar_hilos()
 {
-    pthread_t *hilo_largo_plazo = malloc(sizeof(pthread_t));
-
-    pthread_create(hilo_largo_plazo, NULL, planificador_largo_plazo, NULL);
-    pthread_detach(*hilo_largo_plazo);
+    hilo_corto_plazo = malloc(sizeof(pthread_t));
+    hilo_largo_plazo = malloc(sizeof(pthread_t));
 }
 
 void liberar_memoria()
@@ -103,4 +103,10 @@ void liberar_semaforos()
 {
     sem_destroy(&grado_multiprog_lo_permite);
     sem_destroy(&llego_un_proceso);
+}
+
+void liberar_hilos()
+{
+    free(hilo_corto_plazo);
+    free(hilo_largo_plazo);
 }

@@ -50,13 +50,17 @@ pthread_mutex_t mutex_procesos_en_ready;
 sem_t grado_multiprog_lo_permite;
 sem_t llego_un_proceso;
 
+pthread_t *hilo_corto_plazo;
+pthread_t *hilo_largo_plazo;
+
+
 ///////////////////////////////////////////
 
 void iniciar_logger();
 void iniciar_config();
 void iniciar_semaforos();
 void iniciar_mutex();
-
+void iniciar_hilos();
 void iniciar_estructuras();
 
 void inicializar_plani_largo_plazo();
@@ -69,5 +73,6 @@ void liberar_mutex();
 
 #include <conexion.h>
 #include <plani_largo_plazo.h>
+#include <plani_corto_plazo.h>
 
 #endif
