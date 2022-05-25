@@ -1,9 +1,12 @@
-#include "../include/paginacion"
+#include "../include/paginacion.h"
 
 void crear_tabla_principal(){
 
 } // tiene entradas_por_tabla filas que referencian a las entradas_por_tabla paginas de segundo nivel
-void crear_tablas_segundo_nivel(); // se crean memoria.cantidad_frames / entradas_por_tabla tablas de seg nivel
+
+void crear_tablas_segundo_nivel(){
+
+}; // se crean memoria.cantidad_frames / entradas_por_tabla tablas de seg nivel
 
 
 int get_cantidad_total_paginas() {
@@ -16,7 +19,7 @@ int get_nro_pagina(uint32_t dir_logica) {
 
 int agregar_pag_a_tabla(t_tabla_pagina *tabla_pagina, char *nro_pag) {
     if(!hay_espacio_en_swap(tabla_pagina)) { //Es necesario el size??
-        return ERROR;
+        return -1;
     }
     if(dictionary_has_key(tabla_pagina->tabla, nro_pag)){
         return 0;
@@ -30,69 +33,24 @@ int agregar_pag_a_tabla(t_tabla_pagina *tabla_pagina, char *nro_pag) {
     return 0;
 }
 
-int armar_tabla_paginas(int size_total, int dir_logica_desde, t_tabla_pagina *tabla_carpi) {
-    switch(asignacion_marcos) {
-        case FIJA:
-            if(!dictionary_is_empty(tabla_carpi->tabla)) {
-                return armar_tabla_paginas_dinamicamente(size_total,dir_logica_desde,tabla_carpi);
-            }
-            return armar_tabla_paginas_fija(size_total, tabla_carpi);
-        break;
-        case DINAMICA:
-            return armar_tabla_paginas_dinamicamente(size_total,dir_logica_desde,tabla_carpi);
-        break;
-    }
-    return ERROR;
-}
-
-int armar_tabla_paginas_dinamicamente(int size_total, int dir_logica_desde, t_tabla_pagina *tabla_carpi) {
-    int nro_pagina_slot = (double) dir_logica_desde / (double) config_memoria.tamanio_pagina;
-    char *nro_pagina = string_itoa(nro_pagina_slot);
-    t_pag_incompleta pag_incompleta;
-
-    int pags_que_ocupa = get_cantidad_paginas(size_total);
-    if(dictionary_has_key(tabla_carpi->tabla, nro_pagina)) {
-    	if(data_esta_en_una_pagina(size_total, dir_logica_desde, &pag_incompleta)) {
-    		return 0;
-    	}
-    	nro_pagina_slot++;
-    }
-    int resultado;
-    //TODO: Verificar, me pide una pagina de mas en el caso de pedir dos alloc de 32bytes
-    for(int i=nro_pagina_slot; i<(nro_pagina_slot+pags_que_ocupa); i++) {
-        nro_pagina = string_itoa(i);
-        if(!dictionary_has_key(tabla_carpi->tabla, nro_pagina)) {
-            resultado = agregar_pag_a_tabla(tabla_carpi, nro_pagina);
-            if(resultado == ERROR) {
-                pthread_mutex_lock(&mutex_logger);
-                log_error(logger_memoria, "Espacio de memoria de llena del carpincho");
-                pthread_mutex_unlock(&mutex_logger);
-                liberar_todas_las_paginas(tabla_carpi);
-                return ERROR;
-            }
-    	}
-    }
-    return resultado;
-}
-
-int armar_tabla_paginas_fija(int size, t_tabla_pagina *tabla_carpi) {
+int armar_tabla_paginas_fija(int size, t_tabla_pagina *tabla_pag_1n) {
     char *nro_pagina;
     int resultado;
     for(int i=0; i<cantidad_maxima_frames; i++) {
         nro_pagina = string_itoa(i);
-        resultado = agregar_pag_a_tabla(tabla_carpi, nro_pagina);
-        if(resultado == ERROR) {
-            pthread_mutex_lock(&mutex_logger);
+        resultado = agregar_pag_a_tabla(tabla_pag_1n, nro_pagina);
+        if(resultado == -1) {
+            // pthread_mutex_lock(&mutex_logger);
             log_error(logger_memoria, "Espacio de memoria de llena del carpincho");
-            pthread_mutex_unlock(&mutex_logger);
-            liberar_todas_las_paginas(tabla_carpi);
-            return ERROR;
+            // pthread_mutex_unlock(&mutex_logger);
+            liberar_todas_las_paginas(tabla_pag_1n);
+            return -1;
         }
     }
     int espacio_asignado = config_memoria.tamanio_pagina * cantidad_maxima_frames;
     if((espacio_asignado - size) < 0) {
         //Solicitar mas paginas con los mismo marcos
-        resultado = armar_tabla_paginas_dinamicamente(size - espacio_asignado, espacio_asignado, tabla_carpi);
+        resultado = armar_tabla_paginas_dinamicamente(size - espacio_asignado, espacio_asignado, tabla_pag_1n);
     }
     return resultado;
 }
@@ -103,7 +61,7 @@ void modificar_bit_de_presencia_pagina(t_frame *frame, int value) {
     registro->presencia = value;
 }
 
-int liberar_paginas_si_es_posible(uint32_t dir_logica, t_tabla_pagina* tabla_carpincho) {
+/*int liberar_paginas_si_es_posible(uint32_t dir_logica, t_tabla_pagina* tabla_carpincho) {
     int ultima_pagina = dictionary_size(tabla_carpincho->tabla);
     int nro_pagina_heap = get_nro_pagina(dir_logica) + 1;
     int size_a_liberar = (ultima_pagina * config_memoria.tamanio_pagina) - (dir_logica + sizeof(HeapMetadata));
@@ -124,7 +82,7 @@ int liberar_paginas_si_es_posible(uint32_t dir_logica, t_tabla_pagina* tabla_car
         return 1;
     }
     return 0;
-}
+}*/
 
 void liberar_todas_las_paginas(t_tabla_pagina* tabla_carpincho) {
     char *nro_pagina;

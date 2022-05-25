@@ -83,6 +83,7 @@ typedef enum
 t_config_memoria config_memoria;
 t_log *logger_memoria;
 t_algoritmo tipo_algoritmo;
+int cantidad_maxima_frames;
 
 /************ESTRUCTURAS DE MEMORIA*******/
 
