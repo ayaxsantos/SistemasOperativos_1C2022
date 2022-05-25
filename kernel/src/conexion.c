@@ -43,6 +43,7 @@ void *gestionar_comunicacion_con_proceso(void* socket_proceso_param)
             break;
     }
 
+    //Temporal para pruebas con largo plazo solo!!
     responder_fin_proceso(socket_proceso);
 
     return NULL;
