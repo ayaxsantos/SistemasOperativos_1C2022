@@ -51,6 +51,21 @@ typedef struct t_memoria{
     t_list *frames;
 } t_memoria;
 
+typedef struct t_col_pagina
+{
+    bool presencia;
+    int nro_frame;
+} t_col_pagina;
+
+typedef struct t_tabla_pagina
+{
+    unsigned int pid;
+    t_dictionary *tabla;
+    int puntero;
+    int cantidad_hit;
+    int cantidad_miss;
+} t_tabla_pagina;
+
 typedef enum
 {   
     READ,
