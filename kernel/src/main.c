@@ -55,6 +55,7 @@ void iniciar_estructuras()
 void iniciar_mutex()
 {
     pthread_mutex_init(&mutex_log,NULL);
+    pthread_mutex_init(&mutex_procesos_en_new,NULL);
 }
 
 void liberar_memoria()

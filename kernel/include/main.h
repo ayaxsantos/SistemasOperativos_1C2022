@@ -41,6 +41,7 @@ t_list *procesos_en_bloq;
 t_list *procesos_en_exit;
 
 pthread_mutex_t mutex_log;
+pthread_mutex_t mutex_procesos_en_new;
 
 ///////////////////////////////////////////
 

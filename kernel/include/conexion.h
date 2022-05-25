@@ -11,6 +11,7 @@ void *gestionar_comunicacion_con_proceso(void*);
 
 void inicializar_proceso(int);
 t_pcb *inicializar_pcb(int);
+void pasar_proceso_a_new(t_proceso *);
 
 unsigned int obtener_tamanio(int);
 t_list *obtener_instrucciones(int socket_proceso);

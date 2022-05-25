@@ -51,6 +51,15 @@ void inicializar_proceso(int socket_proceso)
     t_proceso *un_proceso = malloc(sizeof (t_proceso));
     un_proceso->un_pcb = inicializar_pcb(socket_proceso);
     un_proceso->socket_proceso = socket_proceso;    //Cuando pasa exit, podemos responderle a la consola en particular
+
+    pasar_proceso_a_new(un_proceso);
+}
+
+void pasar_proceso_a_new(t_proceso *un_proceso)
+{
+    pthread_mutex_lock(&mutex_procesos_en_new);
+    list_add(procesos_en_new,un_proceso);
+    pthread_mutex_unlock(&mutex_procesos_en_new);
 }
 
 t_pcb *inicializar_pcb(int socket_proceso)
