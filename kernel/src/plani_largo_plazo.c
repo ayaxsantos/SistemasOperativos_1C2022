@@ -1,6 +1,50 @@
 #include "../include/plani_largo_plazo.h"
 
-int planificador_largo_plazo(void)
+////////////////////////////////////////////
+
+void* planificador_largo_plazo(void)
 {
-    return EXIT_SUCCESS;
+    int valor_semaforo_multiprog = 0;
+    t_proceso *un_proceso;
+
+    while(true)
+    {
+        sem_wait(&grado_multiprog_lo_permite);
+        sem_wait(&llego_un_proceso);
+        sem_getvalue(&grado_multiprog_lo_permite,&valor_semaforo_multiprog);
+
+        pthread_mutex_lock(&mutex_log);
+        log_info(un_logger,"Se pasa proceso a READY, grado multiprogramacion: %d",valor_semaforo_multiprog);
+        pthread_mutex_unlock(&mutex_log);
+
+        un_proceso = obtener_proceso_en_new();
+        transicionar_proceso_a_ready(un_proceso);
+    }
+    return NULL;
 }
+
+////////////////////////////////////////////
+
+t_proceso *obtener_proceso_en_new()
+{
+    t_proceso *un_proceso;
+
+    pthread_mutex_lock(&mutex_procesos_en_new);
+    un_proceso = (t_proceso*) queue_pop(procesos_en_new);
+    pthread_mutex_unlock(&mutex_procesos_en_new);
+
+    return un_proceso;
+}
+
+void transicionar_proceso_a_ready(t_proceso *un_proceso)
+{
+    pthread_mutex_lock(&mutex_procesos_en_ready);
+    list_add(procesos_en_ready,(void*) un_proceso);
+    pthread_mutex_lock(&mutex_procesos_en_ready);
+
+    pthread_mutex_lock(&mutex_log);
+    log_info(un_logger,"Se pasa proceso a READY -> PID = %d",un_proceso->un_pcb->pid);
+    pthread_mutex_unlock(&mutex_log);
+}
+
+////////////////////////////////////////////

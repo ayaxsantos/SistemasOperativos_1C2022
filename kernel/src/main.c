@@ -4,7 +4,11 @@ int main(void)
 {
     iniciar_logger();
     iniciar_config();
+    iniciar_semaforos();
     iniciar_mutex();
+    iniciar_estructuras();
+
+    inicializar_plani_largo_plazo();
 
     conexion();
 
@@ -46,26 +50,57 @@ void iniciar_config()
 
 void iniciar_estructuras()
 {
-    procesos_en_new = list_create();
+    procesos_en_new = queue_create();
     procesos_en_ready = list_create();
     procesos_en_bloq = list_create();
     procesos_en_exit = list_create();
+}
+
+void iniciar_semaforos()
+{
+    sem_init(&grado_multiprog_lo_permite,0,una_config_kernel.grado_multiprogramacion);
+    sem_init(&llego_un_proceso,0,0);
 }
 
 void iniciar_mutex()
 {
     pthread_mutex_init(&mutex_log,NULL);
     pthread_mutex_init(&mutex_procesos_en_new,NULL);
+    pthread_mutex_init(&mutex_procesos_en_ready,NULL);
+}
+
+void inicializar_plani_largo_plazo()
+{
+    pthread_t *hilo_largo_plazo = malloc(sizeof(pthread_t));
+
+    pthread_create(hilo_largo_plazo, NULL, planificador_largo_plazo, NULL);
+    pthread_detach(*hilo_largo_plazo);
 }
 
 void liberar_memoria()
 {
     //Ir agregando mas adelante los free/destroy necesarios!
 
-    list_destroy(procesos_en_new);
+    queue_destroy(procesos_en_new);
     list_destroy(procesos_en_ready);
     list_destroy(procesos_en_bloq);
     list_destroy(procesos_en_exit);
 
     log_destroy(un_logger);
+
+    liberar_semaforos();
+    liberar_mutex();
+}
+
+void liberar_mutex()
+{
+    pthread_mutex_destroy(&mutex_log);
+    pthread_mutex_destroy(&mutex_procesos_en_new);
+    pthread_mutex_destroy(&mutex_procesos_en_ready);
+}
+
+void liberar_semaforos()
+{
+    sem_destroy(&grado_multiprog_lo_permite);
+    sem_destroy(&llego_un_proceso);
 }

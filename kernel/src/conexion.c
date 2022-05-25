@@ -1,5 +1,7 @@
 #include "../include/conexion.h"
 
+////////////////////////////////////////////
+
 void conexion(void)
 {
     int socket_kernel_serv = iniciar_servidor("127.0.0.1", "25655");
@@ -46,6 +48,8 @@ void *gestionar_comunicacion_con_proceso(void* socket_proceso_param)
     return NULL;
 }
 
+////////////////////////////////////////////
+
 void inicializar_proceso(int socket_proceso)
 {
     t_proceso *un_proceso = malloc(sizeof (t_proceso));
@@ -58,7 +62,7 @@ void inicializar_proceso(int socket_proceso)
 void pasar_proceso_a_new(t_proceso *un_proceso)
 {
     pthread_mutex_lock(&mutex_procesos_en_new);
-    list_add(procesos_en_new,un_proceso);
+    queue_push(procesos_en_new,(void*) un_proceso);
     pthread_mutex_unlock(&mutex_procesos_en_new);
 }
 
@@ -76,6 +80,8 @@ t_pcb *inicializar_pcb(int socket_proceso)
     probar_comunicacion_instrucciones(un_pcb);
     return un_pcb;
 }
+
+////////////////////////////////////////////
 
 void mostrar_en_pantalla(t_instruccion *una_instruccion)
 {
