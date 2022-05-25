@@ -42,7 +42,7 @@ void *gestionar_comunicacion_con_proceso(void* socket_proceso_param)
             pthread_mutex_unlock(&mutex_log);
             break;
     }
-
+    
     responder_fin_proceso(socket_proceso);
 
     return NULL;
@@ -64,6 +64,8 @@ void pasar_proceso_a_new(t_proceso *un_proceso)
     pthread_mutex_lock(&mutex_procesos_en_new);
     queue_push(procesos_en_new,(void*) un_proceso);
     pthread_mutex_unlock(&mutex_procesos_en_new);
+
+    sem_post(&llego_un_proceso);
 }
 
 t_pcb *inicializar_pcb(int socket_proceso)
@@ -115,6 +117,8 @@ void responder_fin_proceso(int socket_proceso)
     pthread_mutex_lock(&mutex_log);
     log_info(un_logger,"Se envio mensaje de finalizacion!!");
     pthread_mutex_unlock(&mutex_log);
+
+    sem_post(&grado_multiprog_lo_permite);
 }
 
 //////////////////////////////////////////////////

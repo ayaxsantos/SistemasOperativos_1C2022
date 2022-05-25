@@ -40,7 +40,7 @@ void transicionar_proceso_a_ready(t_proceso *un_proceso)
 {
     pthread_mutex_lock(&mutex_procesos_en_ready);
     list_add(procesos_en_ready,(void*) un_proceso);
-    pthread_mutex_lock(&mutex_procesos_en_ready);
+    pthread_mutex_unlock(&mutex_procesos_en_ready);
 
     pthread_mutex_lock(&mutex_log);
     log_info(un_logger,"Se pasa proceso a READY -> PID = %d",un_proceso->un_pcb->pid);
