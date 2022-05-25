@@ -52,8 +52,9 @@ Mkfile.old
 dkms.conf
 
 #vscode
-.vscode/
 **/.vscode/
+.vscode/
+
 
 # Created by https://www.toptal.com/developers/gitignore/api/eclipse
 # Edit at https://www.toptal.com/developers/gitignore?templates=eclipse
@@ -73,6 +74,12 @@ local.properties
 
 # External tool builders
 **/.externalToolBuilders/
+.settings/
+.loadpath
+.recommenders
+
+# External tool builders
+.externalToolBuilders/
 
 # Locally stored "Eclipse launch configurations"
 *.launch
@@ -82,6 +89,7 @@ local.properties
 
 # CDT-specific (C/C++ Development Tooling)
 **/.cproject
+.cproject
 
 # CDT- autotools
 .autotools
@@ -135,6 +143,7 @@ local.properties
 # Reference: https://intellij-support.jetbrains.com/hc/en-us/articles/206544839
 
 # User-specific stuff
+.idea/
 **/.idea/**/workspace.xml
 **/.idea/**/tasks.xml
 **/.idea/**/usage.statistics.xml
@@ -146,6 +155,17 @@ local.properties
 
 # Generated files
 **/.idea/**/contentModel.xml
+.idea/**/workspace.xml
+.idea/**/tasks.xml
+.idea/**/usage.statistics.xml
+.idea/**/dictionaries
+.idea/**/shelf
+
+# AWS User-specific
+.idea/**/aws.xml
+
+# Generated files
+.idea/**/contentModel.xml
 
 # Sensitive or high-churn files
 .idea/**/dataSources/
@@ -240,3 +260,6 @@ fabric.properties
 .idea/codestream.xml
 
 # End of https://www.toptal.com/developers/gitignore/api/clion
+
+#other
+*.log
