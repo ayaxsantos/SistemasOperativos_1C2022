@@ -26,7 +26,6 @@ void* planificador_largo_plazo(void)
         un_proceso = obtener_proceso_en_new();
         transicionar_proceso_a_ready(un_proceso);
     }
-    return NULL;
 }
 
 ////////////////////////////////////////////

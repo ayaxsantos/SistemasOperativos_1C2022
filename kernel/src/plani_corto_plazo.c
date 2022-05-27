@@ -6,11 +6,11 @@ void inicializar_plani_corto_plazo(char *algoritmo_seleccionado)
 {
     if(!strcmp("FIFO",algoritmo_seleccionado))
     {
-        lanzar_hilo_plani_corto_plazo(algoritmo_fifo);
+        lanzar_hilo_plani_corto_plazo_con(algoritmo_fifo);
     }
     else if(!strcmp("SJF",algoritmo_seleccionado))
     {
-        lanzar_hilo_plani_corto_plazo(algoritmo_sjf_con_desalojo);
+        lanzar_hilo_plani_corto_plazo_con(algoritmo_sjf_con_desalojo);
     }
     else
     {
@@ -23,7 +23,7 @@ void inicializar_plani_corto_plazo(char *algoritmo_seleccionado)
     }
 }
 
-void lanzar_hilo_plani_corto_plazo(void* (*algoritmo_plani)(void*))
+void lanzar_hilo_plani_corto_plazo_con(void* (*algoritmo_plani)(void*))
 {
     pthread_create(hilo_corto_plazo, NULL, algoritmo_plani, NULL);
     pthread_detach(*hilo_corto_plazo);
@@ -31,7 +31,10 @@ void lanzar_hilo_plani_corto_plazo(void* (*algoritmo_plani)(void*))
 
 void *algoritmo_fifo(void * args)
 {
-    return NULL;
+    while(true)
+    {
+
+    }
 }
 
 void *algoritmo_sjf_con_desalojo(void *args)
