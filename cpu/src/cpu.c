@@ -52,17 +52,31 @@ void *ejecutar_pcb(void *arg) {
     //SIGNAL(sem_interrupt);
 }
 
-void recibir_pcb() {
-    t_pcb *pcb = deserializar_pcb(socket_kernel_dispatch);
-    while(queue_is_empty(pcb->consola->instrucciones)) {
-        t_instruccion *instruccion = (t_instruccion *) queue_pop(pcb->consola->instrucciones);
-        switch (instruccion->instruc) {
-            case NO_OP:
-                break;
-            case IO:
-                break;
-        }
-    }
+//void recibir_pcb() {
+//    t_pcb *pcb = deserializar_pcb(socket_kernel_dispatch);
+//    while(queue_is_empty(pcb->consola->instrucciones)) {
+//        t_instruccion *instruccion = (t_instruccion *) queue_pop(pcb->consola->instrucciones);
+//        switch (instruccion->instruc) {
+//            case NO_OP:
+//                break;
+//            case IO:
+//                break;
+//        }
+//    }
+//}
+
+void ciclo_de_instruccion() {
+	t_pcb *pcb = deserializar_pcb(socket_kernel_dispatch);
+
+	t_instruccion *instruccion = (t_instruccion *) queue_pop(pcb->consola->instrucciones); // equivale a nuestro fetch(*pcb)
+
+	if(necesita_fetch_operands(instruccion->instruc)) {
+		// Pedir direc logica a MMU
+	}
+
+	ejecutar_instruccion(*pcb, *instruccion);
+
+
 }
 
 void *ejecutar_interrupcion(void *arg) {
@@ -70,4 +84,8 @@ void *ejecutar_interrupcion(void *arg) {
     //guardar esa interrupcion
     //WAIT(sem_interrupt) -> inicia: 0
     //SIGNAL(sem_ejectar);
+}
+
+int necesita_fetch_operands(instruccion instruction) {
+	return instruction == COPY;
 }
