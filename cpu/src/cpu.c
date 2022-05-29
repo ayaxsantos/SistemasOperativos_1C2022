@@ -1,4 +1,5 @@
 #include "../include/cpu.h"
+#include <unistd.h> // Incluye el unsleep, preguntar donde agregar este include
 
 void iniciar() {
     //pcbs = list_create();
@@ -68,13 +69,13 @@ void *ejecutar_pcb(void *arg) {
 void ciclo_de_instruccion() {
 	t_pcb *pcb = deserializar_pcb(socket_kernel_dispatch);
 
-	t_instruccion *instruccion = (t_instruccion *) queue_pop(pcb->consola->instrucciones); // equivale a nuestro fetch(*pcb)
+	t_instruccion *instruccion = (t_instruccion *) queue_pop(pcb->consola->instrucciones); // FETCH
 
-	if(necesita_fetch_operands(instruccion->instruc)) {
+	if(necesita_fetch_operands(instruccion->instruc)) { // DECODE
 		// Pedir direc logica a MMU
 	}
 
-	ejecutar_instruccion(*pcb, *instruccion);
+	ejecutar_instruccion(instruccion);
 
 
 }
@@ -86,6 +87,15 @@ void *ejecutar_interrupcion(void *arg) {
     //SIGNAL(sem_ejectar);
 }
 
-int necesita_fetch_operands(instruccion instruction) {
+int necesita_fetch_operands(instruccion *instruction) {
 	return instruction == COPY;
+}
+
+void ejecutar_instruccion(t_instruccion *instruccion) {
+    switch (instruccion->instruc) {
+        case NO_OP: unsleep(config_cpu.retardo_noop * 1000); // devuelve 0, todo ok o -1 si fallo, falta agarrar el error
+           break;
+        case IO:
+           break;
+    }
 }
