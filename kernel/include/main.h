@@ -33,6 +33,9 @@ typedef struct proceso
 
 ///////////////////////////////////////////
 
+int socket_dispatch, socket_interrupt;
+
+//////////////////////////////////////////
 t_log *un_logger;
 t_config_kernel una_config_kernel;
 
@@ -46,9 +49,13 @@ t_proceso *proceso_en_exec;
 pthread_mutex_t mutex_log;
 pthread_mutex_t mutex_procesos_en_new;
 pthread_mutex_t mutex_procesos_en_ready;
+pthread_mutex_t mutex_procesos_en_bloq;
+pthread_mutex_t mutex_socket_dispatch;
 
 sem_t grado_multiprog_lo_permite;
 sem_t llego_un_proceso;
+sem_t hay_procesos_en_ready;
+sem_t hay_procesos_en_blocked;
 
 pthread_t *hilo_corto_plazo;
 pthread_t *hilo_largo_plazo;

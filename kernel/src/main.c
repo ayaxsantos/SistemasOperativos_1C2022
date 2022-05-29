@@ -10,7 +10,7 @@ int main(void)
     iniciar_hilos();
 
     inicializar_plani_largo_plazo();
-    inicializar_plani_corto_plazo();
+    inicializar_plani_corto_plazo(una_config_kernel.algoritmo_planificacion);
 
     conexion();
 

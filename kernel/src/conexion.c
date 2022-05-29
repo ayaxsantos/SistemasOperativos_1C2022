@@ -9,6 +9,8 @@ void conexion(void)
 
     int socket_proceso = 0;
 
+    conectar_con_cpu(socket_kernel_serv);
+
     // Aca tendriamos que conectarnos con MEMORIA y CPU
     // En caso de no poder realizar la conexion, error!! Kernel Panic (?
 
@@ -22,6 +24,28 @@ void conexion(void)
         pthread_detach(*hilo_proceso);
     }
 }
+
+int conectar_con_cpu(int socket_kernel_serv)
+{
+    socket_dispatch = crear_conexion(una_config_kernel.ip_cpu, una_config_kernel.puerto_cpu_dispatch);
+    socket_interrupt = crear_conexion(una_config_kernel.ip_cpu, una_config_kernel.puerto_cpu_interrupt);
+    log_info(un_logger, "Enviando HANDSHAKE a CPU \n");
+    enviar_handshake(socket_dispatch, KERNEL);
+    return esperar_handshake(socket_dispatch, confirmar_modulo);
+}
+
+void confirmar_modulo(int *socket, modulo modulo) {
+    if(modulo == CPU) {
+        log_info(un_logger, "HANDSHAKE exitoso con CPU \n");
+    }
+    else {
+        log_error(un_logger,"KERNEL PANIC -> Error al realizar el HANDSHAKE con CPU");
+        exit(EXIT_FAILURE);
+    }
+}
+
+
+
 
 void *gestionar_comunicacion_con_proceso(void* socket_proceso_param)
 {
@@ -129,13 +153,6 @@ void responder_fin_proceso(int socket_proceso)
 
 void realizar_handshake(int socket_proceso)
 {
-    if(esperar_handshake(&socket_proceso,mapeador) != 0)
-    {
-        pthread_mutex_lock(&mutex_log);
-        log_info(un_logger,"No se pudo realizar el handshake :c");
-        pthread_mutex_unlock(&mutex_log);
-        pthread_exit(NULL);     //Como el exit, pero para threads
-    }
 
     responder_handshake(socket_proceso);
 }
