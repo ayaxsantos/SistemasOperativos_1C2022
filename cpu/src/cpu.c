@@ -83,7 +83,7 @@ void *ejecutar_interrupcion(void *arg) {
     int socket_interrupt = esperar_cliente(interrupt);
     //guardar esa interrupcion
     //WAIT(sem_interrupt) -> inicia: 0
-    //SIGNAL(sem_ejectar);
+    //SIGNAL(sem_execute);
 }
 
 int necesita_fetch_operands(instruccion *instruction) {

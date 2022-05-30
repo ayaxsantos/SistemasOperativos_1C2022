@@ -1,6 +1,7 @@
 #include <general/carpisLib.h>
 #include <utils/serverutils.h>
 #include <pthread.h>
+#include <semaphore.h>
 
 typedef int32_t dir_logica;
 
@@ -45,6 +46,7 @@ t_config_cpu config_cpu;
 t_log *logger_cpu;
 
 int socket_memoria, dispatch, interrupt, socket_kernel_dispatch;
+sem_t sem_interrupt, sem_execute;
 ////////////////////////////////////////////////////////////
 void leer_configuracion();
 void arrancar_logger();
