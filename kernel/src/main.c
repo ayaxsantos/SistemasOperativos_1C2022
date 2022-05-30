@@ -10,7 +10,7 @@ int main(void)
     iniciar_hilos();
 
     inicializar_plani_largo_plazo();
-    inicializar_plani_corto_plazo(una_config_kernel.algoritmo_planificacion);
+    inicializar_plani_corto_plazo();
 
     conexion();
 
@@ -33,7 +33,7 @@ void iniciar_logger()
 
 void iniciar_config()
 {
-    t_config *una_config = config_create("./kernel.config");
+    una_config = config_create("../kernel.config");
 
     una_config_kernel.ip_memoria = config_get_string_value(una_config,"IP_MEMORIA");
     una_config_kernel.puerto_memoria = config_get_string_value(una_config,"PUERTO_MEMORIA");
@@ -46,8 +46,6 @@ void iniciar_config()
     una_config_kernel.alfa_plani = config_get_int_value(una_config,"ALFA");
     una_config_kernel.grado_multiprogramacion = config_get_int_value(una_config,"GRADO_MULTIPROGRAMACION");
     una_config_kernel.tiempo_max_bloqueado = config_get_int_value(una_config,"TIEMPO_MAXIMO_BLOQUEADO");
-
-    config_destroy(una_config);
 }
 
 void iniciar_estructuras()
@@ -87,6 +85,7 @@ void liberar_memoria()
     list_destroy(procesos_en_exit);
 
     log_destroy(un_logger);
+    config_destroy(una_config);
 
     liberar_semaforos();
     liberar_mutex();

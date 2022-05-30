@@ -2,13 +2,13 @@
 
 ////////////////////////////////////////////
 
-void inicializar_plani_corto_plazo(char *algoritmo_seleccionado)
+void inicializar_plani_corto_plazo()
 {
-    if(!strcmp("FIFO",algoritmo_seleccionado))
+    if(strcmp("FIFO",una_config_kernel.algoritmo_planificacion) == 0)
     {
         lanzar_hilo_plani_corto_plazo_con(algoritmo_fifo);
     }
-    else if(!strcmp("SJF",algoritmo_seleccionado))
+    else if(strcmp("SJF",una_config_kernel.algoritmo_planificacion) == 0)
     {
         lanzar_hilo_plani_corto_plazo_con(algoritmo_sjf_con_desalojo);
     }
@@ -38,9 +38,15 @@ void *algoritmo_fifo(void * args)
         pthread_mutex_lock(&mutex_procesos_en_ready);
         proceso_en_exec = list_get(procesos_en_ready, 0);
         pthread_mutex_unlock(&mutex_procesos_en_ready);
+
+        pthread_mutex_lock(&mutex_log);
+        log_info(un_logger,"Se pasa a EXEC el proceso PID = %d",proceso_en_exec->un_pcb->pid);
+        pthread_mutex_unlock(&mutex_log);
+
         pthread_mutex_lock(&mutex_socket_dispatch);
         enviar_pcb(socket_dispatch, proceso_en_exec->un_pcb);
         pthread_mutex_unlock(&mutex_socket_dispatch);
+        
         gestionar_pcb();
     }
 }
@@ -108,6 +114,7 @@ void gestionar_pcb()
             pthread_mutex_lock(&mutex_log);
             log_info(un_logger,"Volvio un PCB para finalizar!!");
             pthread_mutex_unlock(&mutex_log);
+            finalizar_proceso_ejecutando();
             break;
         default:
             pthread_mutex_lock(&mutex_log);

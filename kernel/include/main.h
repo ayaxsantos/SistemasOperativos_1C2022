@@ -39,6 +39,7 @@ int socket_dispatch, socket_interrupt;
 //////////////////////////////////////////
 
 t_log *un_logger;
+t_config *una_config;
 t_config_kernel una_config_kernel;
 
 t_queue *procesos_en_new;
