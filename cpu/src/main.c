@@ -72,7 +72,8 @@ void obtener_configuracion(int *socket, modulo modulo) {
 }
 
 void iniciar_semaforos() {
-
+	sem_init(&sem_execute, 0, 1);  // Preguntar si el 2do parametro está bien(en ambos)
+	sem_init(&sem_interrupt, 0, 0);
 }
 
 void setear_algoritmo_reemplazo_tlb() {
