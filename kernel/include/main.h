@@ -31,11 +31,6 @@ typedef struct proceso
     t_pcb *un_pcb;
 } t_proceso;
 
-///////////////////////////////////////////
-
-int socket_dispatch, socket_interrupt;
-
-
 //////////////////////////////////////////
 
 t_log *un_logger;
@@ -84,5 +79,12 @@ void liberar_mutex();
 #include <conexion.h>
 #include <plani_largo_plazo.h>
 #include <plani_corto_plazo.h>
+
+///////////////////////////////////////////
+
+int socket_dispatch;
+int socket_interrupt;
+
+///////////////////////////////////////////
 
 #endif

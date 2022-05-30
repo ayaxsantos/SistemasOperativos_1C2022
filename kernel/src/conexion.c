@@ -9,7 +9,7 @@ void conexion(void)
 
     int socket_proceso = 0;
 
-    //conectar_con_cpu(socket_kernel_serv);
+    conectar_con_cpu(socket_kernel_serv);
 
     // Aca tendriamos que conectarnos con MEMORIA y CPU
     // En caso de no poder realizar la conexion, error!! Kernel Panic (?

@@ -9,6 +9,9 @@ int main(void)
     iniciar_estructuras();
     iniciar_hilos();
 
+    socket_dispatch = 0;
+    socket_interrupt = 0;
+
     inicializar_plani_largo_plazo();
     inicializar_plani_corto_plazo();
 

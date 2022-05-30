@@ -46,7 +46,7 @@ void *algoritmo_fifo(void * args)
         pthread_mutex_lock(&mutex_socket_dispatch);
         enviar_pcb(socket_dispatch, proceso_en_exec->un_pcb);
         pthread_mutex_unlock(&mutex_socket_dispatch);
-        
+
         gestionar_pcb();
     }
 }
