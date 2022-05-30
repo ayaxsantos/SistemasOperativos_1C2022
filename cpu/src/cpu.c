@@ -73,11 +73,10 @@ void ciclo_de_instruccion() {
 
 	if(necesita_fetch_operands(instruccion->instruc)) { // DECODE
 		// Pedir direc logica a MMU
+        void *espacio_a_asignar = obtener_dato_memoria(instruccion->parametro1, pcb);
 	}
 
 	ejecutar_instruccion(instruccion);
-
-
 }
 
 void *ejecutar_interrupcion(void *arg) {
@@ -92,8 +91,12 @@ int necesita_fetch_operands(instruccion *instruction) {
 }
 
 void ejecutar_instruccion(t_instruccion *instruccion) {
+    int resultado;
     switch (instruccion->instruc) {
-        case NO_OP: unsleep(config_cpu.retardo_noop * 1000); // devuelve 0, todo ok o -1 si fallo, falta agarrar el error
+        case NO_OP:
+            resultado = usleep(config_cpu.retardo_noop * 1000); // devuelve 0, todo ok o -1 si fallo, falta agarrar el error
+            if(resultado == -1 )
+                log_error(logger_cpu, "Error al realizar usleep");
            break;
         case IO:
            break;
