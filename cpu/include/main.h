@@ -55,6 +55,7 @@ void obtener_configuracion(int *socket, modulo modulo);
 
 void setear_algoritmo_reemplazo_tlb();
 
+void liberar_semaforos();
 void liberar_configuracion_y_log();
 
 #include "mmu.h"

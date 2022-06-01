@@ -88,6 +88,12 @@ void setear_algoritmo_reemplazo_tlb() {
     } 
 }
 
+void liberar_semaforos()
+{
+    sem_destroy(&sem_execute);
+    sem_destroy(&sem_interrupt);
+}
+
 void liberar_configuracion_y_log() {
     free(config_cpu.ip_memoria);
     free(config_cpu.puerto_memoria);
