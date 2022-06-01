@@ -2,6 +2,8 @@
 
 ////////////////////////////////////////////
 
+time_t tiempoF, tiempoI;
+
 void inicializar_plani_corto_plazo()
 {
     if(strcmp("FIFO",una_config_kernel.algoritmo_planificacion) == 0)
@@ -36,7 +38,7 @@ void *algoritmo_fifo(void * args)
         //Tomar el primer elemento de la lista
         sem_wait(&hay_procesos_en_ready);
         pthread_mutex_lock(&mutex_procesos_en_ready);
-        proceso_en_exec = list_get(procesos_en_ready, 0);
+        proceso_en_exec = list_remove(procesos_en_ready, 0);
         pthread_mutex_unlock(&mutex_procesos_en_ready);
 
         pthread_mutex_lock(&mutex_log);
@@ -56,11 +58,16 @@ void *algoritmo_sjf_con_desalojo(void *args)
     while(true)
     {
         sem_wait(&hay_procesos_en_ready);
-        //Aplicar algoritmo de ordenamiento
+        //Ordenar lista
+        organizacionPlani();
+        //Tomar el primer elemento de la lista
         pthread_mutex_lock(&mutex_procesos_en_ready);
-        proceso_en_exec = list_get(procesos_en_ready, 0);
+        proceso_en_exec = list_remove(procesos_en_ready, 0);
         pthread_mutex_unlock(&mutex_procesos_en_ready);
-        return NULL;
+        pthread_mutex_lock(&mutex_socket_dispatch);
+        enviar_pcb(socket_dispatch, proceso_en_exec->un_pcb);
+        pthread_mutex_unlock(&mutex_socket_dispatch);
+        gestionar_pcb();
     }
 }
 
@@ -69,7 +76,7 @@ void pasar_proceso_a_bloqueado(t_proceso *un_proceso)
     //Esta funcion va a encargarse de pasar los procesos a bloqueado al recibir I/O
     un_proceso->un_pcb->un_estado = BLOCKED;
     pthread_mutex_lock(&mutex_procesos_en_bloq);
-    list_add(procesos_en_bloq,(void*) un_proceso);
+    queue_push(procesos_en_bloq,(void*) un_proceso);
     pthread_mutex_unlock(&mutex_procesos_en_bloq);
     sem_post(&hay_procesos_en_blocked);
 }
@@ -78,8 +85,11 @@ void pasar_proceso_a_bloqueado(t_proceso *un_proceso)
 
 void enviar_pcb(int socket, t_pcb* un_pcb)
 {
+    un_pcb->un_estado = EXEC;
     t_operacion *operacion = crear_operacion(PCB);
     setear_operacion(operacion, un_pcb);
+    //Se coloca tiempoI aqui
+    time(&tiempoI);
     enviar_operacion(operacion, socket);
     eliminar_operacion(operacion);
 }
@@ -98,6 +108,7 @@ void gestionar_pcb()
 {
     pthread_mutex_lock(&mutex_socket_dispatch);
     codigo_operacion un_codigo = (codigo_operacion)recibir_operacion(socket_dispatch);
+    //Se coloca tiempoF aqui
     pthread_mutex_unlock(&mutex_socket_dispatch);
     switch(un_codigo)
     {
@@ -108,6 +119,8 @@ void gestionar_pcb()
             pthread_mutex_lock(&mutex_socket_dispatch);
             proceso_en_exec->un_pcb = recibir_pcb();
             pthread_mutex_unlock(&mutex_socket_dispatch);
+            time(&tiempoF);
+            proceso_en_exec->un_pcb->una_estimacion = calcular_estimacion(tiempoF,tiempoI,proceso_en_exec);
             pasar_proceso_a_bloqueado(proceso_en_exec);
             break;
         case FIN_PROCESO:
@@ -122,6 +135,39 @@ void gestionar_pcb()
             pthread_mutex_unlock(&mutex_log);
             break;
     }
+}
+
+int calcular_estimacion(time_t tiempoF, time_t tiempoI, t_proceso *un_proceso)
+{
+    double real_anterior = difftime(tiempoF,tiempoI);
+    int alpha = una_config_kernel.alfa_plani;
+
+    pthread_mutex_lock(&mutex_log);
+    log_info(un_logger,"Tiempito -> Real Anterior: %lf ms",real_anterior * 1E3);
+    pthread_mutex_unlock(&mutex_log);
+
+    int estimacion_anterior = un_proceso->un_pcb->una_estimacion;
+
+    return estimacion_anterior * alpha + real_anterior * (1-alpha);
+    //Cuenta...
+    //Ti = Ti­1 * α + Ri­1 * (1 -­ α)
+}
+
+void organizacionPlani()
+{
+    pthread_mutex_lock(&mutex_procesos_en_ready);
+    bool comparador_procesos_SJF(void* proceso_primero, void* proceso_segundo)
+    {
+        return comparador_de_procesos_SJF((t_proceso*)proceso_primero,(t_proceso*)proceso_segundo);
+    }
+    list_sort(procesos_en_ready, comparador_procesos_SJF);
+    pthread_mutex_unlock(&mutex_procesos_en_ready);
+
+}
+
+bool comparador_de_procesos_SJF(t_proceso *un_proceso_primero, t_proceso *un_proceso_segundo)
+{
+    return un_proceso_primero->un_pcb->una_estimacion < un_proceso_segundo->un_pcb->una_estimacion;
 }
 
 /////////////////////////////////////////
