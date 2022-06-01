@@ -11,6 +11,7 @@ int main(void)
 
     inicializar_plani_largo_plazo();
     inicializar_plani_corto_plazo(una_config_kernel.algoritmo_planificacion);
+    inicializar_plani_corto_plazo();
 
     conexion();
 

@@ -43,6 +43,8 @@ t_proceso *obtener_proceso_en_new()
 
 void transicionar_proceso_a_ready(t_proceso *un_proceso)
 {
+    //Agrego que se le coloque una estimacion inicial al proceso -> Carlos
+    un_proceso->un_pcb->una_estimacion = una_config_kernel.estimacion_inicial;
     pthread_mutex_lock(&mutex_procesos_en_ready);
     list_add(procesos_en_ready,(void*) un_proceso);
     pthread_mutex_unlock(&mutex_procesos_en_ready);
