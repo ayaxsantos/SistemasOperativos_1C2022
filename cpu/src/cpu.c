@@ -86,7 +86,7 @@ void *ejecutar_interrupcion(void *arg) {
     //SIGNAL(sem_execute);
 }
 
-int necesita_fetch_operands(instruccion *instruction) {
+int necesita_fetch_operands(instruccion instruction) {
 	return instruction == COPY;
 }
 
@@ -98,7 +98,15 @@ void ejecutar_instruccion(t_instruccion *instruccion) {
             if(resultado == -1 )
                 log_error(logger_cpu, "Error al realizar usleep");
            break;
-        case IO:
+        case IO: // Pedir a Kernel que bloque el proceso el tiempo que viene indicado en el param1
+           break;
+        case READ:
+           break;
+        case WRITE:
+           break;
+        case COPY:
+           break;
+        case I_EXIT: // Avisar a Kernel, enviando PCB
            break;
     }
 }
