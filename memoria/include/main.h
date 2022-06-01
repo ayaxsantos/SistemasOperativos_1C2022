@@ -61,9 +61,11 @@ typedef struct t_tabla_pagina
 {
     unsigned int pid;
     t_dictionary *tabla;
+    int nro_tabla_2n;
     int puntero;
     int cantidad_hit;
     int cantidad_miss;
+    t_list* tablas_segundo_nivel;
 } t_tabla_pagina;
 
 typedef enum
@@ -83,13 +85,11 @@ typedef enum
 t_config_memoria config_memoria;
 t_log *logger_memoria;
 t_algoritmo tipo_algoritmo;
-int cantidad_maxima_frames;
 
 /************ESTRUCTURAS DE MEMORIA*******/
 
 t_memoria *memoria_principal;
-t_list *tabla_principal;
-t_list *tablas_segundo_nivel;
+t_list *tablas_primer_nivel;
 
 ////////////////////////////////////////////////
 
