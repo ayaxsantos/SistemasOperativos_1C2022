@@ -42,7 +42,7 @@ void *ejecutar_pcb(void *arg) {
     int operacion = recibir_operacion(dispatch);
     switch (operacion) {
         case PCB:
-            recibir_pcb();
+            ciclo_de_instruccion();
             break;
         default:
             break;
@@ -72,11 +72,11 @@ void ciclo_de_instruccion() {
 	t_instruccion *instruccion = (t_instruccion *) queue_pop(pcb->consola->instrucciones); // FETCH
 
 	if(necesita_fetch_operands(instruccion->instruc)) { // DECODE
-		// Pedir direc logica a MMU
+		// TODO
         void *espacio_a_asignar = obtener_dato_memoria(instruccion->parametro1, pcb);
 	}
 
-	ejecutar_instruccion(instruccion);
+	ejecutar_instruccion(instruccion, pcb);
 }
 
 void *ejecutar_interrupcion(void *arg) {
@@ -90,10 +90,11 @@ int necesita_fetch_operands(instruccion instruction) {
 	return instruction == COPY;
 }
 
-void ejecutar_instruccion(t_instruccion *instruccion) {
-    int resultado;
+void ejecutar_instruccion(t_instruccion *instruccion, t_pcb *pcb) {
+	int resultado;
     switch (instruccion->instruc) {
         case NO_OP:
+
             resultado = usleep(config_cpu.retardo_noop * 1000); // devuelve 0, todo ok o -1 si fallo, falta agarrar el error
             if(resultado == -1 )
                 log_error(logger_cpu, "Error al realizar usleep");
@@ -106,7 +107,17 @@ void ejecutar_instruccion(t_instruccion *instruccion) {
            break;
         case COPY:
            break;
-        case I_EXIT: // Avisar a Kernel, enviando PCB
+        case I_EXIT: fin_de_proceso(socket_kernel_dispatch, pcb); // Preguntar si esta bien ese socket
            break;
     }
+}
+
+// Inspirado en Kernel 😂
+//  TODO: tal vez esta funcion deberia ir a carpisLib, se usa en cpu y kernel, para evitar repeticion de lógica
+void fin_de_proceso(int socket, t_pcb* un_pcb)
+{
+    t_operacion *operacion = crear_operacion(FIN_PROCESO);
+    setear_operacion(operacion, un_pcb);
+    enviar_operacion(operacion, socket);
+    eliminar_operacion(operacion);
 }
