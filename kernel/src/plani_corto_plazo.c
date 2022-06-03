@@ -88,10 +88,17 @@ void enviar_pcb(int socket, t_pcb* un_pcb)
     un_pcb->un_estado = EXEC;
     t_operacion *operacion = crear_operacion(PCB);
     setear_operacion(operacion, un_pcb);
-    //Se coloca tiempoI aqui
-    time(&tiempoI);
+
     enviar_operacion(operacion, socket);
     eliminar_operacion(operacion);
+}
+
+void realizar_envio_pcb(int socket, t_pcb *un_pcb)
+{
+    un_pcb->un_estado = EXEC;
+    enviar_pcb(socket,un_pcb,PCB);
+    //Se coloca tiempoI aqui
+    time(&tiempoI);
 }
 
 t_pcb *recibir_pcb()
