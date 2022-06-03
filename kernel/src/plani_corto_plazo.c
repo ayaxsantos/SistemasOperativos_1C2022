@@ -82,17 +82,7 @@ void pasar_proceso_a_bloqueado(t_proceso *un_proceso)
 }
 
 /////////////////////////////////////////////////
-/*
-void enviar_pcb_pri(int socket, t_pcb* un_pcb)
-{
-    un_pcb->un_estado = EXEC;
-    t_operacion *operacion = crear_operacion(PCB);
-    setear_operacion(operacion, un_pcb);
 
-    enviar_operacion(operacion, socket);
-    eliminar_operacion(operacion);
-}
-*/
 void realizar_envio_pcb(int socket, t_pcb *un_pcb)
 {
     un_pcb->un_estado = EXEC;
@@ -100,8 +90,8 @@ void realizar_envio_pcb(int socket, t_pcb *un_pcb)
     //Se coloca tiempoI aqui
     time(&tiempoI);
 }
-/*
-t_pcb *recibir_pcb()
+
+t_pcb *obtener_pcb()
 {
     //Size aca no me sirve pero para que no rompa lo dejo
     int size;
@@ -109,7 +99,7 @@ t_pcb *recibir_pcb()
     t_pcb *un_pcb = deserializar_pcb(socket_dispatch);
     free(buffer);
     return un_pcb;
-}*/
+}
 
 void gestionar_pcb()
 {
@@ -121,10 +111,24 @@ void gestionar_pcb()
     {
         case PCB:
             pthread_mutex_lock(&mutex_log);
-            log_info(un_logger,"Volvio un PCB para bloquear!!");
+            log_info(un_logger,"Volvio un PCB desaloja3!!");
             pthread_mutex_unlock(&mutex_log);
             pthread_mutex_lock(&mutex_socket_dispatch);
-            proceso_en_exec->un_pcb = recibir_pcb();
+            proceso_en_exec->un_pcb = obtener_pcb();
+            pthread_mutex_unlock(&mutex_socket_dispatch);
+            time(&tiempoF);
+            proceso_en_exec->un_pcb->una_estimacion = calcular_estimacion(tiempoF,tiempoI,proceso_en_exec);
+            pasar_proceso_a_bloqueado(proceso_en_exec);
+            break;
+        case BLOQUEO:
+            pthread_mutex_lock(&mutex_log);
+            log_info(un_logger,"Volvio un PCB para bloquear!!");
+            pthread_mutex_unlock(&mutex_log);
+
+            //t_proceso_bloqueo *proceso_para_bloquear = deserializar_proceso_bloqueo();
+
+            pthread_mutex_lock(&mutex_socket_dispatch);
+            proceso_en_exec->un_pcb = obtener_pcb();
             pthread_mutex_unlock(&mutex_socket_dispatch);
             time(&tiempoF);
             proceso_en_exec->un_pcb->una_estimacion = calcular_estimacion(tiempoF,tiempoI,proceso_en_exec);
@@ -157,7 +161,7 @@ int calcular_estimacion(time_t tiempoF, time_t tiempoI, t_proceso *un_proceso)
 
     return estimacion_anterior * alpha + real_anterior * (1-alpha);
     //Cuenta...
-    //Ti = Ti­1 * α + Ri­1 * (1 -­ α)
+    //Ti = Ti1 * α + Ri1 * (1 - α)
 }
 
 void organizacionPlani()

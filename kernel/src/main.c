@@ -55,7 +55,7 @@ void iniciar_estructuras()
 {
     procesos_en_new = queue_create();
     procesos_en_ready = list_create();
-    procesos_en_bloq = list_create();
+    procesos_en_bloq = queue_create();
     procesos_en_exit = list_create();
 }
 
@@ -84,7 +84,7 @@ void liberar_memoria()
 
     queue_destroy(procesos_en_new);
     list_destroy(procesos_en_ready);
-    list_destroy(procesos_en_bloq);
+    queue_destroy(procesos_en_bloq);
     list_destroy(procesos_en_exit);
 
     log_destroy(un_logger);
