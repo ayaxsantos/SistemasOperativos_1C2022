@@ -38,6 +38,16 @@ t_consola *recibir_datos_consola(int socket) {
     return consola;
 }
 
+void enviar_interrupcion(int socket)
+{
+    bool valor_interrupcion = true;
+
+    t_operacion *operacion = crear_operacion(INTERRUPCION);
+    setear_operacion(operacion, &valor_interrupcion);
+    enviar_operacion(operacion, socket);
+    eliminar_operacion(operacion);
+}
+
 void enviar_pcb(int socket, t_pcb* un_pcb, codigo_operacion codigo)
 {
     t_operacion *operacion = crear_operacion(codigo);
@@ -129,20 +139,6 @@ void *serializar_tabla1n(t_dictionary *tabla1n, int *size) {
     return stream;
 }
 
-t_proceso_bloqueo *deserializar_proceso_bloqueo(int socket)
-{
-    int size;
-    void *buffer = recibir_buffer(&size,socket);
-
-    t_proceso_bloqueo *proceso_bloqueo = malloc(sizeof(t_proceso_bloqueo));
-    proceso_bloqueo->pcb = deserializar_pcb_enviar(socket,buffer);
-
-    memcpy(&(proceso_bloqueo->tiempo_bloqueo), buffer, sizeof(int));
-    free(buffer);
-    return proceso_bloqueo;
-}
-
-
 t_pcb *recibir_pcb(int socket, void * buffer) {
     //Size aca no me sirve pero para que no rompa lo dejo
     int size;
@@ -168,11 +164,24 @@ t_pcb *recibir_pcb(int socket, void * buffer) {
     return pcb;
 }
 
+t_proceso_bloqueo *deserializar_proceso_bloqueo(int socket)
+{
+    int size;
+    void *buffer = recibir_buffer(&size,socket);
+
+    t_proceso_bloqueo *proceso_bloqueo = malloc(sizeof(t_proceso_bloqueo));
+    proceso_bloqueo->pcb = recibir_pcb(socket,buffer);
+
+    memcpy(&(proceso_bloqueo->tiempo_bloqueo), buffer, sizeof(int));
+    free(buffer);
+    return proceso_bloqueo;
+}
+
 t_pcb *deserializar_pcb(int socket) {
     //Size aca no me sirve pero para que no rompa lo dejo
     int size;
     void * buffer = recibir_buffer(&size, socket);
-    t_pcb *pcb = deserializar_pcb_enviar(socket,buffer);
+    t_pcb *pcb = recibir_pcb(socket,buffer);
     free(buffer);
     return pcb;
 }

@@ -16,7 +16,7 @@ bool comparador_de_procesos_SJF(t_proceso *un_proceso_primero, t_proceso *un_pro
 
 //////////////////////////////////////
 
-void enviar_pcb(int socket, t_pcb* un_pcb);
+//void enviar_pcb_pri(int socket, t_pcb* un_pcb);
 t_pcb *recibir_pcb();
 void gestionar_pcb();
 

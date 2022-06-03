@@ -35,6 +35,7 @@ typedef enum
     HANDSHAKE,
     PCB,
     BLOQUEO,
+    INTERRUPCION,
 	FIN_PROCESO,
 	MSJ
     /*A definir*/

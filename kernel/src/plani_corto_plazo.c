@@ -46,7 +46,7 @@ void *algoritmo_fifo(void * args)
         pthread_mutex_unlock(&mutex_log);
 
         pthread_mutex_lock(&mutex_socket_dispatch);
-        enviar_pcb(socket_dispatch, proceso_en_exec->un_pcb);
+        enviar_pcb(socket_dispatch, proceso_en_exec->un_pcb,PCB);
         pthread_mutex_unlock(&mutex_socket_dispatch);
 
         gestionar_pcb();
@@ -65,7 +65,7 @@ void *algoritmo_sjf_con_desalojo(void *args)
         proceso_en_exec = list_remove(procesos_en_ready, 0);
         pthread_mutex_unlock(&mutex_procesos_en_ready);
         pthread_mutex_lock(&mutex_socket_dispatch);
-        enviar_pcb(socket_dispatch, proceso_en_exec->un_pcb);
+        enviar_pcb(socket_dispatch, proceso_en_exec->un_pcb,PCB);
         pthread_mutex_unlock(&mutex_socket_dispatch);
         gestionar_pcb();
     }
@@ -82,8 +82,8 @@ void pasar_proceso_a_bloqueado(t_proceso *un_proceso)
 }
 
 /////////////////////////////////////////////////
-
-void enviar_pcb(int socket, t_pcb* un_pcb)
+/*
+void enviar_pcb_pri(int socket, t_pcb* un_pcb)
 {
     un_pcb->un_estado = EXEC;
     t_operacion *operacion = crear_operacion(PCB);
@@ -92,7 +92,7 @@ void enviar_pcb(int socket, t_pcb* un_pcb)
     enviar_operacion(operacion, socket);
     eliminar_operacion(operacion);
 }
-
+*/
 void realizar_envio_pcb(int socket, t_pcb *un_pcb)
 {
     un_pcb->un_estado = EXEC;
@@ -100,7 +100,7 @@ void realizar_envio_pcb(int socket, t_pcb *un_pcb)
     //Se coloca tiempoI aqui
     time(&tiempoI);
 }
-
+/*
 t_pcb *recibir_pcb()
 {
     //Size aca no me sirve pero para que no rompa lo dejo
@@ -109,7 +109,7 @@ t_pcb *recibir_pcb()
     t_pcb *un_pcb = deserializar_pcb(socket_dispatch);
     free(buffer);
     return un_pcb;
-}
+}*/
 
 void gestionar_pcb()
 {

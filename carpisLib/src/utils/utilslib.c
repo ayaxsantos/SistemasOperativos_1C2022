@@ -42,6 +42,13 @@ void setear_operacion(t_operacion *operacion, void *valor) {
             operacion->buffer->size = size;
             operacion->buffer->stream = stream;
             break;
+		case INTERRUPCION:
+			size = sizeof(int);
+			stream = malloc(size);
+			memcpy(stream, valor, size);
+			operacion->buffer->size = size;
+            operacion->buffer->stream = stream;
+			break;
     }
     return;
 }
