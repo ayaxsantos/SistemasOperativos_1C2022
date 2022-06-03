@@ -137,6 +137,8 @@ t_pcb *deserializar_pcb(int socket);
 t_consola *deserializar_consola(void *buffer);
 t_queue *deserializar_instrucciones(void *buffer, int size_cola);
 t_dictionary *deserializar_tabla1n(void *buffer, int size_tabla);
+t_proceso_bloqueo *deserializar_proceso_bloqueo(int socket);
+
 #include "../utils/utilslib.h"
 
 #endif

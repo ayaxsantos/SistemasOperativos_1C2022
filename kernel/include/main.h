@@ -30,6 +30,7 @@ typedef struct proceso
 {
     int socket_proceso;
     t_pcb *un_pcb;
+    int tiempo_a_bloquear;
 } t_proceso;
 
 //////////////////////////////////////////
