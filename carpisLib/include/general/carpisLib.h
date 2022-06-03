@@ -122,6 +122,9 @@ int esperar_handshake(int *socket, void(*mapeador)(int*, modulo));
 void enviar_datos_consola(int socket, t_consola *consola);
 t_consola *recibir_datos_consola(int socket);
 
+void enviar_interrupcion(int socket);
+bool recibir_interrupcion(int socket);
+
 void enviar_pcb(int socket, t_pcb* un_pcb, codigo_operacion codigo);
 void *serializar_consola(t_consola *consola, int *size);
 t_pcb *deserializar_pcb_enviar(int socket, void * buffer);

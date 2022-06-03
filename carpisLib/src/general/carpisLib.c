@@ -38,6 +38,17 @@ t_consola *recibir_datos_consola(int socket) {
     return consola;
 }
 
+bool recibir_interrupcion(int socket)
+{
+    bool valor_interrupcion = false;
+    int size;
+    void *buffer = recibir_buffer(&size,socket);
+
+    memcpy(&(valor_interrupcion),buffer,size);
+    free(buffer);
+    return valor_interrupcion;
+}
+
 void enviar_interrupcion(int socket)
 {
     bool valor_interrupcion = true;
