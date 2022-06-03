@@ -38,7 +38,7 @@ void enviar_confirmacion(int *socket, modulo modulo_solicitante) {
 }
 
 void *ejecutar_pcb(void *arg) {
-    //WAIT(sem_ejecutar); inicia: 1
+    sem_wait(&sem_execute);
     int operacion = recibir_operacion(dispatch);
     switch (operacion) {
         case PCB:
@@ -50,21 +50,9 @@ void *ejecutar_pcb(void *arg) {
     /*
      * La cpu es una sola no?
      */
-    //SIGNAL(sem_interrupt);
+    sem_post(&sem_interrupt);
 }
 
-//void recibir_pcb() {
-//    t_pcb *pcb = deserializar_pcb(socket_kernel_dispatch);
-//    while(queue_is_empty(pcb->consola->instrucciones)) {
-//        t_instruccion *instruccion = (t_instruccion *) queue_pop(pcb->consola->instrucciones);
-//        switch (instruccion->instruc) {
-//            case NO_OP:
-//                break;
-//            case IO:
-//                break;
-//        }
-//    }
-//}
 
 void ciclo_de_instruccion() {
 	t_pcb *pcb = deserializar_pcb(socket_kernel_dispatch);
@@ -82,8 +70,9 @@ void ciclo_de_instruccion() {
 void *ejecutar_interrupcion(void *arg) {
     int socket_interrupt = esperar_cliente(interrupt);
     //guardar esa interrupcion
-    //WAIT(sem_interrupt) -> inicia: 0
-    //SIGNAL(sem_execute);
+    sem_wait(&sem_interrupt);
+    // Pasar pcb a kernel, socket dispatch
+    sem_post(&sem_execute);
 }
 
 int necesita_fetch_operands(instruccion instruction) {
