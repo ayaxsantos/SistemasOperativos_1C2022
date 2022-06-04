@@ -13,11 +13,16 @@ void pasar_proceso_a_bloqueado(t_proceso *un_proceso);
 void organizacionPlani();
 int calcular_estimacion(time_t tiempoF, time_t tiempoI, t_proceso *un_proceso);
 bool comparador_de_procesos_SJF(t_proceso *un_proceso_primero, t_proceso *un_proceso_segundo);
+void devolver_proceso_a_ready(t_proceso *);
 
 //////////////////////////////////////
 
 t_pcb *obtener_pcb();
 void gestionar_pcb();
+
+//////////////////////////////////////
+
+time_t tiempoF, tiempoI;
 
 //////////////////////////////////////
 
