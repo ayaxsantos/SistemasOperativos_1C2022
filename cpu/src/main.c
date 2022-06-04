@@ -72,7 +72,8 @@ void obtener_configuracion(int *socket, modulo modulo) {
 }
 
 void iniciar_semaforos() {
-
+	sem_init(&sem_execute, 0, 1);  // Preguntar si el 2do parametro está bien(en ambos)
+	sem_init(&sem_interrupt, 0, 0);
 }
 
 void setear_algoritmo_reemplazo_tlb() {
@@ -85,6 +86,12 @@ void setear_algoritmo_reemplazo_tlb() {
     else {
         log_error(logger_cpu,"No se pudieron setear las estructuras de CPU. Error en el archivo config.");
     } 
+}
+
+void liberar_semaforos()
+{
+    sem_destroy(&sem_execute);
+    sem_destroy(&sem_interrupt);
 }
 
 void liberar_configuracion_y_log() {
