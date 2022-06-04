@@ -13,7 +13,7 @@ void iniciar() {
 void esperar_a_kernel() {
     log_info(logger_cpu,"CPU a la espera de Kernel");
     socket_kernel_dispatch = esperar_cliente(dispatch);
-    esperar_handshake(socket_kernel_dispatch, enviar_confirmacion);
+    esperar_handshake(&socket_kernel_dispatch, enviar_confirmacion);
     pthread_t hilo_dispatch, hilo_interrupt;
     pthread_create(&hilo_dispatch, NULL, &ejecutar_pcb, NULL);
     pthread_create(&hilo_interrupt, NULL, &ejecutar_interrupcion, NULL);
