@@ -4,15 +4,15 @@
 void iniciar() {
     //pcbs = list_create();
 
-    dispatch = iniciar_servidor(config_cpu.ip_cpu, config_cpu.puerto_escucha_dispatch);
-    interrupt = iniciar_servidor(config_cpu.ip_cpu, config_cpu.puerto_escucha_interrupt);
+    cpu_dispatch = iniciar_servidor(config_cpu.ip_cpu, config_cpu.puerto_escucha_dispatch);
+    cpu_interrupt = iniciar_servidor(config_cpu.ip_cpu, config_cpu.puerto_escucha_interrupt);
     conectar_a_memoria_y_recibir_config();
     esperar_a_kernel();
 }
 
 void esperar_a_kernel() {
     log_info(logger_cpu,"CPU a la espera de Kernel");
-    socket_kernel_dispatch = esperar_cliente(dispatch);
+    socket_kernel_dispatch = esperar_cliente(cpu_dispatch);
     esperar_handshake(&socket_kernel_dispatch, enviar_confirmacion);
     pthread_t hilo_dispatch, hilo_interrupt;
     pthread_create(&hilo_dispatch, NULL, &ejecutar_pcb, NULL);
@@ -38,19 +38,21 @@ void enviar_confirmacion(int *socket, modulo modulo_solicitante) {
 }
 
 void *ejecutar_pcb(void *arg) {
-    sem_wait(&sem_execute);
-    int operacion = recibir_operacion(dispatch);
-    switch (operacion) {
-        case PCB:
-            ciclo_de_instruccion();
-            break;
-        default:
-            break;
-    }
-    /*
-     * La cpu es una sola no?
-     */
-    sem_post(&sem_interrupt);
+	while(true) {
+		sem_wait(&sem_execute);
+		int operacion = recibir_operacion(cpu_dispatch);
+		switch (operacion) {
+			case PCB:
+				ciclo_de_instruccion();
+				break;
+			default:
+				break;
+		}
+		/*
+		 * La cpu es una sola no?
+		 */
+		sem_post(&sem_interrupt);
+	}
 }
 
 
@@ -65,14 +67,17 @@ void ciclo_de_instruccion() {
 	}
 
 	ejecutar_instruccion(instruccion, pcb);
+	pcb->program_counter ++;
 }
 
 void *ejecutar_interrupcion(void *arg) {
-    int socket_interrupt = esperar_cliente(interrupt);
-    //guardar esa interrupcion
-    sem_wait(&sem_interrupt);
-    // Pasar pcb a kernel, socket dispatch
-    sem_post(&sem_execute);
+	while(true) {
+		int socket_interrupt = esperar_cliente(cpu_interrupt);
+		//guardar esa interrupcion
+		sem_wait(&sem_interrupt);
+		// Pasar pcb a kernel, socket dispatch
+		sem_post(&sem_execute);
+	}
 }
 
 int necesita_fetch_operands(instruccion instruction) {
@@ -84,7 +89,7 @@ void ejecutar_instruccion(t_instruccion *instruccion, t_pcb *pcb) {
     switch (instruccion->instruc) {
         case NO_OP:
 
-            resultado = usleep(config_cpu.retardo_noop * 1000); // devuelve 0, todo ok o -1 si fallo, falta agarrar el error
+            resultado = usleep(config_cpu.retardo_noop * 1000);
             if(resultado == -1 )
                 log_error(logger_cpu, "Error al realizar usleep");
            break;
