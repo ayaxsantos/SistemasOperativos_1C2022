@@ -4,14 +4,26 @@ void iniciar_mmu() {
     
 }
 
-char *dir_logica_a_fisica(dir_logica dir_logica, t_pcb *pcb, t_accion accion) {
+void *obtener_dato_memoria(dir_logica dir, t_pcb *pcb) {
+    /*
+     * 1- Un primer acceso para conocer en qué tabla de páginas de 2do nivel
+     *      está direccionado el marco en que se encuentra la página a la que queremos acceder
+     * 2- Un segundo acceso para conocer en qué marco está la misma
+     * 3- Finalmente acceder a la porción de memoria correspondiente (la dirección física).
+     */
+
+    t_dictionary *tabla_2n = solicitar_tabla_2nivel(entrada_tabla_1er_nivel(numero_pagina(dir)));
+
+}
+
+char *dir_logica_a_fisica(dir_logica dir, t_pcb *pcb, t_accion accion) {
     int cantidad_paginas = dictionary_size(pcb->tabla_1n);
-    int dir_nro_pagina = get_nro_pagina(dir_logica);
+    int dir_nro_pagina = get_nro_pagina(dir);
     if(dir_nro_pagina >= cantidad_paginas) {
         //No se encontro la direccion logica;
         return "-100";
     }
-    int desplazamiento = dir_logica  - config_memoria.tamanio_pagina * dir_nro_pagina;
+    int desplazamiento = dir - config_memoria.tamanio_pagina * dir_nro_pagina;
     int resultado = obtener_nro_frame_de_tlb(dir_nro_pagina, tabla_carpincho->pid);
     t_frame *frame;
     if(resultado != -1) {
@@ -44,4 +56,21 @@ char *dir_logica_a_fisica(dir_logica dir_logica, t_pcb *pcb, t_accion accion) {
         free(nro_pagina);
         return frame->base + desplazamiento;
     }
+}
+
+////////////////////////////////////////////////////////
+int numero_pagina(dir_logica dir) {
+    return floor(dir / config_cpu.tamanio_pagina);
+}
+
+int entrada_tabla_1er_nivel(int numero_pagina) {
+    return floor(numero_pagina / config_cpu.entradas_por_tabla);
+}
+
+int entrada_tabla_2do_nivel(int numero_pagina) {
+    return numero_pagina % config_cpu.entradas_por_tabla;
+}
+
+int calcular_desplazamiento(dir_logica dir, int numero_pagina) {
+    return dir - numero_pagina * config_cpu.tamanio_pagina;
 }

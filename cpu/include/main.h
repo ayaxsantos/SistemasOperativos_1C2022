@@ -1,6 +1,7 @@
 #include <general/carpisLib.h>
 #include <utils/serverutils.h>
 #include <pthread.h>
+#include <math.h>
 
 typedef int32_t dir_logica;
 
