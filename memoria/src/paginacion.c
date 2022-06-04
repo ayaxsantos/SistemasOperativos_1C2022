@@ -1,59 +1,62 @@
 #include "../include/paginacion.h"
 
-t_tabla_pagina *crear_tabla_principal_para(int pid_proceso){
-	t_tabla_pagina *tabla_principal = armar_tabla_paginas(pid_proceso);
-	tabla_principal->tablas_segundo_nivel = list_create();
-	crear_tablas_segundo_nivel(pid_proceso, tabla_principal);
+t_tabla_pagina *crear_tabla_principal_para(int pid){
+	t_tabla_pagina *tabla_principal = inicializar_tabla(pid);
+	crear_tablas_segundo_nivel(tabla_principal);
 
 	return tabla_principal;
 }
 
-void crear_tablas_segundo_nivel(int pid_proceso, t_tabla_pagina *tabla_principal){
-	int cant_tablas_2n = memoria_principal->cantidad_frames / config_memoria.entradas_por_tabla;
-	t_tabla_pagina *tabla_aux;
-	int i = 0;
+void crear_tablas_segundo_nivel(t_tabla_pagina *tabla_principal){
+	char *nro_pag;
+	int i;
 
-	for (i=0; i < cant_tablas_2n; i++){
-		tabla_aux = armar_tabla_paginas(pid_proceso);
-		tabla_aux->nro_tabla_2n = i;
-		list_add(tabla_principal->tablas_segundo_nivel, tabla_aux);
-		dictionary_put(tabla_principal->tabla, string_itoa(i), i);
+	for (i=0; i < config_memoria.entradas_por_tabla; i++){
+		nro_pag = string_itoa(i);
+		agregar_pag_a_tabla_1n(tabla_principal, nro_pag);
 	}
-
 };
 
-t_tabla_pagina *armar_tabla_paginas(int pid) {
-	t_tabla_pagina *tabla_paginas = crear_tabla_inicializada(pid);
-
-    int cant_frames = config_memoria.entradas_por_tabla;
-    int resultado;
-	char *nro_pagina;
-
-    for(int i=0; i < cant_frames; i++) {
-        nro_pagina = string_itoa(i);
-        resultado = agregar_pag_a_tabla(tabla_paginas, nro_pagina);
-        if(resultado == -1) {
-            // pthread_mutex_lock(&mutex_logger);
-            log_error(logger_memoria, "El espacio de memoria del proceso está lleno.");
-            // pthread_mutex_unlock(&mutex_logger);
-            liberar_todas_las_paginas(tabla_paginas);
-            return -1;
-        }
-    }
-
-    return resultado;
-}
-
-t_tabla_pagina *crear_tabla_inicializada(int pid){
+t_tabla_pagina *inicializar_tabla(int pid){
 	t_tabla_pagina* nueva_tabla = malloc(sizeof(t_tabla_pagina));
 	nueva_tabla->tabla = dictionary_create();
-	nueva_tabla->nro_tabla_2n = -1;
-	nueva_tabla->pid = pid;
+	nueva_tabla->pid = pid;		// pid -1 indica que es tabla de 2N
 	nueva_tabla->puntero = 0;
 	nueva_tabla->cantidad_hit = 0;
 	nueva_tabla->cantidad_miss = 0;
 
 	return nueva_tabla;
+}
+
+int agregar_pag_a_tabla_1n(t_tabla_pagina *tabla_proceso, char *nro_pag){
+	t_tabla_pagina *tabla_2n_aux = inicializar_tabla(-1);
+	int i, resultado;
+
+    for (i=0; i < config_memoria.entradas_por_tabla; i++){
+    		nro_pag = string_itoa(i);
+    		resultado = agregar_pag_a_tabla_2n(tabla_proceso, nro_pag);
+
+    		if(resultado == -1) {
+    			// pthread_mutex_lock(&mutex_logger);
+    			log_error(logger_memoria, "El espacio de memoria del proceso está lleno.");
+    			// pthread_mutex_unlock(&mutex_logger);
+    			liberar_todas_las_paginas(tabla_proceso);
+    			return -1;
+    		}
+    	}
+
+    dictionary_put(tabla_proceso->tabla, nro_pag, tabla_2n_aux);
+    return 0;
+}
+
+int agregar_pag_a_tabla_2n(t_tabla_pagina *tabla_proceso, char *nro_pag){
+    t_col_pagina *col = malloc(sizeof(t_col_pagina));
+    t_frame *frame = obtener_frame_libre(tabla_proceso, col, atoi(nro_pag));
+    dictionary_put(tabla_proceso->tabla, nro_pag, col);
+    frame->nro_pagina_asignada = atoi(nro_pag);
+    frame->pid_asignado = tabla_proceso->pid;
+    frame->is_free = false;
+    return 0;
 }
 
 int get_cantidad_total_paginas() {
@@ -63,16 +66,6 @@ int get_cantidad_total_paginas() {
 // TODO: Chequear qué dirección lógica pasa CPU
 int get_nro_pagina(uint32_t dir_logica) {
     return trunc((double) dir_logica / (double) config_memoria.tamanio_pagina);
-}
-
-int agregar_pag_a_tabla(t_tabla_pagina *tabla_proceso, char *nro_pag){
-    t_col_pagina *col = malloc(sizeof(t_col_pagina));
-    t_frame *frame = obtener_frame_libre(tabla_proceso, col, atoi(nro_pag));
-    dictionary_put(tabla_proceso->tabla, nro_pag, col);
-    frame->nro_pagina_asignada = atoi(nro_pag);
-    frame->pid_asignado = tabla_proceso->pid;
-    frame->is_free = false;
-    return 0;
 }
 
 void modificar_bit_de_presencia_pagina(t_frame *frame, int valor){
@@ -98,6 +91,6 @@ void liberar_todas_las_paginas_del_proceso(t_tabla_pagina* tabla_proceso){
 }
 
 void eliminar_columna_tabla(void *arg) {
-    t_columna_pagina *registro = (t_columna_pagina *)arg;
-    free(registro);
+    // t_columna_pagina *registro = (t_columna_pagina*)arg;
+    // free(registro);
 }

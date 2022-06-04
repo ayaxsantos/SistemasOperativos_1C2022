@@ -61,11 +61,9 @@ typedef struct t_tabla_pagina
 {
     unsigned int pid;
     t_dictionary *tabla;
-    int nro_tabla_2n;
     int puntero;
     int cantidad_hit;
     int cantidad_miss;
-    t_list* tablas_segundo_nivel;
 } t_tabla_pagina;
 
 typedef enum
