@@ -1,3 +1,6 @@
+#ifndef MAIN_H_INCLUDED
+#define MAIN_H_INCLUDED
+
 #include <general/carpisLib.h>
 #include <utils/serverutils.h>
 #include <pthread.h>
@@ -7,8 +10,8 @@ typedef int32_t dir_logica;
 
 typedef enum
 {
-    READ,
-    WRITE
+    READ_ACCION,
+    WRITE_ACCION
 }t_accion;
 
 /**
@@ -60,3 +63,5 @@ void liberar_configuracion_y_log();
 
 #include "mmu.h"
 #include "cpu.h"
+
+#endif
