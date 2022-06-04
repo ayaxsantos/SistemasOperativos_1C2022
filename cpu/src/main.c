@@ -28,7 +28,7 @@ void arrancar_logger() {
 void leer_configuracion() {   
     t_config *un_config;
 
-    un_config = config_create("./memoria.config");
+    un_config = config_create("./cpu.config");
     
     config_cpu.ip_memoria = strdup(config_get_string_value(un_config,"IP_MEMORIA"));
     config_cpu.puerto_memoria = strdup(config_get_string_value(un_config,"PUERTO_MEMORIA"));
@@ -38,6 +38,7 @@ void leer_configuracion() {
     config_cpu.puerto_escucha_dispatch = strdup(config_get_string_value(un_config,"PUERTO_ESCUCHA_DISPATCH"));
     config_cpu.puerto_escucha_interrupt = strdup(config_get_string_value(un_config,"PUERTO_ESCUCHA_INTERRUPT"));
     config_cpu.log_habilitado = config_get_int_value(un_config,"LOG_HABILITADO");
+    config_cpu.ip_cpu = strdup(config_get_string_value(un_config,"IP_CPU"));
     habilitar_log(logger_cpu, config_cpu.log_habilitado);
     
     config_destroy(un_config);
