@@ -8,8 +8,6 @@ void iniciar() {
 }
 
 void iniciar_proceso(t_pcb *proceso, int socket_cliente) {
-	proceso->pid = get_thread_id();
-
 	t_tabla_pagina* tabla_principal_del_proceso = crear_tabla_principal_para(proceso->pid);
 
     list_add(tablas_primer_nivel, tabla_principal_del_proceso);

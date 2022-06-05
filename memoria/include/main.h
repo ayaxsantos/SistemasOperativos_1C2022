@@ -1,21 +1,23 @@
 #ifndef MAIN_H_INCLUDED
 #define MAIN_H_INCLUDED
 
+#include <time.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
 #include <string.h>
+#include <stdint.h>
+#include <pthread.h>
+#include <semaphore.h>
+#include <sys/syscall.h>
 #include <commons/log.h>
 #include <commons/config.h>
 #include <commons/temporal.h>
 #include <commons/string.h>
-#include <pthread.h>
-#include <sys/syscall.h>
-#include <stdint.h>
 #include <commons/collections/queue.h>
-#include <semaphore.h>
-#include <time.h>
-#include <signal.h>
+#include <general/carpisLib.h>
+#include <utils/serverutils.h>
+#include <utils/utilslib.h>
 
 ////////////////////////////////////////////////
 
@@ -68,9 +70,9 @@ typedef struct t_tabla_pagina
 
 typedef enum
 {   
-    READ,
-    WRITE
-}t_accion;
+    MEM_READ,
+    MEM_WRITE
+} accion;
 
 typedef enum
 {   

@@ -2,6 +2,9 @@
 #define PAGINACION_H_INCLUDED
 
 #include "main.h"
+#include "swap.h"
+#include "swap_controlador.h"
+#include "memoria_controlador.h"
 
 t_tabla_pagina * crear_tabla_principal_para(int pid_proceso);
 t_tabla_pagina *inicializar_tabla(int pid);

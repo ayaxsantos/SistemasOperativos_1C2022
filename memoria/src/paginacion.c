@@ -40,7 +40,7 @@ int agregar_pag_a_tabla_1n(t_tabla_pagina *tabla_proceso, char *nro_pag){
     			// pthread_mutex_lock(&mutex_logger);
     			log_error(logger_memoria, "El espacio de memoria del proceso está lleno.");
     			// pthread_mutex_unlock(&mutex_logger);
-    			liberar_todas_las_paginas(tabla_proceso);
+    			liberar_todas_las_paginas_del_proceso(tabla_proceso);
     			return -1;
     		}
     	}
@@ -63,9 +63,8 @@ int get_cantidad_total_paginas() {
     return config_memoria.entradas_por_tabla*config_memoria.entradas_por_tabla;
 }
 
-// TODO: Chequear qué dirección lógica pasa CPU
 int get_nro_pagina(uint32_t dir_logica) {
-    return trunc((double) dir_logica / (double) config_memoria.tamanio_pagina);
+	// TODO: Chequear qué dirección lógica pasa CPU
 }
 
 void modificar_bit_de_presencia_pagina(t_frame *frame, int valor){
