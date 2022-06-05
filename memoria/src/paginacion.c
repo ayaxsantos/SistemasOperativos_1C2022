@@ -65,6 +65,7 @@ int get_cantidad_total_paginas() {
 
 int get_nro_pagina(uint32_t dir_logica) {
 	// TODO: Chequear qué dirección lógica pasa CPU
+	return 0;
 }
 
 void modificar_bit_de_presencia_pagina(t_frame *frame, int valor){
@@ -86,7 +87,7 @@ void liberar_todas_las_paginas_del_proceso(t_tabla_pagina* tabla_proceso){
         free(pagina);
     }
     dictionary_clean_and_destroy_elements(tabla_proceso->tabla, eliminar_columna_tabla);
-    //TODO: Liberar en swamp
+    //TODO: Liberar en swap
 }
 
 void eliminar_columna_tabla(void *arg) {

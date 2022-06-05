@@ -78,13 +78,14 @@ typedef enum
 {   
     CLOCK,
     CLOCKM
-}t_algoritmo;
+} algoritmo;
 
 ////////////////////////////////////////////////
 
 t_config_memoria config_memoria;
 t_log *logger_memoria;
-t_algoritmo tipo_algoritmo;
+algoritmo tipo_algoritmo;
+int cantidad_maxima_frames;
 
 /************ESTRUCTURAS DE MEMORIA*******/
 

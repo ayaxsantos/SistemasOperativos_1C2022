@@ -3,7 +3,7 @@
 
 #include "main.h"
 
-void iniciar();
+void iniciar_memoria();
 void iniciar_proceso(t_pcb *proceso, int socket_cliente);
 void terminar(int socket_cliente);
 

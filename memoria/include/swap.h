@@ -3,6 +3,7 @@
 
 #include <sys/types.h>
 #include <commons/log.h>
+#include <commons/config.h>
 #include <commons/string.h>
 #include <commons/collections/list.h>
 #include <stdlib.h>
@@ -10,6 +11,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <sys/mman.h>
+#include "main.h"
 
 #define ERROR_SWAP_WRITE -2
 
@@ -72,9 +74,9 @@ int max_marcos_por_proceso_en_swap;
 
 ////////////////////////////////////////////////
 
-void iniciar();
-void arrancar_logger();
-void leer_configuracion();
+void iniciar_swap();
+void arrancar_logger_swap();
+void leer_configuracion_swap();
 
 void formatear_swap();
 t_list* inicializar_particion();

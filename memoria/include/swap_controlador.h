@@ -3,7 +3,8 @@
 
 #include "swap.h"
 
-t_particion* encontrar_particion_de_pid(int pid);
+bool buscar_en_swap_por_pid(void *unaPagina, int pid);
+t_particion* encontrar_particion_de(int pid);
 t_particion* asignar_particion_a(int pid);
 
 int obtener_nro_pagina_libre(t_particion* particion);

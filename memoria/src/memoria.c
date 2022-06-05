@@ -1,6 +1,6 @@
 #include "../include/memoria.h"
 
-void iniciar() {
+void iniciar_memoria() {
     tablas_primer_nivel = list_create();
     setear_estructuras_de_memoria();
 
