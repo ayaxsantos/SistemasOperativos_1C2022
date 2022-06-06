@@ -1,6 +1,7 @@
 #include "../include/plani_corto_plazo.h"
 
 ////////////////////////////////////////////
+// Generales, lanzamiento plani + funcion principal de este
 
 void inicializar_plani_corto_plazo()
 {
@@ -40,14 +41,17 @@ void *algoritmo_fifo(void * args)
         pthread_mutex_unlock(&mutex_procesos_en_ready);
 
         pthread_mutex_lock(&mutex_log);
-        log_info(un_logger,"Se pasa a EXEC el proceso PID = %d",proceso_en_exec->un_pcb->pid);
+        log_info(un_logger,"Se pasa a EXEC el proceso PID = %u",proceso_en_exec->un_pcb->pid);
         pthread_mutex_unlock(&mutex_log);
 
+        /*
         pthread_mutex_lock(&mutex_socket_dispatch);
         enviar_pcb(socket_dispatch, proceso_en_exec->un_pcb,PCB);
         pthread_mutex_unlock(&mutex_socket_dispatch);
+         */
 
-        gestionar_pcb();
+        gestionar_pcb_para_probar_sin_cpu();
+        //gestionar_pcb();
     }
 }
 
@@ -73,6 +77,9 @@ void pasar_proceso_a_bloqueado(t_proceso *un_proceso)
 {
     //Esta funcion va a encargarse de pasar los procesos a bloqueado al recibir I/O
     un_proceso->un_pcb->un_estado = BLOCKED;
+
+    proceso_en_exec = NULL;
+
     pthread_mutex_lock(&mutex_procesos_en_bloq);
     queue_push(procesos_en_bloq,(void*) un_proceso);
     pthread_mutex_unlock(&mutex_procesos_en_bloq);
@@ -153,7 +160,7 @@ void gestionar_pcb()
 void devolver_proceso_a_ready(t_proceso *un_proceso)
 {
     pthread_mutex_lock(&mutex_log);
-    log_info(un_logger,"Se desaloja al proceso con PID: %d",un_proceso->un_pcb->pid);
+    log_info(un_logger,"Se desaloja al proceso con PID: %u",un_proceso->un_pcb->pid);
     pthread_mutex_unlock(&mutex_log);
 
 
@@ -164,6 +171,9 @@ void devolver_proceso_a_ready(t_proceso *un_proceso)
     sem_post(&hay_procesos_en_ready);
 
 }
+
+/////////////////////////////////////////////////
+// Exclusivas de SJF con desalojo
 
 int calcular_estimacion(time_t tiempoF, time_t tiempoI, t_proceso *un_proceso)
 {
@@ -198,4 +208,39 @@ bool comparador_de_procesos_SJF(t_proceso *un_proceso_primero, t_proceso *un_pro
     return un_proceso_primero->un_pcb->una_estimacion < un_proceso_segundo->un_pcb->una_estimacion;
 }
 
-/////////////////////////////////////////
+/////////////////////////////////////////////////////
+// FUNCION SOLO PARA PROBAR SIN NECESIDAD DE LEVANTAR CPU...
+// SOLO PRUEBAS BASICAS DE PLANIFICACION CORTO PLAZO
+
+void gestionar_pcb_para_probar_sin_cpu() {
+
+    while (true) {
+        t_instruccion *una_instruccion = queue_pop(proceso_en_exec->un_pcb->consola->instrucciones);
+
+        pthread_mutex_lock(&mutex_log);
+        log_info(un_logger, "La instruccion ejecutando es: %u", una_instruccion->instruc);
+        pthread_mutex_unlock(&mutex_log);
+
+        if (una_instruccion->instruc == IO) {
+            pthread_mutex_lock(&mutex_log);
+            log_info(un_logger, "Volvio un PCB para bloquear!!");
+            pthread_mutex_unlock(&mutex_log);
+
+            proceso_en_exec->tiempo_a_bloquear = una_instruccion->parametro1;
+            time(&tiempoF);
+            proceso_en_exec->un_pcb->una_estimacion = 0;
+
+            pasar_proceso_a_bloqueado(proceso_en_exec);
+            break;
+        } else if (una_instruccion->instruc == I_EXIT) {
+            pthread_mutex_lock(&mutex_log);
+            log_info(un_logger, "Volvio un PCB para finalizar!!");
+            pthread_mutex_unlock(&mutex_log);
+
+            finalizar_proceso_ejecutando();
+            break;
+        }
+    }
+}
+
+//////////////////////////////////////////////////////

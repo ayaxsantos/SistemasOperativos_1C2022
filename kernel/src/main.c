@@ -14,6 +14,7 @@ int main(void)
 
     inicializar_plani_largo_plazo();
     inicializar_plani_corto_plazo();
+    inicializar_gestor_io();
 
     conexion();
 
@@ -36,7 +37,7 @@ void iniciar_logger()
 
 void iniciar_config()
 {
-    una_config = config_create("../kernel.config");
+    una_config = config_create("kernel.config");
 
     una_config_kernel.ip_memoria = config_get_string_value(una_config,"IP_MEMORIA");
     una_config_kernel.puerto_memoria = config_get_string_value(una_config,"PUERTO_MEMORIA");
@@ -63,6 +64,8 @@ void iniciar_semaforos()
 {
     sem_init(&grado_multiprog_lo_permite,0,una_config_kernel.grado_multiprogramacion);
     sem_init(&llego_un_proceso,0,0);
+    sem_init(&hay_procesos_en_ready,0,0);
+    sem_init(&hay_procesos_en_blocked,0,0);
 }
 
 void iniciar_mutex()
@@ -76,6 +79,8 @@ void iniciar_hilos()
 {
     hilo_corto_plazo = malloc(sizeof(pthread_t));
     hilo_largo_plazo = malloc(sizeof(pthread_t));
+    hilo_mediano_plazo = malloc(sizeof(pthread_t));
+    hilo_gestor_io = malloc(sizeof(pthread_t));
 }
 
 void liberar_memoria()

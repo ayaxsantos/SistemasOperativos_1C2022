@@ -9,7 +9,7 @@ void conexion(void)
 
     int socket_proceso = 0;
 
-    conectar_con_cpu(socket_kernel_serv);
+    //conectar_con_cpu(socket_kernel_serv);
 
     // Aca tendriamos que conectarnos con MEMORIA y CPU
     // En caso de no poder realizar la conexion, error!! Kernel Panic (?
@@ -53,7 +53,7 @@ void *gestionar_comunicacion_con_proceso(void* socket_proceso_param)
     {
         case T_CONSOLA:
             pthread_mutex_lock(&mutex_log);
-            log_info(un_logger,"Recibi unas instrucciones!! 😂");
+            log_info(un_logger,"Recibi unas instrucciones!");
             pthread_mutex_unlock(&mutex_log);
             inicializar_proceso(socket_proceso);
             break;
@@ -63,9 +63,6 @@ void *gestionar_comunicacion_con_proceso(void* socket_proceso_param)
             pthread_mutex_unlock(&mutex_log);
             break;
     }
-
-    //Temporal para pruebas con largo plazo solo!!
-    //responder_fin_proceso(socket_proceso);
 
     return NULL;
 }
@@ -104,7 +101,7 @@ t_pcb *inicializar_pcb(int socket_proceso)
     un_pcb->consola = una_consola;
     un_pcb->tabla_1n = dictionary_create();
 
-    probar_comunicacion_instrucciones(un_pcb);
+    //probar_comunicacion_instrucciones(un_pcb);
     return un_pcb;
 }
 

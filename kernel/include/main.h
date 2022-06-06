@@ -66,6 +66,7 @@ sem_t hay_procesos_en_blocked_susp;
 pthread_t *hilo_corto_plazo;
 pthread_t *hilo_largo_plazo;
 pthread_t *hilo_mediano_plazo;
+pthread_t *hilo_gestor_io;
 
 
 ///////////////////////////////////////////
@@ -89,6 +90,7 @@ void liberar_mutex();
 #include <plani_largo_plazo.h>
 #include <plani_corto_plazo.h>
 #include <plani_mediano_plazo.h>
+#include <gestor_io.h>
 
 ///////////////////////////////////////////
 

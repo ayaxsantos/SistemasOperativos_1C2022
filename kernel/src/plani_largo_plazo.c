@@ -48,12 +48,12 @@ void transicionar_proceso_a_ready(t_proceso *un_proceso)
     pthread_mutex_lock(&mutex_procesos_en_ready);
     list_add(procesos_en_ready,(void*) un_proceso);
     pthread_mutex_unlock(&mutex_procesos_en_ready);
-    sem_post(&hay_procesos_en_ready);
-
 
     pthread_mutex_lock(&mutex_log);
-    log_info(un_logger,"Se pasa proceso a READY -> PID = %d",un_proceso->un_pcb->pid);
+    log_info(un_logger,"Se pasa proceso a READY -> PID = %u",un_proceso->un_pcb->pid);
     pthread_mutex_unlock(&mutex_log);
+
+    sem_post(&hay_procesos_en_ready);
 }
 
 ////////////////////////////////////////////
@@ -66,8 +66,8 @@ void finalizar_proceso_ejecutando()
 
     transicionar_proceso_a_exit();
 
-    proceso_en_exec = NULL;
     responder_fin_proceso(proceso_en_exec->socket_proceso);
+    proceso_en_exec = NULL;
 
     sem_post(&grado_multiprog_lo_permite);
 }

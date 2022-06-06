@@ -14,6 +14,7 @@ void organizacionPlani();
 int calcular_estimacion(time_t tiempoF, time_t tiempoI, t_proceso *un_proceso);
 bool comparador_de_procesos_SJF(t_proceso *un_proceso_primero, t_proceso *un_proceso_segundo);
 void devolver_proceso_a_ready(t_proceso *);
+void gestionar_pcb_para_probar_sin_cpu();
 
 //////////////////////////////////////
 
