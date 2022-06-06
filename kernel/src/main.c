@@ -9,6 +9,8 @@ int main(void)
     iniciar_estructuras();
     iniciar_hilos();
 
+    contador_pid = 1;
+
     socket_dispatch = 0;
     socket_interrupt = 0;
 
@@ -58,6 +60,8 @@ void iniciar_estructuras()
     procesos_en_ready = list_create();
     procesos_en_bloq = queue_create();
     procesos_en_exit = list_create();
+
+    hilos_comunicacion = list_create();
 }
 
 void iniciar_semaforos()
@@ -91,6 +95,7 @@ void liberar_memoria()
     list_destroy(procesos_en_ready);
     queue_destroy(procesos_en_bloq);
     list_destroy(procesos_en_exit);
+    list_destroy_and_destroy_elements(hilos_comunicacion,free);
 
     log_destroy(un_logger);
     config_destroy(una_config);

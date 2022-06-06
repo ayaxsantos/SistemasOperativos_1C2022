@@ -230,6 +230,7 @@ void gestionar_pcb_para_probar_sin_cpu() {
             time(&tiempoF);
             proceso_en_exec->un_pcb->una_estimacion = 0;
 
+            free(una_instruccion);
             pasar_proceso_a_bloqueado(proceso_en_exec);
             break;
         } else if (una_instruccion->instruc == I_EXIT) {
@@ -237,9 +238,11 @@ void gestionar_pcb_para_probar_sin_cpu() {
             log_info(un_logger, "Volvio un PCB para finalizar!!");
             pthread_mutex_unlock(&mutex_log);
 
+            free(una_instruccion);
             finalizar_proceso_ejecutando();
             break;
         }
+        free(una_instruccion);
     }
 }
 

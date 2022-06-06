@@ -65,8 +65,6 @@ void finalizar_proceso_ejecutando()
     pthread_mutex_unlock(&mutex_log);
 
     transicionar_proceso_a_exit();
-
-    responder_fin_proceso(proceso_en_exec->socket_proceso);
     proceso_en_exec = NULL;
 
     sem_post(&grado_multiprog_lo_permite);
@@ -74,5 +72,13 @@ void finalizar_proceso_ejecutando()
 
 void transicionar_proceso_a_exit()
 {
-    list_add(procesos_en_exit,proceso_en_exec);
+    // No se si va a ser necesaria la lista!
+    //list_add(procesos_en_exit,proceso_en_exec);
+
+    responder_fin_proceso(proceso_en_exec->socket_proceso);
+    queue_destroy(proceso_en_exec->un_pcb->consola->instrucciones);
+    dictionary_destroy(proceso_en_exec->un_pcb->tabla_1n);
+    free(proceso_en_exec->un_pcb->consola);
+    free(proceso_en_exec->un_pcb);
+    free(proceso_en_exec);
 }

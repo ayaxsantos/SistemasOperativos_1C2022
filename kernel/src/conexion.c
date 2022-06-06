@@ -19,6 +19,7 @@ void conexion(void)
         socket_proceso = esperar_cliente(socket_kernel_serv);
 
         pthread_t *hilo_proceso = malloc(sizeof(pthread_t));
+        list_add(hilos_comunicacion,hilo_proceso);
 
         pthread_create(hilo_proceso, NULL, gestionar_comunicacion_con_proceso, (void*)&socket_proceso);
         pthread_detach(*hilo_proceso);
@@ -94,7 +95,7 @@ t_pcb *inicializar_pcb(int socket_proceso)
     t_consola *una_consola = recibir_datos_consola(socket_proceso);
     t_pcb *un_pcb = malloc(sizeof(un_pcb));
 
-    un_pcb->pid = obtener_id_hilo();
+    asignar_pid(un_pcb);
     un_pcb->program_counter = 0;
     un_pcb->una_estimacion = una_config_kernel.estimacion_inicial;
     un_pcb->un_estado = NEW;
@@ -123,9 +124,10 @@ void probar_comunicacion_instrucciones(t_pcb * un_pcb)
     }
 }
 
-unsigned int obtener_id_hilo()
+void asignar_pid(t_pcb *un_pcb)
 {
-    return syscall(SYS_gettid);
+    un_pcb->pid = contador_pid;
+    contador_pid++;
 }
 
 ////////////////////////////////////////////////

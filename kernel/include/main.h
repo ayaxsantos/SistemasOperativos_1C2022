@@ -63,11 +63,13 @@ sem_t hay_procesos_en_ready;
 sem_t hay_procesos_en_blocked;
 sem_t hay_procesos_en_blocked_susp;
 
+t_list *hilos_comunicacion;
 pthread_t *hilo_corto_plazo;
 pthread_t *hilo_largo_plazo;
 pthread_t *hilo_mediano_plazo;
 pthread_t *hilo_gestor_io;
 
+int contador_pid;
 
 ///////////////////////////////////////////
 

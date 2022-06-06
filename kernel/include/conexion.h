@@ -17,7 +17,7 @@ void confirmar_modulo(int *socket, modulo modulo);
 
 unsigned int obtener_tamanio(int);
 t_list *obtener_instrucciones(int socket_proceso);
-unsigned int obtener_id_hilo();
+void asignar_pid(t_pcb *);
 
 void responder_fin_proceso(int);
 void responder_handshake(int);
