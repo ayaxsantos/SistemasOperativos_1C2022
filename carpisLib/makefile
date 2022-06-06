@@ -2,7 +2,7 @@ include settings.mk
 
 ################################################################################
 
-filename = lib$(1).a
+filename = libcarpisLib.a
 
 define compile_bin
 ar rcs -o "$@" $^
