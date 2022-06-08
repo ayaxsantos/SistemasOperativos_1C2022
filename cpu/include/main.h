@@ -64,9 +64,6 @@ void liberar_configuracion_y_log();
 
 #include "mmu.h"
 #include "cpu.h"
-<<<<<<< HEAD
 #include "conector_memoria.h"
-=======
 
 #endif
->>>>>>> 21-ciclo-de-instrucciones
