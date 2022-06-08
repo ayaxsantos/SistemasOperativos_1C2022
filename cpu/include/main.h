@@ -58,3 +58,4 @@ void liberar_configuracion_y_log();
 
 #include "mmu.h"
 #include "cpu.h"
+#include "conector_memoria.h"

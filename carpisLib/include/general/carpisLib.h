@@ -91,6 +91,13 @@ typedef struct pcb
     t_dictionary *tabla_1n;
 } t_pcb;
 
+/*** CPU + MEMORIA ***/
+typedef struct t_columna_pagina
+{
+    bool presencia;
+    int nro_frame;
+} t_columna_pagina;
+
 /**
  * @name habilitar_log
  * 

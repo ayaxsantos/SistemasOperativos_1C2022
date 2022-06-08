@@ -11,11 +11,13 @@ void *obtener_dato_memoria(dir_logica dir, t_pcb *pcb) {
      * 2- Un segundo acceso para conocer en qué marco está la misma
      * 3- Finalmente acceder a la porción de memoria correspondiente (la dirección física).
      */
-
-    t_dictionary *tabla_2n = solicitar_tabla_2nivel(entrada_tabla_1er_nivel(numero_pagina(dir)));
+    int num_pagina = numero_pagina(dir);
+    char *entrada_tabla_1n = string_itoa(entrada_tabla_1er_nivel(num_pagina));
+    int id_tabla_2n = (int *)dictionary_get(pcb->tabla_1n, entrada_tabla_1n);
+    t_columna_pagina *pagina = solicitar_registro_2nivel(id_tabla_2n, entrada_tabla_2do_nivel(num_pagina));
 
 }
-
+/*
 char *dir_logica_a_fisica(dir_logica dir, t_pcb *pcb, t_accion accion) {
     int cantidad_paginas = dictionary_size(pcb->tabla_1n);
     int dir_nro_pagina = get_nro_pagina(dir);
@@ -56,7 +58,7 @@ char *dir_logica_a_fisica(dir_logica dir, t_pcb *pcb, t_accion accion) {
         free(nro_pagina);
         return frame->base + desplazamiento;
     }
-}
+}*/
 
 ////////////////////////////////////////////////////////
 int numero_pagina(dir_logica dir) {
