@@ -1,5 +1,7 @@
 #include <main.h>
 
+/////////////////////////////////////////////////
+
 int main(void)
 {
     iniciar_logger();
@@ -23,6 +25,8 @@ int main(void)
     liberar_memoria();
     return EXIT_SUCCESS;
 }
+
+/////////////////////////////////////////////////
 
 void iniciar_logger()
 {
@@ -87,6 +91,8 @@ void iniciar_hilos()
     hilo_gestor_io = malloc(sizeof(pthread_t));
 }
 
+/////////////////////////////////////////////////
+
 void liberar_memoria()
 {
     //Ir agregando mas adelante los free/destroy necesarios!
@@ -122,3 +128,5 @@ void liberar_hilos()
     free(hilo_corto_plazo);
     free(hilo_largo_plazo);
 }
+
+/////////////////////////////////////////////////

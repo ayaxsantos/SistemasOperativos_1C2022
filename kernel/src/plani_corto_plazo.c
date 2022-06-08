@@ -62,26 +62,35 @@ void *algoritmo_sjf_con_desalojo(void *args)
         sem_wait(&hay_procesos_en_ready);
         //Ordenar lista
         organizacionPlani();
+
         //Tomar el primer elemento de la lista
         pthread_mutex_lock(&mutex_procesos_en_ready);
         proceso_en_exec = list_remove(procesos_en_ready, 0);
         pthread_mutex_unlock(&mutex_procesos_en_ready);
+
+        pthread_mutex_lock(&mutex_log);
+        log_info(un_logger,"Se pasa a EXEC el proceso PID = %u",proceso_en_exec->un_pcb->pid);
+        pthread_mutex_unlock(&mutex_log);
+
         pthread_mutex_lock(&mutex_socket_dispatch);
         enviar_pcb(socket_dispatch, proceso_en_exec->un_pcb,PCB);
         pthread_mutex_unlock(&mutex_socket_dispatch);
+
         gestionar_pcb();
     }
 }
 
-void pasar_proceso_a_bloqueado(t_proceso *un_proceso)
+void pasar_proceso_a_bloqueado()
 {
     //Esta funcion va a encargarse de pasar los procesos a bloqueado al recibir I/O
-    un_proceso->un_pcb->un_estado = BLOCKED;
+
+    t_proceso *proceso_a_bloquear = proceso_en_exec;
 
     proceso_en_exec = NULL;
+    proceso_a_bloquear->un_pcb->un_estado = BLOCKED;
 
     pthread_mutex_lock(&mutex_procesos_en_bloq);
-    queue_push(procesos_en_bloq,(void*) un_proceso);
+    queue_push(procesos_en_bloq,(void*) proceso_a_bloquear);
     pthread_mutex_unlock(&mutex_procesos_en_bloq);
     sem_post(&hay_procesos_en_blocked);
 }
@@ -140,7 +149,7 @@ void gestionar_pcb()
 
             time(&tiempoF);
             proceso_en_exec->un_pcb->una_estimacion = calcular_estimacion(tiempoF,tiempoI,proceso_en_exec);
-            pasar_proceso_a_bloqueado(proceso_en_exec);
+            pasar_proceso_a_bloqueado();
             //sem_post(&hay_procesos_en_ready);
             break;
         case FIN_PROCESO:
@@ -231,7 +240,7 @@ void gestionar_pcb_para_probar_sin_cpu() {
             proceso_en_exec->un_pcb->una_estimacion = 0;
 
             free(una_instruccion);
-            pasar_proceso_a_bloqueado(proceso_en_exec);
+            pasar_proceso_a_bloqueado();
             break;
         } else if (una_instruccion->instruc == I_EXIT) {
             pthread_mutex_lock(&mutex_log);
