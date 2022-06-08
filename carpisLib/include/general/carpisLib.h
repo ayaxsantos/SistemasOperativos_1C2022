@@ -34,6 +34,8 @@ typedef enum
 	T_CONSOLA,
     HANDSHAKE,
     PCB,
+    BLOQUEO,
+    INTERRUPCION,
 	FIN_PROCESO,
 	MSJ
     /*A definir*/
@@ -98,6 +100,12 @@ typedef struct t_columna_pagina
     int nro_frame;
 } t_columna_pagina;
 
+typedef struct proceso_bloqueo
+{
+    unsigned int tiempo_bloqueo;
+    t_pcb *pcb;
+}t_proceso_bloqueo;
+
 /**
  * @name habilitar_log
  * 
@@ -120,15 +128,23 @@ int esperar_handshake(int *socket, void(*mapeador)(int*, modulo));
 void enviar_datos_consola(int socket, t_consola *consola);
 t_consola *recibir_datos_consola(int socket);
 
+void enviar_interrupcion(int socket);
+bool recibir_interrupcion(int socket);
+
+void enviar_pcb(int socket, t_pcb* un_pcb, codigo_operacion codigo);
 void *serializar_consola(t_consola *consola, int *size);
+t_pcb *deserializar_pcb_enviar(int socket, void * buffer);
 void serializar_pcb(t_pcb *pcb, t_operacion *operacion);
 void *serializar_instrucciones(t_queue *instrucciones, int *size_cola);
 void *serializar_tabla1n(t_dictionary *tabla1n, int *size);
+void serializar_proceso_bloqueo(t_proceso_bloqueo *proceso_bloqueo, t_operacion *operacion);
 
 t_pcb *deserializar_pcb(int socket);
 t_consola *deserializar_consola(void *buffer);
 t_queue *deserializar_instrucciones(void *buffer, int size_cola);
 t_dictionary *deserializar_tabla1n(void *buffer, int size_tabla);
+t_proceso_bloqueo *deserializar_proceso_bloqueo(int socket);
+
 #include "../utils/utilslib.h"
 
 #endif

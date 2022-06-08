@@ -1,14 +1,18 @@
+#ifndef MAIN_H_INCLUDED
+#define MAIN_H_INCLUDED
+
 #include <general/carpisLib.h>
 #include <utils/serverutils.h>
 #include <pthread.h>
 #include <math.h>
+#include <semaphore.h>
 
 typedef int32_t dir_logica;
 
 typedef enum
 {
-    READ,
-    WRITE
+    READ_ACCION,
+    WRITE_ACCION
 }t_accion;
 
 /**
@@ -45,7 +49,8 @@ t_algoritmo tipo_algoritmo_tlb;
 t_config_cpu config_cpu;
 t_log *logger_cpu;
 
-int socket_memoria, dispatch, interrupt, socket_kernel_dispatch;
+int socket_memoria, cpu_dispatch, cpu_interrupt, socket_kernel_dispatch;
+sem_t sem_interrupt, sem_execute;
 ////////////////////////////////////////////////////////////
 void leer_configuracion();
 void arrancar_logger();
@@ -54,8 +59,14 @@ void obtener_configuracion(int *socket, modulo modulo);
 
 void setear_algoritmo_reemplazo_tlb();
 
+void liberar_semaforos();
 void liberar_configuracion_y_log();
 
 #include "mmu.h"
 #include "cpu.h"
+<<<<<<< HEAD
 #include "conector_memoria.h"
+=======
+
+#endif
+>>>>>>> 21-ciclo-de-instrucciones
