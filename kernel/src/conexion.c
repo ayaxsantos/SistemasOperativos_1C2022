@@ -100,7 +100,8 @@ t_pcb *inicializar_pcb(int socket_proceso)
     un_pcb->una_estimacion = una_config_kernel.estimacion_inicial;
     un_pcb->un_estado = NEW;
     un_pcb->consola = una_consola;
-    un_pcb->tabla_1n = dictionary_create();
+
+    un_pcb->tabla_1n = NULL;
 
     //probar_comunicacion_instrucciones(un_pcb);
     return un_pcb;

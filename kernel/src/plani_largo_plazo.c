@@ -61,9 +61,10 @@ void transicionar_proceso_a_ready(t_proceso *un_proceso)
 void finalizar_proceso_ejecutando()
 {
     pthread_mutex_lock(&mutex_log);
-    log_info(un_logger,"Se finaliza el proceso con PID = %d",proceso_en_exec->un_pcb->pid);
+    log_info(un_logger,"Se finaliza el proceso con PID = %u",proceso_en_exec->un_pcb->pid);
     pthread_mutex_unlock(&mutex_log);
 
+    responder_fin_proceso(proceso_en_exec->socket_proceso);
     transicionar_proceso_a_exit();
     proceso_en_exec = NULL;
 
@@ -75,10 +76,11 @@ void transicionar_proceso_a_exit()
     // No se si va a ser necesaria la lista!
     //list_add(procesos_en_exit,proceso_en_exec);
 
-    responder_fin_proceso(proceso_en_exec->socket_proceso);
     queue_destroy(proceso_en_exec->un_pcb->consola->instrucciones);
-    dictionary_destroy(proceso_en_exec->un_pcb->tabla_1n);
     free(proceso_en_exec->un_pcb->consola);
+    //dictionary_destroy(proceso_en_exec->un_pcb->tabla_1n);
     free(proceso_en_exec->un_pcb);
     free(proceso_en_exec);
 }
+
+/////////////////////////////////////////////////

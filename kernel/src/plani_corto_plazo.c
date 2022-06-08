@@ -239,7 +239,7 @@ void gestionar_pcb_para_probar_sin_cpu() {
             pthread_mutex_unlock(&mutex_log);
 
             free(una_instruccion);
-            finalizar_proceso_ejecutando();
+            finalizar_proceso_ejecutando(proceso_en_exec);
             break;
         }
         free(una_instruccion);
