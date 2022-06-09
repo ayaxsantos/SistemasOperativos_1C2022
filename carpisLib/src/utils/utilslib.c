@@ -49,6 +49,11 @@ void setear_operacion(t_operacion *operacion, void *valor) {
 			operacion->buffer->size = size;
             operacion->buffer->stream = stream;
 			break;
+        case REQUEST_TABLA:
+            size = sizeof(int) * 3;
+            operacion->buffer->size = size;
+            operacion->buffer->stream = valor;
+            break;
     }
     return;
 }

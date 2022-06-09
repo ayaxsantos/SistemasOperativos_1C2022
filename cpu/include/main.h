@@ -3,6 +3,7 @@
 
 #include <general/carpisLib.h>
 #include <utils/serverutils.h>
+#include <stdlib.h>
 #include <pthread.h>
 #include <math.h>
 #include <semaphore.h>
@@ -42,7 +43,7 @@ typedef struct
 } t_config_cpu;
 
 /////////////////////////////////////////////////////////////
-t_list *pcbs;
+t_pcb *pcb;
 
 t_algoritmo tipo_algoritmo_tlb;
 
