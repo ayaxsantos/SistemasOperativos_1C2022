@@ -72,7 +72,6 @@ int main(int argc, char *argv[])
     conectar_a_kernel();
     enviar_informacion(tamanio_proceso);
     esperar_mensaje_finalizacion();
-    liberar_memoria_y_conexiones();
     
     return EXIT_SUCCESS;
 }
