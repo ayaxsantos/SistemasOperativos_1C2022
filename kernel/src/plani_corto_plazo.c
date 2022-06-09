@@ -57,9 +57,16 @@ void *algoritmo_fifo(void * args)
 
 void *algoritmo_sjf_con_desalojo(void *args)
 {
+    t_proceso *proceso_candidato;
+
     while(true)
     {
         sem_wait(&hay_procesos_en_ready);
+
+        //Por que este semaforo aca??
+        //Para el primer orden, asi sabemos cual tenemos que mandar a ejecutar!!
+        sem_wait(&hay_que_ordenar_cola_ready);
+
         //Ordenar lista
         organizacionPlani();
 
@@ -76,8 +83,52 @@ void *algoritmo_sjf_con_desalojo(void *args)
         enviar_pcb(socket_dispatch, proceso_en_exec->un_pcb,PCB);
         pthread_mutex_unlock(&mutex_socket_dispatch);
 
+        //Tomamos tiempo inicial APENAS lo pasamos a EXEC
+        time(&tiempoI);
+
+        while(true)
+        {
+            sem_wait(&hay_que_ordenar_cola_ready);
+
+            //Tomamos le tiempo final, este se ira actualizando
+            time(&tiempoF);
+
+            organizacionPlani();
+            proceso_candidato = list_get(procesos_en_ready,0);
+
+            if(hay_que_desalojar(proceso_candidato))
+            {
+                pthread_mutex_lock(&mutex_log);
+                log_info(un_logger, "Se debe desalojar al proceso con PID = %u",proceso_en_exec->un_pcb->pid);
+                log_info(un_logger,"El proceso con PID = %u tiene una estimacion menor, de: %d",
+                         proceso_candidato->un_pcb->pid,
+                         proceso_candidato->un_pcb->una_estimacion);
+                pthread_mutex_unlock(&mutex_log);
+
+                solicitar_desalojo_a_cpu();
+                break;
+            }
+        }
         gestionar_pcb();
     }
+}
+
+void solicitar_desalojo_a_cpu()
+{
+    return;
+}
+
+bool hay_que_desalojar(t_proceso *proceso_candidato)
+{
+    return proceso_candidato->un_pcb->una_estimacion < calcular_promedio_ponderado_exec();
+}
+
+double calcular_promedio_ponderado_exec()
+{
+    double tiempo_transcurrido_exec = difftime(tiempoF,tiempoI);
+    double resultado = proceso_en_exec->un_pcb->una_estimacion - tiempo_transcurrido_exec;
+
+    return round(resultado);
 }
 
 void pasar_proceso_a_bloqueado()
@@ -133,7 +184,6 @@ void gestionar_pcb()
             time(&tiempoF);
             proceso_en_exec->un_pcb->una_estimacion = calcular_estimacion(tiempoF,tiempoI,proceso_en_exec);
             devolver_proceso_a_ready(proceso_en_exec);
-            sem_post(&hay_procesos_en_ready);
             break;
         case BLOQUEO:
             pthread_mutex_lock(&mutex_log);
@@ -177,8 +227,10 @@ void devolver_proceso_a_ready(t_proceso *un_proceso)
     list_add(procesos_en_ready,un_proceso);
     pthread_mutex_lock(&mutex_procesos_en_ready);
 
-    sem_post(&hay_procesos_en_ready);
+    proceso_en_exec = NULL;
 
+    sem_post(&hay_que_ordenar_cola_ready);
+    sem_post(&hay_procesos_en_ready);
 }
 
 /////////////////////////////////////////////////

@@ -2,6 +2,7 @@
 #define KERNEL_PLANI_CORTO_PLAZO_H
 
 #include "main.h"
+#include <math.h>
 
 //////////////////////////////////////
 
@@ -22,6 +23,10 @@ t_pcb *obtener_pcb();
 void gestionar_pcb();
 
 //////////////////////////////////////
+
+bool hay_que_desalojar(t_proceso *);
+void solicitar_desalojo_a_cpu();
+double calcular_promedio_ponderado_exec();
 
 time_t tiempoF, tiempoI;
 

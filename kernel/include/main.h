@@ -36,7 +36,10 @@ typedef struct proceso
 //////////////////////////////////////////
 
 t_log *un_logger;
+
+//Ver de poder sacar esta variable global!!
 t_config *una_config;
+
 t_config_kernel una_config_kernel;
 
 t_queue *procesos_en_new;
@@ -62,6 +65,7 @@ sem_t llego_un_proceso;
 sem_t hay_procesos_en_ready;
 sem_t hay_procesos_en_blocked;
 sem_t hay_procesos_en_blocked_susp;
+sem_t hay_que_ordenar_cola_ready;
 
 t_list *hilos_comunicacion;
 pthread_t *hilo_corto_plazo;

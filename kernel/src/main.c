@@ -74,6 +74,7 @@ void iniciar_semaforos()
     sem_init(&llego_un_proceso,0,0);
     sem_init(&hay_procesos_en_ready,0,0);
     sem_init(&hay_procesos_en_blocked,0,0);
+    sem_init(&hay_que_ordenar_cola_ready,0,0);
 }
 
 void iniciar_mutex()
