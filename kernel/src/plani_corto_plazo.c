@@ -79,9 +79,11 @@ void *algoritmo_sjf_con_desalojo(void *args)
         log_info(un_logger,"Se pasa a EXEC el proceso PID = %u",proceso_en_exec->un_pcb->pid);
         pthread_mutex_unlock(&mutex_log);
 
+        /*
         pthread_mutex_lock(&mutex_socket_dispatch);
         enviar_pcb(socket_dispatch, proceso_en_exec->un_pcb,PCB);
         pthread_mutex_unlock(&mutex_socket_dispatch);
+         */
 
         //Tomamos tiempo inicial APENAS lo pasamos a EXEC
         time(&tiempoI);
@@ -100,7 +102,7 @@ void *algoritmo_sjf_con_desalojo(void *args)
             {
                 pthread_mutex_lock(&mutex_log);
                 log_info(un_logger, "Se debe desalojar al proceso con PID = %u",proceso_en_exec->un_pcb->pid);
-                log_info(un_logger,"El proceso con PID = %u tiene una estimacion menor, de: %d",
+                log_info(un_logger,"El proceso con PID = %u tiene una estimacion menor, de: %f",
                          proceso_candidato->un_pcb->pid,
                          proceso_candidato->un_pcb->una_estimacion);
                 pthread_mutex_unlock(&mutex_log);
@@ -109,7 +111,9 @@ void *algoritmo_sjf_con_desalojo(void *args)
                 break;
             }
         }
-        gestionar_pcb();
+        //gestionar_pcb();
+
+        gestionar_pcb_para_probar_sin_cpu();
     }
 }
 

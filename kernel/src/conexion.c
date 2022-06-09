@@ -93,11 +93,11 @@ void pasar_proceso_a_new(t_proceso *un_proceso)
 t_pcb *inicializar_pcb(int socket_proceso)
 {
     t_consola *una_consola = recibir_datos_consola(socket_proceso);
-    t_pcb *un_pcb = malloc(sizeof(un_pcb));
+    t_pcb *un_pcb = malloc(sizeof(t_pcb));
 
     asignar_pid(un_pcb);
     un_pcb->program_counter = 0;
-    un_pcb->una_estimacion = una_config_kernel.estimacion_inicial;
+    //un_pcb->una_estimacion = una_config_kernel.estimacion_inicial;
     un_pcb->un_estado = NEW;
     un_pcb->consola = una_consola;
 

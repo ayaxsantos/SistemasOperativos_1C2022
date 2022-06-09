@@ -9,10 +9,11 @@ int main(int argc, char *argv[])
         printf("Faltan parametros\n");
         return EXIT_FAILURE;
     }
-    FILE* archivo = malloc(sizeof(FILE));
+    FILE* archivo;
     char *path = strdup(argv[1]);
     char *tamanio_proceso = argv[2];
     cola_instrucciones = queue_create();
+    char **aux;
     int i = 0;
     int j = 0;
     archivo = fopen(path, "r");
@@ -21,10 +22,10 @@ int main(int argc, char *argv[])
       return 1;
     }
     t_instruccion *una_instruccion = NULL;
-    char *buffer = malloc(sizeof(char));
+    char *buffer = malloc(sizeof(MAX_LEN) + 90);
     while (fgets(buffer, MAX_LEN, archivo))
     {
-    	char **aux;
+    	
         buffer[strcspn(buffer, "\n")] = 0;
         aux = string_split(buffer, " ");
 
@@ -55,18 +56,24 @@ int main(int argc, char *argv[])
             }
             queue_push(cola_instrucciones, una_instruccion);
         }
-    //free(aux); ====> Hay que liberar aux??
+        
+        for (int i = 0;i<2;i++)
+            free(aux[i]);
+
+        free(aux);
     }
-    //free(buffer); preguntar como liberar estos dos
-    //free(una_instruccion);
 
     monitorear_colita(cola_instrucciones);
     fclose(archivo);
+    free(buffer);
+    free(path);
 
     leer_configuracion();
     conectar_a_kernel();
     enviar_informacion(tamanio_proceso);
     esperar_mensaje_finalizacion();
+    liberar_memoria_y_conexiones();
+    
     return EXIT_SUCCESS;
 }
 
@@ -103,7 +110,7 @@ void conectar_a_kernel() {
         printf("Conectado a Kernel \n");
     }
     else {
-        printf("No se pudo conectar Consola con el módulo Kernel.");
+        printf("No se pudo conectar Consola con el módulo Kernel \n");
         exit(EXIT_FAILURE);
     }
 }
@@ -120,7 +127,7 @@ void enviar_informacion(char *tamanio) {
 void esperar_mensaje_finalizacion() {
     int estado_finalizacion; // 1: FINALIZO BIEN, 0: FINALIZO MAL
     recv(conexion_kernel, &estado_finalizacion, sizeof(int), MSG_WAITALL); //Se bloquea
-    estado_finalizacion == 1 ? liberar_memoria_y_conexiones() : printf("Error al finalizar consola");
+    estado_finalizacion == 1 ? liberar_memoria_y_conexiones() : printf("Error al finalizar consola \n");
 }
 
 void leer_configuracion() {
@@ -135,9 +142,8 @@ void leer_configuracion() {
     config_destroy(un_config);
 }
 
-void liberar_memoria_y_conexiones() {
+void liberar_memoria_y_conexiones() 
+{
     printf("Finalizando consola ... \n");
-    /**
-     * TODO
-     */
+    queue_destroy(cola_instrucciones);
 }

@@ -102,7 +102,7 @@ void serializar_proceso_bloqueo(t_proceso_bloqueo *proceso_bloqueo, t_operacion 
 void *serializar_consola(t_consola *consola, int *size) {
     int size_cola = 0, desplazamiento = 0;
     void *instrucciones_serializadas = serializar_instrucciones(consola->instrucciones, &size_cola);
-    *size = size_cola + sizeof(int);
+    *size = size_cola + 2 * sizeof(int);
     void *stream = malloc(*size);
     memcpy(stream, &(consola->tamanio),  sizeof(int));
     desplazamiento+=sizeof(int);

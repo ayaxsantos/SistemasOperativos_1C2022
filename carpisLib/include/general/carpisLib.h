@@ -85,7 +85,7 @@ typedef struct pcb
 {
     unsigned int pid;
     unsigned int program_counter;
-    int una_estimacion;
+    double una_estimacion;
     estado un_estado;
     t_consola *consola;
 
