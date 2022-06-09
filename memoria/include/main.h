@@ -1,21 +1,23 @@
 #ifndef MAIN_H_INCLUDED
 #define MAIN_H_INCLUDED
 
+#include <time.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
 #include <string.h>
+#include <stdint.h>
+#include <pthread.h>
+#include <semaphore.h>
+#include <sys/syscall.h>
 #include <commons/log.h>
 #include <commons/config.h>
 #include <commons/temporal.h>
 #include <commons/string.h>
-#include <pthread.h>
-#include <sys/syscall.h>
-#include <stdint.h>
 #include <commons/collections/queue.h>
-#include <semaphore.h>
-#include <time.h>
-#include <signal.h>
+#include <general/carpisLib.h>
+#include <utils/serverutils.h>
+#include <utils/utilslib.h>
 
 ////////////////////////////////////////////////
 
@@ -51,29 +53,44 @@ typedef struct t_memoria{
     t_list *frames;
 } t_memoria;
 
+typedef struct t_col_pagina
+{
+    bool presencia;
+    int nro_frame;
+} t_col_pagina;
+
+typedef struct t_tabla_pagina
+{
+    unsigned int pid;
+    t_dictionary *tabla;
+    int puntero;
+    int cantidad_hit;
+    int cantidad_miss;
+} t_tabla_pagina;
+
 typedef enum
 {   
-    READ,
-    WRITE
-}t_accion;
+    MEM_READ,
+    MEM_WRITE
+} accion;
 
 typedef enum
 {   
     CLOCK,
     CLOCKM
-}t_algoritmo;
+} algoritmo;
 
 ////////////////////////////////////////////////
 
 t_config_memoria config_memoria;
 t_log *logger_memoria;
-t_algoritmo tipo_algoritmo;
+algoritmo tipo_algoritmo;
+int cantidad_maxima_frames;
 
 /************ESTRUCTURAS DE MEMORIA*******/
 
 t_memoria *memoria_principal;
-t_list *tabla_principal;
-t_list *tablas_segundo_nivel;
+t_list *tablas_primer_nivel;
 
 ////////////////////////////////////////////////
 

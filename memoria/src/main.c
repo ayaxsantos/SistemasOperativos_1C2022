@@ -72,7 +72,7 @@ void iniciar_particionamiento_en_frames() {
 }
 
 void iniciar_semaforos() {
-    // TO DO
+    // TODO
 }
 
 void setear_algoritmo_reemplazo() {

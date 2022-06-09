@@ -79,7 +79,7 @@ typedef struct
 
 /*** CPU + KERNEL ***/
 
-typedef struct pcb
+typedef struct
 {
     unsigned int pid;
     unsigned int program_counter;
