@@ -59,10 +59,10 @@ void enviar_interrupcion(int socket)
     eliminar_operacion(operacion);
 }
 
-void enviar_pcb(int socket, t_pcb* un_pcb, codigo_operacion codigo)
+void enviar_proceso_pcb(int socket, t_proceso_pcb *un_proceso_pcb, codigo_operacion un_codigo_operacion)
 {
-    t_operacion *operacion = crear_operacion(codigo);
-    setear_operacion(operacion, un_pcb);
+    t_operacion *operacion = crear_operacion(un_codigo_operacion);
+    setear_operacion(operacion, un_proceso_pcb);
     enviar_operacion(operacion, socket);
     eliminar_operacion(operacion);
 }
@@ -91,7 +91,7 @@ void serializar_pcb(t_pcb *pcb, t_operacion *operacion) {
     operacion->buffer->stream = stream;
 }
 
-void serializar_proceso_bloqueo(t_proceso_bloqueo *proceso_bloqueo, t_operacion *operacion)
+void serializar_proceso_pcb(t_proceso_pcb *proceso_bloqueo, t_operacion *operacion)
 {
     serializar_pcb(proceso_bloqueo->pcb,operacion);
     operacion->buffer->size += sizeof(int);
@@ -175,17 +175,17 @@ t_pcb *recibir_pcb(int socket, void * buffer) {
     return pcb;
 }
 
-t_proceso_bloqueo *deserializar_proceso_bloqueo(int socket)
+t_proceso_pcb *deserializar_proceso_pcb(int socket)
 {
     int size;
     void *buffer = recibir_buffer(&size,socket);
 
-    t_proceso_bloqueo *proceso_bloqueo = malloc(sizeof(t_proceso_bloqueo));
-    proceso_bloqueo->pcb = recibir_pcb(socket,buffer);
+    t_proceso_pcb *un_proceso_pcb = malloc(sizeof(un_proceso_pcb));
+    un_proceso_pcb->pcb = recibir_pcb(socket,buffer);
 
-    memcpy(&(proceso_bloqueo->tiempo_bloqueo), buffer, sizeof(int));
+    memcpy(&(un_proceso_pcb->tiempo_bloqueo), buffer, sizeof(int));
     free(buffer);
-    return proceso_bloqueo;
+    return un_proceso_pcb;
 }
 
 t_pcb *deserializar_pcb(int socket) {

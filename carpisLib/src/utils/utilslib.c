@@ -34,14 +34,16 @@ void setear_operacion(t_operacion *operacion, void *valor) {
     void *stream;
 
     switch (op_code) {
-        case PCB:
-            serializar_pcb((t_pcb *)valor, operacion);
-            break;
-        case T_CONSOLA:
+		case T_CONSOLA:
             stream = serializar_consola((t_consola *)valor, &size);
             operacion->buffer->size = size;
             operacion->buffer->stream = stream;
             break;
+        case PCB:
+		case BLOQUEO:
+		case FIN_PROCESO:
+			serializar_proceso_pcb((t_proceso_pcb *)valor,operacion);
+			break;
 		case INTERRUPCION:
 			size = sizeof(int);
 			stream = malloc(size);
