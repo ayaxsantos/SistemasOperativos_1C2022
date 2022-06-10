@@ -37,18 +37,20 @@ t_log *logger_swap;
 
 typedef struct pagina_swap{
     int id_memoria;         // id de la página en memoria
-    int pid;				// a qué proceso corresponde
     bool is_free;
 } t_pagina_swap;
 
 typedef struct fcb{
     int id_archivo;
+    int id_tabla;
     char* path_archivo;
+    t_list* pags_en_archivo;
 } t_fcb;
 
 typedef struct particion{
     t_fcb* fcb;
     int archivo;
+    int tamanio;
 } t_particion;
 
 ////////////////////////////////////////////////
@@ -68,6 +70,7 @@ void iniciar_swap();
 void arrancar_logger_swap();
 
 void formatear_swap();
-void crear_archivo();
+void crear_archivo(int nro_proceso, int tamanio_proceso);
+t_list* formatear_pags_en_archivo(int tamanio_proceso);
 
 #endif /* INCLUDE_SWAP_H_ */

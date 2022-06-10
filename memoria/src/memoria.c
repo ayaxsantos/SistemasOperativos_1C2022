@@ -26,6 +26,8 @@ void iniciar_proceso(int socket_cliente) {
 	// setear_funcion(funcion,index_tabla);
 	// enviar_funcion(funcion,socket_cliente);
 	// eliminar_funcion(funcion);
+
+    crear_archivo(index_tabla, tabla_principal_del_proceso->tamanio_proceso);
 }
 
 void terminar_proceso(int socket_cliente) {
@@ -33,7 +35,7 @@ void terminar_proceso(int socket_cliente) {
 	void *buffer = recibir_buffer(&nada,socket_cliente);
 	int index_tabla = socket_cliente;		// TODO Obtener id de tabla
 	t_tabla_pagina* tabla_1n = list_get(tablas_primer_nivel, index_tabla);
-	liberar_todas_las_paginas(tabla_1n);
+	// liberar_todas_las_paginas(tabla_1n);
 	free(buffer);
 }
 

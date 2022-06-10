@@ -5,16 +5,7 @@ t_log *logger_swap = NULL;
 void iniciar_swap() {
 	arrancar_logger_swap();
 	habilitar_log(logger_swap, config_swap.log_habilitado);
-
-    log_info(logger_swap,"Iniciando conexión con módulo Memoria ... \n");
-    /*
-    formatear_swap(conexion_swap);
-
-	carpincho_fd = esperar_cliente(conexion_swap);
-
-	codigo_funcion = recibir_operacion(lib_ref->conexion);
-	administrar_operacion(conexion_swap);
-    */
+    formatear_swap();
 }
 
 void arrancar_logger_swap(){
@@ -36,11 +27,15 @@ void formatear_swap(){
 
 void crear_archivo(int nro_proceso, int tamanio_proceso){
 	int truncado = 0, cerrado = 0;
-	char *nombre_archivo = "proceso" + nro_proceso + ".swap";
+	char *nombre_archivo = string_new();
+		string_append(&nombre_archivo,"proceso_");
+		string_append(&nombre_archivo, string_itoa(nro_proceso));
+		string_append(&nombre_archivo,".swap");
 
 	t_fcb *fcb_aux = malloc(sizeof(t_fcb));
 	fcb_aux->id_archivo = nro_proceso;
 	fcb_aux->path_archivo = nombre_archivo;
+	fcb_aux->pags_en_archivo = formatear_pags_en_archivo(tamanio_proceso);
 
 	t_particion *particion = malloc(sizeof(t_particion));
 	particion->fcb = fcb_aux;
@@ -59,3 +54,17 @@ void crear_archivo(int nro_proceso, int tamanio_proceso){
 		log_info(logger_swap,"No se pudo crear el archivo.");
 	}
 }
+
+t_list* formatear_pags_en_archivo(int tamanio_proceso){
+    t_list* pags_en_archivo = list_create();
+    int pags_por_archivo = tamanio_proceso / config_memoria.entradas_por_tabla;
+
+    for (int i = 0; i < pags_por_archivo; i++){
+        t_pagina_swap* pag_aux = malloc(sizeof(t_pagina_swap));
+        pag_aux->id_memoria = -1;
+        pag_aux->is_free = true;
+        list_add(pags_en_archivo, pag_aux);
+    }
+
+    return pags_en_archivo;
+};

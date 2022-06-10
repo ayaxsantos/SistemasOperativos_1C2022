@@ -2,6 +2,7 @@
 #define MEMORIA_H_INCLUDED
 
 #include "main.h"
+#include "swap.h"
 
 void iniciar_memoria();
 void iniciar_proceso(int socket_cliente);
