@@ -89,6 +89,8 @@ void *algoritmo_sjf_con_desalojo(void *args)
         pthread_create(hilo_monitoreo_tiempos, NULL, rutina_monitoreo_desalojo, NULL);
         pthread_detach(*hilo_monitoreo_tiempos);
 
+
+
         /*
         pthread_mutex_lock(&mutex_socket_dispatch);
         enviar_pcb(socket_dispatch, proceso_en_exec->un_pcb,PCB);
@@ -116,7 +118,7 @@ void *rutina_monitoreo_desalojo(void *args)
         organizacionPlani();
         proceso_candidato = list_get(procesos_en_ready,0);
 
-        if(hay_que_desalojar(proceso_candidato))
+        if(list_size(procesos_en_ready) != 0 && hay_que_desalojar(proceso_candidato))
         {
             pthread_mutex_lock(&mutex_log);
             log_info(un_logger, "Se debe desalojar al proceso con PID = %u",proceso_en_exec->un_pcb->pid);
@@ -130,7 +132,7 @@ void *rutina_monitoreo_desalojo(void *args)
         }
 
         //Volvemos a tomar el tiempo inicial, lo medido anteriormente se guardo (OJO ESTO)
-        time(&tiempoI);
+        //time(&tiempoI);
     }
     return NULL;
 }
@@ -144,12 +146,12 @@ void solicitar_desalojo_a_cpu()
 
 bool hay_que_desalojar(t_proceso *proceso_candidato)
 {
-    double estimacion_anterior = proceso_en_exec->un_pcb->una_estimacion;
-    proceso_en_exec->un_pcb->una_estimacion = calcular_tiempo_ejecutando();
+    double tiempo_que_lleva = calcular_tiempo_ejecutando();
+    proceso_en_exec->tiempo_ejecutando_estimacion += tiempo_que_lleva;
 
-    if(proceso_en_exec->un_pcb->una_estimacion <= 0)
+    if(proceso_en_exec->tiempo_ejecutando_estimacion <= 0)
         return false;
-    else if (estimacion_anterior < proceso_en_exec->un_pcb->una_estimacion)
+    else if (proceso_candidato->un_pcb->una_estimacion < proceso_en_exec->tiempo_ejecutando_estimacion)
         return true;
     else
         return false;
@@ -158,7 +160,7 @@ bool hay_que_desalojar(t_proceso *proceso_candidato)
 double calcular_tiempo_ejecutando()
 {
     double tiempo_transcurrido_exec = difftime(tiempoF,tiempoI);
-    double resultado = proceso_en_exec->un_pcb->una_estimacion - tiempo_transcurrido_exec;
+    double resultado = proceso_en_exec->tiempo_ejecutando_estimacion - tiempo_transcurrido_exec;
     return round(resultado);
 }
 
@@ -309,7 +311,7 @@ bool comparador_de_procesos_SJF(t_proceso *un_proceso_primero, t_proceso *un_pro
 
 void gestionar_pcb_para_probar_sin_cpu()
 {
-    while (true)
+    while(true)
     {
         t_instruccion *una_instruccion = queue_pop(proceso_en_exec->un_pcb->consola->instrucciones);
 
@@ -317,7 +319,7 @@ void gestionar_pcb_para_probar_sin_cpu()
         log_info(un_logger, "La instruccion ejecutando es: %u", una_instruccion->instruc);
         pthread_mutex_unlock(&mutex_log);
 
-        if (una_instruccion->instruc == IO)
+        if (una_instruccion->instruc == IO && esta_el_flag_interrupt_en_alto())
         {
             pthread_mutex_lock(&mutex_log);
             log_info(un_logger, "Volvio un PCB para bloquear!!");

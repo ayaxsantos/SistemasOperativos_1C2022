@@ -43,7 +43,7 @@ void iniciar_logger()
 
 void iniciar_config()
 {
-    una_config = config_create("../kernel.config");
+    una_config = config_create("kernel.config");
 
     una_config_kernel.ip_memoria = config_get_string_value(una_config,"IP_MEMORIA");
     una_config_kernel.puerto_memoria = config_get_string_value(una_config,"PUERTO_MEMORIA");
