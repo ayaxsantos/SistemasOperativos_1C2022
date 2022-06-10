@@ -42,7 +42,7 @@ typedef struct t_frame
     int modificado;
     bool is_free;
     int nro_pagina_asignada;
-    int pid_asignado;
+    int tabla_1n_asignada;
     long tiempo_usado;
 } t_frame;
 
@@ -61,7 +61,7 @@ typedef struct t_col_pagina
 
 typedef struct t_tabla_pagina
 {
-    unsigned int pid;
+    int tamanio_proceso;
     t_dictionary *tabla;
     int puntero;
     int cantidad_hit;

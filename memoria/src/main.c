@@ -5,7 +5,8 @@ int main() {
     leer_configuracion();
     habilitar_log(logger_memoria, 1);
     iniciar_semaforos();
-    // iniciar();
+    iniciar_memoria();
+
     return EXIT_SUCCESS;
 }
 
@@ -52,7 +53,7 @@ void setear_estructuras_de_memoria() {
         iniciar_particionamiento_en_frames();
         setear_algoritmo_reemplazo();
     } else {
-    	log_error(logger_memoria,"No se pudieron setear las estructuras de memoria."
+    	log_error(logger_memoria,"No se pudo setear las estructuras de memoria."
     			"Error en el archivo config: Es necesario que el tamanio_pagina sea multiplo de tamanio_memoria.");
     };
 }
@@ -86,6 +87,7 @@ void setear_algoritmo_reemplazo() {
         log_error(logger_memoria,"No se pudo setear el algoritmo de reemplazo. Error en el archivo config.");
     } 
 }
+
 
 void finalizar_memoria() {
     // list_destroy_and_destroy_elements(tablas_paginas, eliminar_paginas);

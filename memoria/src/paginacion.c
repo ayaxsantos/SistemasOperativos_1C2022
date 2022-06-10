@@ -1,7 +1,7 @@
 #include "../include/paginacion.h"
 
-t_tabla_pagina *crear_tabla_principal_para(int pid){
-	t_tabla_pagina *tabla_principal = inicializar_tabla(pid);
+t_tabla_pagina *crear_tabla_principal(int tamanio){
+	t_tabla_pagina *tabla_principal = inicializar_tabla(tamanio);
 	crear_tablas_segundo_nivel(tabla_principal);
 
 	return tabla_principal;
@@ -17,10 +17,10 @@ void crear_tablas_segundo_nivel(t_tabla_pagina *tabla_principal){
 	}
 };
 
-t_tabla_pagina *inicializar_tabla(int pid){
+t_tabla_pagina *inicializar_tabla(int tamanio){
 	t_tabla_pagina* nueva_tabla = malloc(sizeof(t_tabla_pagina));
 	nueva_tabla->tabla = dictionary_create();
-	nueva_tabla->pid = pid;		// pid -1 indica que es tabla de 2N
+	nueva_tabla->tamanio_proceso = tamanio;
 	nueva_tabla->puntero = 0;
 	nueva_tabla->cantidad_hit = 0;
 	nueva_tabla->cantidad_miss = 0;
@@ -29,7 +29,7 @@ t_tabla_pagina *inicializar_tabla(int pid){
 }
 
 int agregar_pag_a_tabla_1n(t_tabla_pagina *tabla_proceso, char *nro_pag){
-	t_tabla_pagina *tabla_2n_aux = inicializar_tabla(-1);
+	t_tabla_pagina *tabla_2n_aux = inicializar_tabla(tabla_proceso->tamanio_proceso);
 	int i, resultado;
 
     for (i=0; i < config_memoria.entradas_por_tabla; i++){
@@ -49,27 +49,22 @@ int agregar_pag_a_tabla_1n(t_tabla_pagina *tabla_proceso, char *nro_pag){
     return 0;
 }
 
-int agregar_pag_a_tabla_2n(t_tabla_pagina *tabla_proceso, char *nro_pag){
+int agregar_pag_a_tabla_2n(t_tabla_pagina *tabla_2n, char *nro_pag){
     t_col_pagina *col = malloc(sizeof(t_col_pagina));
-    t_frame *frame = obtener_frame_libre(tabla_proceso, col, atoi(nro_pag));
-    dictionary_put(tabla_proceso->tabla, nro_pag, col);
+    t_frame *frame = obtener_frame_libre(tabla_2n, col, atoi(nro_pag));
+    dictionary_put(tabla_2n->tabla, nro_pag, col);
     frame->nro_pagina_asignada = atoi(nro_pag);
-    frame->pid_asignado = tabla_proceso->pid;
     frame->is_free = false;
     return 0;
 }
 
-int get_cantidad_total_paginas() {
-    return config_memoria.entradas_por_tabla*config_memoria.entradas_por_tabla;
-}
-
-int get_nro_pagina(uint32_t dir_logica) {
+int get_frame(uint32_t dir_logica) {
 	// TODO: Chequear qué dirección lógica pasa CPU
 	return 0;
 }
 
 void modificar_bit_de_presencia_pagina(t_frame *frame, int valor){
-    t_tabla_pagina *tabla_paginas = encontrar_tabla_de_pid(frame->pid_asignado);
+    t_tabla_pagina *tabla_paginas = list_get(tablas_primer_nivel,frame->tabla_1n_asignada);
     t_col_pagina *registro = (t_col_pagina *) dictionary_get(tabla_paginas->tabla, string_itoa(frame->nro_pagina_asignada));
     registro->presencia = valor;
 }
@@ -91,6 +86,6 @@ void liberar_todas_las_paginas_del_proceso(t_tabla_pagina* tabla_proceso){
 }
 
 void eliminar_columna_tabla(void *arg) {
-    // t_columna_pagina *registro = (t_columna_pagina*)arg;
-    // free(registro);
+    t_col_pagina *registro = (t_col_pagina*)arg;
+    free(registro);
 }

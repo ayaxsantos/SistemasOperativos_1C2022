@@ -2,21 +2,39 @@
 
 void iniciar_memoria() {
     tablas_primer_nivel = list_create();
+    // int server = iniciar_servidor(config_memoria.puerto_escucha);
     setear_estructuras_de_memoria();
 
-    // TODO Completar
+	/*log_info(logger_memoria,"Memoria a la espera de conexiones ...");
+
+	int socket_cliente;
+	while(true) {
+		socket_cliente = esperar_cliente(server);
+		pthread_t hilo;
+		pthread_create(&hilo, NULL, &gestionar_conexion, &socket_cliente);
+		pthread_detach(hilo);
+	}*/
 }
 
-void iniciar_proceso(t_pcb *proceso, int socket_cliente) {
-	t_tabla_pagina* tabla_principal_del_proceso = crear_tabla_principal_para(proceso->pid);
-
+void iniciar_proceso(int socket_cliente) {
+	t_tabla_pagina* tabla_principal_del_proceso = crear_tabla_principal();
     list_add(tablas_primer_nivel, tabla_principal_del_proceso);
+    int index_tabla = list_size(tablas_primer_nivel)-1;
 
-    // TODO Completar
+    // TODO Agregar index al paquete que devuelvo
+    // t_funcion *funcion = crear_funcion(INICIAR);
+	// setear_funcion(funcion,index_tabla);
+	// enviar_funcion(funcion,socket_cliente);
+	// eliminar_funcion(funcion);
 }
 
-void terminar(int socket_cliente) {
-	// TODO Completar
+void terminar_proceso(int socket_cliente) {
+	int nada;
+	void *buffer = recibir_buffer(&nada,socket_cliente);
+	int index_tabla = socket_cliente;		// TODO Obtener id de tabla
+	t_tabla_pagina* tabla_1n = list_get(tablas_primer_nivel, index_tabla);
+	liberar_todas_las_paginas(tabla_1n);
+	free(buffer);
 }
 
 void gestionar_suspension(int socket_cliente) {
@@ -33,30 +51,6 @@ void gestionar_lectura(int socket_cliente){
 
 void gestionar_escritura(int socket_cliente){
 	// TODO Completar
-}
-
-
-bool buscar_por_pid(void *una_tabla_de_proceso, unsigned int pid) {
-    t_tabla_pagina *tabla = (t_tabla_pagina *) una_tabla_de_proceso;
-    return tabla->pid == pid;
-}
-
-// TODO: Debugear
-t_tabla_pagina* encontrar_tabla_de_pid(unsigned int pid){
-    //pthread_mutex_lock(&mutex_lista_tablas_paginas);
-    bool _buscar_por_id(void *un_proceso) {
-        return buscar_por_pid(un_proceso, pid);
-    }
-    t_tabla_pagina *tabla_pagina = (t_tabla_pagina *)list_find(tablas_primer_nivel, _buscar_por_id);
-    //pthread_mutex_unlock(&mutex_lista_tablas_paginas);
-    if(tabla_pagina == NULL) { return false; }		// ¿Se encontró una tabla asociada al PID?
-    return tabla_pagina;
-}
-
-
-bool hay_espacio_en_memoria_para(){
-	// TODO Completar
-	return false;
 }
 
 void leer_dato() {
