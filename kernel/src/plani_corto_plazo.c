@@ -190,31 +190,26 @@ void realizar_envio_pcb(int socket, t_pcb *un_pcb)
     enviar_proceso_pcb(socket,un_proceso_pcb,PCB);
 }
 
-t_pcb *obtener_pcb()
-{
-    int size;
-    void *buffer = recibir_buffer(&size, socket_dispatch);
-    t_pcb *un_pcb = deserializar_pcb(socket_dispatch);
-    free(buffer);
-    return un_pcb;
-}
-
 void gestionar_pcb()
 {
+    t_proceso_pcb *un_proceso_pcb;
     pthread_mutex_lock(&mutex_socket_dispatch);
     codigo_operacion un_codigo = (codigo_operacion)recibir_operacion(socket_dispatch);
-    //Se coloca tiempoF aqui
     pthread_mutex_unlock(&mutex_socket_dispatch);
+
     switch(un_codigo)
     {
         case PCB:
             pthread_mutex_lock(&mutex_log);
             log_info(un_logger,"Volvio un PCB desaloja3!!");
             pthread_mutex_unlock(&mutex_log);
+
             pthread_mutex_lock(&mutex_socket_dispatch);
-            proceso_en_exec->un_pcb = obtener_pcb();
+            un_proceso_pcb = deserializar_proceso_pcb(socket_dispatch);
             pthread_mutex_unlock(&mutex_socket_dispatch);
-            time(&tiempoF);
+
+            proceso_en_exec->un_pcb = un_proceso_pcb->pcb;
+            proceso_en_exec->tiempo_a_bloquear = un_proceso_pcb->tiempo_bloqueo;
 
             // CUANDO SE DESALOJA NO SE VUELVE A ESTIMAR!!
             //proceso_en_exec->un_pcb->una_estimacion = calcular_estimacion(tiempoF,tiempoI,proceso_en_exec);
@@ -233,15 +228,22 @@ void gestionar_pcb()
             proceso_en_exec->un_pcb = proceso_para_bloquear->pcb;
             proceso_en_exec->tiempo_a_bloquear = proceso_para_bloquear->tiempo_bloqueo;
 
-            time(&tiempoF);
+            // Esto solo deberia ejecutarse con SJF, por ahora aqui pues no afecta!!
             proceso_en_exec->un_pcb->una_estimacion = calcular_estimacion(tiempoF,tiempoI,proceso_en_exec);
             pasar_proceso_a_bloqueado();
-            //sem_post(&hay_procesos_en_ready);
             break;
         case FIN_PROCESO:
             pthread_mutex_lock(&mutex_log);
             log_info(un_logger,"Volvio un PCB para finalizar!!");
             pthread_mutex_unlock(&mutex_log);
+
+            pthread_mutex_lock(&mutex_socket_dispatch);
+            un_proceso_pcb = deserializar_proceso_pcb(socket_dispatch);
+            pthread_mutex_unlock(&mutex_socket_dispatch);
+
+            proceso_en_exec->un_pcb = un_proceso_pcb->pcb;
+            proceso_en_exec->tiempo_a_bloquear = un_proceso_pcb->tiempo_bloqueo;
+
             finalizar_proceso_ejecutando();
             break;
         default:
@@ -306,7 +308,7 @@ bool comparador_de_procesos_SJF(t_proceso *un_proceso_primero, t_proceso *un_pro
 }
 
 /////////////////////////////////////////////////////
-// FUNCION SOLO PARA PROBAR SIN NECESIDAD DE LEVANTAR CPU...
+// FUNCION SOLO PARA PROBAR SIN NECESIDAD DE LEVANTAR CPU (FIFO ONLY)...
 // SOLO PRUEBAS BASICAS DE PLANIFICACION CORTO PLAZO
 
 void gestionar_pcb_para_probar_sin_cpu()
@@ -339,7 +341,7 @@ void gestionar_pcb_para_probar_sin_cpu()
             pthread_mutex_unlock(&mutex_log);
 
             free(una_instruccion);
-            finalizar_proceso_ejecutando(proceso_en_exec);
+            finalizar_proceso_ejecutando();
             break;
         }
         else if (esta_el_flag_interrupt_en_alto())
