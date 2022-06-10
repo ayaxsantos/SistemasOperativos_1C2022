@@ -75,6 +75,7 @@ void inicializar_proceso(int socket_proceso)
     t_proceso *un_proceso = malloc(sizeof (t_proceso));
     un_proceso->un_pcb = inicializar_pcb(socket_proceso);
     un_proceso->socket_proceso = socket_proceso;    //Cuando pasa exit, podemos responderle a la consola en particular
+    un_proceso->tiempo_ejecutando_estimacion = 0;
 
     pasar_proceso_a_new(un_proceso);
 }
@@ -97,7 +98,7 @@ t_pcb *inicializar_pcb(int socket_proceso)
 
     asignar_pid(un_pcb);
     un_pcb->program_counter = 0;
-    //un_pcb->una_estimacion = una_config_kernel.estimacion_inicial;
+    un_pcb->una_estimacion = una_config_kernel.estimacion_inicial;
     un_pcb->un_estado = NEW;
     un_pcb->consola = una_consola;
 

@@ -26,9 +26,16 @@ void gestionar_pcb();
 
 bool hay_que_desalojar(t_proceso *);
 void solicitar_desalojo_a_cpu();
-double calcular_promedio_ponderado_exec();
+double calcular_tiempo_ejecutando();
+void *rutina_monitoreo_desalojo(void *);
 
 time_t tiempoF, tiempoI;
+
+//TEMPORAL, SOLO PARA FUNCION DE TEST
+int flag_interrupt;
+pthread_mutex_t mutex_flag_interrupt;
+
+bool esta_el_flag_interrupt_en_alto();
 
 //////////////////////////////////////
 

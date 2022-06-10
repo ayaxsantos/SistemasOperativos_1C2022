@@ -5,6 +5,13 @@
 
 void inicializar_plani_corto_plazo()
 {
+    pthread_mutex_init(&mutex_flag_interrupt,NULL);
+
+    //TEMPORAL, DESPUES SACAR CUANDO SE INTEGRE CON CPU
+    pthread_mutex_lock(&mutex_flag_interrupt);
+    flag_interrupt = false;
+    pthread_mutex_unlock(&mutex_flag_interrupt);
+
     if(strcmp("FIFO",una_config_kernel.algoritmo_planificacion) == 0)
     {
         lanzar_hilo_plani_corto_plazo_con(algoritmo_fifo);
@@ -57,7 +64,7 @@ void *algoritmo_fifo(void * args)
 
 void *algoritmo_sjf_con_desalojo(void *args)
 {
-    t_proceso *proceso_candidato;
+    pthread_t *hilo_monitoreo_tiempos = malloc(sizeof(pthread_t));
 
     while(true)
     {
@@ -73,11 +80,14 @@ void *algoritmo_sjf_con_desalojo(void *args)
         //Tomar el primer elemento de la lista
         pthread_mutex_lock(&mutex_procesos_en_ready);
         proceso_en_exec = list_remove(procesos_en_ready, 0);
-        pthread_mutex_unlock(&mutex_procesos_en_ready);
+        pthread_mutex_unlock( &mutex_procesos_en_ready);
 
         pthread_mutex_lock(&mutex_log);
         log_info(un_logger,"Se pasa a EXEC el proceso PID = %u",proceso_en_exec->un_pcb->pid);
         pthread_mutex_unlock(&mutex_log);
+
+        pthread_create(hilo_monitoreo_tiempos, NULL, rutina_monitoreo_desalojo, NULL);
+        pthread_detach(*hilo_monitoreo_tiempos);
 
         /*
         pthread_mutex_lock(&mutex_socket_dispatch);
@@ -85,53 +95,70 @@ void *algoritmo_sjf_con_desalojo(void *args)
         pthread_mutex_unlock(&mutex_socket_dispatch);
          */
 
-        //Tomamos tiempo inicial APENAS lo pasamos a EXEC
-        time(&tiempoI);
-
-        while(true)
-        {
-            sem_wait(&hay_que_ordenar_cola_ready);
-
-            //Tomamos le tiempo final, este se ira actualizando
-            time(&tiempoF);
-
-            organizacionPlani();
-            proceso_candidato = list_get(procesos_en_ready,0);
-
-            if(hay_que_desalojar(proceso_candidato))
-            {
-                pthread_mutex_lock(&mutex_log);
-                log_info(un_logger, "Se debe desalojar al proceso con PID = %u",proceso_en_exec->un_pcb->pid);
-                log_info(un_logger,"El proceso con PID = %u tiene una estimacion menor, de: %f",
-                         proceso_candidato->un_pcb->pid,
-                         proceso_candidato->un_pcb->una_estimacion);
-                pthread_mutex_unlock(&mutex_log);
-
-                solicitar_desalojo_a_cpu();
-                break;
-            }
-        }
-        //gestionar_pcb();
-
         gestionar_pcb_para_probar_sin_cpu();
+        //gestionar_pcb();
     }
+}
+
+void *rutina_monitoreo_desalojo(void *args)
+{
+    t_proceso *proceso_candidato;
+
+    //Tomamos tiempo inicial APENAS lo pasamos a EXEC
+    time(&tiempoI);
+    while(true)
+    {
+        sem_wait(&hay_que_ordenar_cola_ready);
+
+        //Tomamos le tiempo final, este se ira actualizando
+        time(&tiempoF);
+
+        organizacionPlani();
+        proceso_candidato = list_get(procesos_en_ready,0);
+
+        if(hay_que_desalojar(proceso_candidato))
+        {
+            pthread_mutex_lock(&mutex_log);
+            log_info(un_logger, "Se debe desalojar al proceso con PID = %u",proceso_en_exec->un_pcb->pid);
+            log_info(un_logger,"El proceso con PID = %u tiene una estimacion menor, de: %f",
+                     proceso_candidato->un_pcb->pid,
+                     proceso_candidato->un_pcb->una_estimacion);
+            pthread_mutex_unlock(&mutex_log);
+
+            solicitar_desalojo_a_cpu();
+            break;
+        }
+
+        //Volvemos a tomar el tiempo inicial, lo medido anteriormente se guardo (OJO ESTO)
+        time(&tiempoI);
+    }
+    return NULL;
 }
 
 void solicitar_desalojo_a_cpu()
 {
-    return;
+    pthread_mutex_lock(&mutex_flag_interrupt);
+    flag_interrupt = true;
+    pthread_mutex_unlock(&mutex_flag_interrupt);
 }
 
 bool hay_que_desalojar(t_proceso *proceso_candidato)
 {
-    return proceso_candidato->un_pcb->una_estimacion < calcular_promedio_ponderado_exec();
+    double estimacion_anterior = proceso_en_exec->un_pcb->una_estimacion;
+    proceso_en_exec->un_pcb->una_estimacion = calcular_tiempo_ejecutando();
+
+    if(proceso_en_exec->un_pcb->una_estimacion <= 0)
+        return false;
+    else if (estimacion_anterior < proceso_en_exec->un_pcb->una_estimacion)
+        return true;
+    else
+        return false;
 }
 
-double calcular_promedio_ponderado_exec()
+double calcular_tiempo_ejecutando()
 {
     double tiempo_transcurrido_exec = difftime(tiempoF,tiempoI);
     double resultado = proceso_en_exec->un_pcb->una_estimacion - tiempo_transcurrido_exec;
-
     return round(resultado);
 }
 
@@ -186,7 +213,10 @@ void gestionar_pcb()
             proceso_en_exec->un_pcb = obtener_pcb();
             pthread_mutex_unlock(&mutex_socket_dispatch);
             time(&tiempoF);
-            proceso_en_exec->un_pcb->una_estimacion = calcular_estimacion(tiempoF,tiempoI,proceso_en_exec);
+
+            // CUANDO SE DESALOJA NO SE VUELVE A ESTIMAR!!
+            //proceso_en_exec->un_pcb->una_estimacion = calcular_estimacion(tiempoF,tiempoI,proceso_en_exec);
+
             devolver_proceso_a_ready(proceso_en_exec);
             break;
         case BLOQUEO:
@@ -277,28 +307,31 @@ bool comparador_de_procesos_SJF(t_proceso *un_proceso_primero, t_proceso *un_pro
 // FUNCION SOLO PARA PROBAR SIN NECESIDAD DE LEVANTAR CPU...
 // SOLO PRUEBAS BASICAS DE PLANIFICACION CORTO PLAZO
 
-void gestionar_pcb_para_probar_sin_cpu() {
-
-    while (true) {
+void gestionar_pcb_para_probar_sin_cpu()
+{
+    while (true)
+    {
         t_instruccion *una_instruccion = queue_pop(proceso_en_exec->un_pcb->consola->instrucciones);
 
         pthread_mutex_lock(&mutex_log);
         log_info(un_logger, "La instruccion ejecutando es: %u", una_instruccion->instruc);
         pthread_mutex_unlock(&mutex_log);
 
-        if (una_instruccion->instruc == IO) {
+        if (una_instruccion->instruc == IO)
+        {
             pthread_mutex_lock(&mutex_log);
             log_info(un_logger, "Volvio un PCB para bloquear!!");
             pthread_mutex_unlock(&mutex_log);
 
             proceso_en_exec->tiempo_a_bloquear = una_instruccion->parametro1;
-            time(&tiempoF);
-            proceso_en_exec->un_pcb->una_estimacion = 0;
+            proceso_en_exec->un_pcb->una_estimacion = calcular_estimacion(tiempoF, tiempoI, proceso_en_exec);
 
             free(una_instruccion);
             pasar_proceso_a_bloqueado();
             break;
-        } else if (una_instruccion->instruc == I_EXIT) {
+        }
+        else if (una_instruccion->instruc == I_EXIT)
+        {
             pthread_mutex_lock(&mutex_log);
             log_info(un_logger, "Volvio un PCB para finalizar!!");
             pthread_mutex_unlock(&mutex_log);
@@ -307,8 +340,27 @@ void gestionar_pcb_para_probar_sin_cpu() {
             finalizar_proceso_ejecutando(proceso_en_exec);
             break;
         }
+        else if (esta_el_flag_interrupt_en_alto())
+        {
+            pthread_mutex_lock(&mutex_log);
+            log_info(un_logger, "HAY QUE DESALOJAR!!");
+            pthread_mutex_unlock(&mutex_log);
+
+            pthread_mutex_lock(&mutex_flag_interrupt);
+            flag_interrupt = false;
+            pthread_mutex_unlock(&mutex_flag_interrupt);
+        }
         free(una_instruccion);
     }
+}
+
+bool esta_el_flag_interrupt_en_alto()
+{
+    bool valor;
+    pthread_mutex_lock(&mutex_flag_interrupt);
+    valor = flag_interrupt;
+    pthread_mutex_unlock(&mutex_flag_interrupt);
+    return valor;
 }
 
 //////////////////////////////////////////////////////

@@ -32,6 +32,8 @@ void *gestor_io(void)
         pthread_mutex_lock(&mutex_procesos_en_ready);
         list_add(procesos_en_ready,un_proceso);
         pthread_mutex_unlock(&mutex_procesos_en_ready);
+
+        sem_post(&hay_que_ordenar_cola_ready);
         sem_post(&hay_procesos_en_ready);
     }
 }

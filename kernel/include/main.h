@@ -29,6 +29,7 @@ typedef struct config_kernel
 typedef struct proceso
 {
     int socket_proceso;
+    double tiempo_ejecutando_estimacion;
     t_pcb *un_pcb;
     int tiempo_a_bloquear;
 } t_proceso;
