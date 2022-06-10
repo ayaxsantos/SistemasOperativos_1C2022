@@ -183,11 +183,11 @@ void pasar_proceso_a_bloqueado()
 
 void realizar_envio_pcb(int socket, t_pcb *un_pcb)
 {
-    un_pcb->un_estado = EXEC;
-    enviar_pcb(socket,un_pcb,PCB);
+    t_proceso_pcb *un_proceso_pcb = malloc(sizeof(t_proceso_pcb));
 
-    //Se coloca tiempoI aqui
-    time(&tiempoI);
+    un_proceso_pcb->tiempo_bloqueo = UNDEFINED;
+    un_proceso_pcb->pcb = un_pcb;
+    enviar_proceso_pcb(socket,un_proceso_pcb,PCB);
 }
 
 t_pcb *obtener_pcb()
@@ -227,7 +227,7 @@ void gestionar_pcb()
             pthread_mutex_unlock(&mutex_log);
 
             pthread_mutex_lock(&mutex_socket_dispatch);
-            t_proceso_bloqueo *proceso_para_bloquear = deserializar_proceso_bloqueo(socket_dispatch);
+            t_proceso_pcb *proceso_para_bloquear = deserializar_proceso_pcb(socket_dispatch);
             pthread_mutex_unlock(&mutex_socket_dispatch);
 
             proceso_en_exec->un_pcb = proceso_para_bloquear->pcb;
