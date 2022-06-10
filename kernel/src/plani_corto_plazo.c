@@ -319,7 +319,7 @@ void gestionar_pcb_para_probar_sin_cpu()
         log_info(un_logger, "La instruccion ejecutando es: %u", una_instruccion->instruc);
         pthread_mutex_unlock(&mutex_log);
 
-        if (una_instruccion->instruc == IO && esta_el_flag_interrupt_en_alto())
+        if (una_instruccion->instruc == IO)
         {
             pthread_mutex_lock(&mutex_log);
             log_info(un_logger, "Volvio un PCB para bloquear!!");
