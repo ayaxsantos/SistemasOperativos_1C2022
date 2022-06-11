@@ -1,5 +1,7 @@
 #include <main.h>
 
+/////////////////////////////////////////////////
+
 int main(void)
 {
     iniciar_logger();
@@ -9,17 +11,22 @@ int main(void)
     iniciar_estructuras();
     iniciar_hilos();
 
+    contador_pid = 1;
+
     socket_dispatch = 0;
     socket_interrupt = 0;
 
     inicializar_plani_largo_plazo();
     inicializar_plani_corto_plazo();
+    inicializar_gestor_io();
 
     conexion();
 
     liberar_memoria();
     return EXIT_SUCCESS;
 }
+
+/////////////////////////////////////////////////
 
 void iniciar_logger()
 {
@@ -36,7 +43,7 @@ void iniciar_logger()
 
 void iniciar_config()
 {
-    una_config = config_create("../kernel.config");
+    una_config = config_create("kernel.config");
 
     una_config_kernel.ip_memoria = config_get_string_value(una_config,"IP_MEMORIA");
     una_config_kernel.puerto_memoria = config_get_string_value(una_config,"PUERTO_MEMORIA");
@@ -63,6 +70,9 @@ void iniciar_semaforos()
 {
     sem_init(&grado_multiprog_lo_permite,0,una_config_kernel.grado_multiprogramacion);
     sem_init(&llego_un_proceso,0,0);
+    sem_init(&hay_procesos_en_ready,0,0);
+    sem_init(&hay_procesos_en_blocked,0,0);
+    sem_init(&hay_que_ordenar_cola_ready,0,0);
 }
 
 void iniciar_mutex()
@@ -70,13 +80,23 @@ void iniciar_mutex()
     pthread_mutex_init(&mutex_log,NULL);
     pthread_mutex_init(&mutex_procesos_en_new,NULL);
     pthread_mutex_init(&mutex_procesos_en_ready,NULL);
+    pthread_mutex_init(&mutex_procesos_en_bloq,NULL);
+    pthread_mutex_init(&mutex_contador_pid,NULL);
+
+    //Estos pueden estar demas...
+    pthread_mutex_init(&mutex_socket_dispatch,NULL);
+    pthread_mutex_init(&mutex_procesos_en_bloq_susp,NULL);
 }
 
 void iniciar_hilos()
 {
     hilo_corto_plazo = malloc(sizeof(pthread_t));
     hilo_largo_plazo = malloc(sizeof(pthread_t));
+    hilo_mediano_plazo = malloc(sizeof(pthread_t));
+    hilo_gestor_io = malloc(sizeof(pthread_t));
 }
+
+/////////////////////////////////////////////////
 
 void liberar_memoria()
 {
@@ -92,6 +112,7 @@ void liberar_memoria()
 
     liberar_semaforos();
     liberar_mutex();
+    liberar_hilos();
 }
 
 void liberar_mutex()
@@ -105,10 +126,17 @@ void liberar_semaforos()
 {
     sem_destroy(&grado_multiprog_lo_permite);
     sem_destroy(&llego_un_proceso);
+    sem_destroy(&hay_procesos_en_ready);
+    sem_destroy(&hay_procesos_en_blocked);
+    sem_destroy(&hay_que_ordenar_cola_ready);
+    sem_destroy(&hay_procesos_en_blocked_susp);
 }
 
 void liberar_hilos()
 {
     free(hilo_corto_plazo);
     free(hilo_largo_plazo);
+    free(hilo_gestor_io);
 }
+
+/////////////////////////////////////////////////

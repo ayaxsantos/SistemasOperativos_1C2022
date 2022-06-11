@@ -85,7 +85,7 @@ typedef struct pcb
 {
     unsigned int pid;
     unsigned int program_counter;
-    int una_estimacion;
+    double una_estimacion;
     estado un_estado;
     t_consola *consola;
 
@@ -94,11 +94,11 @@ typedef struct pcb
 } t_pcb;
 
 
-typedef struct proceso_bloqueo
+typedef struct proceso_pcb
 {
-    unsigned int tiempo_bloqueo;
+    int tiempo_bloqueo;
     t_pcb *pcb;
-}t_proceso_bloqueo;
+} t_proceso_pcb;
 
 /**
  * @name habilitar_log
@@ -125,19 +125,19 @@ t_consola *recibir_datos_consola(int socket);
 void enviar_interrupcion(int socket);
 bool recibir_interrupcion(int socket);
 
-void enviar_pcb(int socket, t_pcb* un_pcb, codigo_operacion codigo);
 void *serializar_consola(t_consola *consola, int *size);
 t_pcb *deserializar_pcb_enviar(int socket, void * buffer);
 void serializar_pcb(t_pcb *pcb, t_operacion *operacion);
 void *serializar_instrucciones(t_queue *instrucciones, int *size_cola);
 void *serializar_tabla1n(t_dictionary *tabla1n, int *size);
-void serializar_proceso_bloqueo(t_proceso_bloqueo *proceso_bloqueo, t_operacion *operacion);
+void enviar_proceso_pcb(int socket, t_proceso_pcb *un_proceso_pcb, codigo_operacion un_codigo_operacion);
+void serializar_proceso_pcb(t_proceso_pcb *proceso_bloqueo, t_operacion *operacion);
 
 t_pcb *deserializar_pcb(int socket);
 t_consola *deserializar_consola(void *buffer);
 t_queue *deserializar_instrucciones(void *buffer, int size_cola);
 t_dictionary *deserializar_tabla1n(void *buffer, int size_tabla);
-t_proceso_bloqueo *deserializar_proceso_bloqueo(int socket);
+t_proceso_pcb *deserializar_proceso_pcb(int socket);
 
 #include "../utils/utilslib.h"
 
