@@ -16,6 +16,7 @@
 
 #define ERROR -1
 #define UNDEFINED -100
+#define DATO (>0)
 
 /*** ENUMS ***/
 typedef enum
@@ -38,12 +39,12 @@ typedef enum
     INTERRUPCION,
 	FIN_PROCESO,
     /*Memoria + CPU*/
-    REQUEST_TABLA,
-    RESPONSE_TABLA,
-    RESPONSE_REGISTRO,
+    PRIMERA_SOLICITUD,
+    SEGUNDA_SOLICITUD,
+    TERCERA_SOLICITUD,
 	MSJ
     /*A definir*/
-}codigo_operacion;
+} codigo_operacion;
 
 typedef enum
 {   
@@ -61,6 +62,12 @@ typedef enum
     COPY,
     I_EXIT
 } instruccion;
+
+typedef enum
+{
+    READ_ACCION,
+    WRITE_ACCION
+} accion;
 
 /*** Generales ***/
 typedef struct
@@ -98,18 +105,20 @@ typedef struct pcb
 } t_pcb;
 
 /*** CPU + MEMORIA ***/
-typedef struct t_columna_pagina
-{
-    bool presencia;
-    int nro_frame;
-} __attribute__((packed)) t_columna_pagina;
-
-typedef struct t_request_tabla
+typedef struct t_solicitud
 {
     int32_t id_tabla_1n;
     int32_t entrada_tabla;
     int32_t tabla2n;
-} __attribute__((packed)) t_request_tabla;
+} __attribute__((packed)) t_solicitud;
+
+typedef struct t_tercera_solictud
+{
+    unsigned int desplazamiento;
+    unsigned int nro_frame;
+    accion accion_solicitada;
+    unsigned int dato; //Suponemos un entero no signado de 4bytes
+} __attribute__((packed)) t_tercera_solictud;
 
 typedef struct proceso_bloqueo
 {
