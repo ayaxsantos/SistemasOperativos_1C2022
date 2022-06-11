@@ -65,7 +65,7 @@ void ciclo_de_instruccion() {
 		// TODO
         void *espacio_a_asignar = obtener_dato_memoria(instruccion->parametro1, pcb);
 	}
-	pcb->program_counter ++; // Incremento acá pc porque si no, si tengo que enviar pcb a kernel, se va a mandar pc desactualizado
+	pcb->program_counter ++; // Incremento pc acá  porque sino, si tengo que enviar pcb a kernel, se va a mandar pc desactualizado
 	ejecutar_instruccion(instruccion); // EXECUTE
 
 	sem_post(&sem_execute); // Comience el ciclo de instrucccion devuelta
@@ -102,43 +102,38 @@ int necesita_fetch_operands(instruccion instruction) {
 void ejecutar_instruccion(t_instruccion *instruccion) {
 	int resultado;
 	t_proceso_pcb *proceso_a_enviar = malloc(sizeof(t_proceso_pcb));
+	proceso_a_enviar->pcb = pcb;
+
     switch (instruccion->instruc) {
         case NO_OP:
-
             resultado = usleep(config_cpu.retardo_noop * 1000);
             if(resultado == -1 )
                 log_error(logger_cpu, "Error al realizar usleep");
             sem_post(&sem_interrupt);
            break;
+
         case IO: // Pedir a Kernel que bloque el proceso el tiempo que viene indicado en el param1
-        	proceso_a_enviar->pcb = pcb;
         	proceso_a_enviar->tiempo_bloqueo = instruccion->parametro1;
         	enviar_proceso_pcb(socket_kernel_dispatch, proceso_a_enviar, BLOQUEO);
            break;
+
         case READ:
         	sem_post(&sem_interrupt);
            break;
+
         case WRITE:
         	sem_post(&sem_interrupt);
            break;
+
         case COPY:
         	sem_post(&sem_interrupt);
            break;
-        case I_EXIT:
 
-        	//fin_de_proceso(socket_kernel_dispatch, pcb);
-        	sem_post(&sem_execute);
+        case I_EXIT:
+			proceso_a_enviar->tiempo_bloqueo = UNDEFINED;
+			enviar_proceso_pcb(socket_kernel_dispatch, proceso_a_enviar, FIN_PROCESO);
            break;
     }
     free(proceso_a_enviar);
 }
 
-// Inspirado en Kernel 😂
-//  TODO: tal vez esta funcion deberia ir a carpisLib, se usa en cpu y kernel, para evitar repeticion de lógica
-void fin_de_proceso(int socket, t_pcb* un_pcb)
-{
-    t_operacion *operacion = crear_operacion(FIN_PROCESO);
-    setear_operacion(operacion, un_pcb);
-    enviar_operacion(operacion, socket);
-    eliminar_operacion(operacion);
-}

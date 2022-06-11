@@ -12,6 +12,4 @@ void ciclo_de_instruccion();
 int necesita_fetch_operands(instruccion instruction);
 void ejecutar_instruccion(t_instruccion *instruccion);
 
-void fin_de_proceso(int socket, t_pcb* un_pcb);
-
 #endif /* CPU_H_INCLUDED */
