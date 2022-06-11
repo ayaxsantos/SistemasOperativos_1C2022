@@ -65,9 +65,9 @@ void ciclo_de_instruccion() {
 		// TODO
         void *espacio_a_asignar = obtener_dato_memoria(instruccion->parametro1, pcb);
 	}
+	pcb->program_counter ++; // Incremento acá pc porque si no, si tengo que enviar pcb a kernel, se va a mandar pc desactualizado
+	ejecutar_instruccion(instruccion); // EXECUTE
 
-	ejecutar_instruccion(instruccion, pcb); // EXECUTE
-	pcb->program_counter ++;
 	sem_post(&sem_execute); // Comience el ciclo de instrucccion devuelta
 }
 
@@ -88,10 +88,10 @@ void *ejecutar_interrupcion(void *arg) {
 				proceso_a_enviar->pcb = pcb;
 
 				enviar_proceso_pcb(socket_kernel_dispatch, proceso_a_enviar, INTERRUPCION);
+
+				free(proceso_a_enviar); // Preguntar si está OK el free acá
 			}
 		}
-		// Pasar pcb a kernel, socket dispatch
-
 	}
 }
 
@@ -99,8 +99,9 @@ int necesita_fetch_operands(instruccion instruction) {
 	return instruction == COPY;
 }
 
-void ejecutar_instruccion(t_instruccion *instruccion, t_pcb *pcb) {
+void ejecutar_instruccion(t_instruccion *instruccion) {
 	int resultado;
+	t_proceso_pcb *proceso_a_enviar = malloc(sizeof(t_proceso_pcb));
     switch (instruccion->instruc) {
         case NO_OP:
 
@@ -110,7 +111,9 @@ void ejecutar_instruccion(t_instruccion *instruccion, t_pcb *pcb) {
             sem_post(&sem_interrupt);
            break;
         case IO: // Pedir a Kernel que bloque el proceso el tiempo que viene indicado en el param1
-
+        	proceso_a_enviar->pcb = pcb;
+        	proceso_a_enviar->tiempo_bloqueo = instruccion->parametro1;
+        	enviar_proceso_pcb(socket_kernel_dispatch, proceso_a_enviar, BLOQUEO);
            break;
         case READ:
         	sem_post(&sem_interrupt);
@@ -121,10 +124,13 @@ void ejecutar_instruccion(t_instruccion *instruccion, t_pcb *pcb) {
         case COPY:
         	sem_post(&sem_interrupt);
            break;
-        case I_EXIT: fin_de_proceso(socket_kernel_dispatch, pcb);
+        case I_EXIT:
+
+        	//fin_de_proceso(socket_kernel_dispatch, pcb);
         	sem_post(&sem_execute);
            break;
     }
+    free(proceso_a_enviar);
 }
 
 // Inspirado en Kernel 😂
