@@ -16,12 +16,23 @@ void conexion(void)
 
     while(true)
     {
+        t_com_proceso *comunicacion_proceso = malloc(sizeof(t_com_proceso));
+
+        pthread_mutex_t *mutex_socket_proceso = malloc(sizeof(pthread_mutex_t));
+        pthread_mutex_init(mutex_socket_proceso,NULL);
+
+        pthread_mutex_lock(mutex_socket_proceso);
         socket_proceso = esperar_cliente(socket_kernel_serv);
+        pthread_mutex_unlock(mutex_socket_proceso);
 
         pthread_t *hilo_proceso = malloc(sizeof(pthread_t));
         list_add(hilos_comunicacion,hilo_proceso);
 
-        pthread_create(hilo_proceso, NULL, gestionar_comunicacion_con_proceso, (void*)&socket_proceso);
+        comunicacion_proceso->socket_proceso = socket_proceso;
+        comunicacion_proceso->mutex_socket_proceso = mutex_socket_proceso;
+        comunicacion_proceso->hilo_com_proceso = hilo_proceso;
+
+        pthread_create(hilo_proceso, NULL, gestionar_comunicacion_con_proceso, (void*)comunicacion_proceso);
         pthread_detach(*hilo_proceso);
     }
 }
@@ -45,18 +56,21 @@ void confirmar_modulo(int *socket, modulo modulo) {
     }
 }
 
-void *gestionar_comunicacion_con_proceso(void* socket_proceso_param)
+void *gestionar_comunicacion_con_proceso(void* com_proceso_param)
 {
-    int socket_proceso = *((int*) socket_proceso_param);                 //Casteo necesario por los argumentos, tambien necesario por pthread_create
+    t_com_proceso *comunicacion_proceso = (t_com_proceso*) com_proceso_param;
 
-    codigo_operacion un_codigo = (codigo_operacion) recibir_operacion(socket_proceso);
+    pthread_mutex_lock(comunicacion_proceso->mutex_socket_proceso);
+    codigo_operacion un_codigo = (codigo_operacion) recibir_operacion(comunicacion_proceso->socket_proceso);
+    pthread_mutex_unlock(comunicacion_proceso->mutex_socket_proceso);
+
     switch(un_codigo)
     {
         case T_CONSOLA:
             pthread_mutex_lock(&mutex_log);
             log_info(un_logger,"Recibi unas instrucciones!");
             pthread_mutex_unlock(&mutex_log);
-            inicializar_proceso(socket_proceso);
+            inicializar_proceso(comunicacion_proceso);
             break;
         default:
             pthread_mutex_lock(&mutex_log);
@@ -64,17 +78,17 @@ void *gestionar_comunicacion_con_proceso(void* socket_proceso_param)
             pthread_mutex_unlock(&mutex_log);
             break;
     }
-
     return NULL;
 }
 
 ////////////////////////////////////////////
 
-void inicializar_proceso(int socket_proceso)
+void inicializar_proceso(t_com_proceso *comunicacion_proceso)
 {
     t_proceso *un_proceso = malloc(sizeof (t_proceso));
-    un_proceso->un_pcb = inicializar_pcb(socket_proceso);
-    un_proceso->socket_proceso = socket_proceso;    //Cuando pasa exit, podemos responderle a la consola en particular
+
+    un_proceso->un_pcb = inicializar_pcb(comunicacion_proceso);
+    un_proceso->comunicacion_proceso = comunicacion_proceso;
     un_proceso->tiempo_ejecutando_estimacion = 0;
 
     pasar_proceso_a_new(un_proceso);
@@ -91,9 +105,11 @@ void pasar_proceso_a_new(t_proceso *un_proceso)
     sem_post(&llego_un_proceso);
 }
 
-t_pcb *inicializar_pcb(int socket_proceso)
+t_pcb *inicializar_pcb(t_com_proceso *comunicacion_proceso)
 {
-    t_consola *una_consola = recibir_datos_consola(socket_proceso);
+    pthread_mutex_lock(comunicacion_proceso->mutex_socket_proceso);
+    t_consola *una_consola = recibir_datos_consola(comunicacion_proceso->socket_proceso);
+    pthread_mutex_unlock(comunicacion_proceso->mutex_socket_proceso);
     t_pcb *un_pcb = malloc(sizeof(t_pcb));
 
     asignar_pid(un_pcb);
@@ -128,8 +144,10 @@ void probar_comunicacion_instrucciones(t_pcb * un_pcb)
 
 void asignar_pid(t_pcb *un_pcb)
 {
+    pthread_mutex_lock(&mutex_contador_pid);
     un_pcb->pid = contador_pid;
     contador_pid++;
+    pthread_mutex_unlock(&mutex_contador_pid);
 }
 
 ////////////////////////////////////////////////

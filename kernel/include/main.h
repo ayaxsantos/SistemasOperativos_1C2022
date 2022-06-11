@@ -26,9 +26,16 @@ typedef struct config_kernel
     int tiempo_max_bloqueado;
 } t_config_kernel;
 
-typedef struct proceso
+typedef struct com_proceso
 {
     int socket_proceso;
+    pthread_mutex_t *mutex_socket_proceso;
+    pthread_t *hilo_com_proceso;
+}t_com_proceso;
+
+typedef struct proceso
+{
+    t_com_proceso *comunicacion_proceso;
     double tiempo_ejecutando_estimacion;
     t_pcb *un_pcb;
     int tiempo_a_bloquear;
@@ -60,6 +67,7 @@ pthread_mutex_t mutex_procesos_en_ready;
 pthread_mutex_t mutex_procesos_en_bloq;
 pthread_mutex_t mutex_procesos_en_bloq_susp;
 pthread_mutex_t mutex_socket_dispatch;
+pthread_mutex_t mutex_contador_pid;
 
 sem_t grado_multiprog_lo_permite;
 sem_t llego_un_proceso;
@@ -90,6 +98,7 @@ void inicializar_plani_largo_plazo();
 void liberar_memoria();
 void liberar_semaforos();
 void liberar_mutex();
+void liberar_hilos();
 
 ///////////////////////////////////////////
 

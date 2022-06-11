@@ -82,6 +82,12 @@ void iniciar_mutex()
     pthread_mutex_init(&mutex_log,NULL);
     pthread_mutex_init(&mutex_procesos_en_new,NULL);
     pthread_mutex_init(&mutex_procesos_en_ready,NULL);
+    pthread_mutex_init(&mutex_procesos_en_bloq,NULL);
+    pthread_mutex_init(&mutex_contador_pid,NULL);
+
+    //Estos pueden estar demas...
+    pthread_mutex_init(&mutex_socket_dispatch,NULL);
+    pthread_mutex_init(&mutex_procesos_en_bloq_susp,NULL);
 }
 
 void iniciar_hilos()
@@ -109,6 +115,7 @@ void liberar_memoria()
 
     liberar_semaforos();
     liberar_mutex();
+    liberar_hilos();
 }
 
 void liberar_mutex()
