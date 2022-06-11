@@ -64,8 +64,6 @@ void iniciar_estructuras()
     procesos_en_ready = list_create();
     procesos_en_bloq = queue_create();
     procesos_en_exit = list_create();
-
-    hilos_comunicacion = list_create();
 }
 
 void iniciar_semaforos()
@@ -108,7 +106,6 @@ void liberar_memoria()
     list_destroy(procesos_en_ready);
     queue_destroy(procesos_en_bloq);
     list_destroy(procesos_en_exit);
-    list_destroy_and_destroy_elements(hilos_comunicacion,free);
 
     log_destroy(un_logger);
     config_destroy(una_config);
@@ -129,12 +126,17 @@ void liberar_semaforos()
 {
     sem_destroy(&grado_multiprog_lo_permite);
     sem_destroy(&llego_un_proceso);
+    sem_destroy(&hay_procesos_en_ready);
+    sem_destroy(&hay_procesos_en_blocked);
+    sem_destroy(&hay_que_ordenar_cola_ready);
+    sem_destroy(&hay_procesos_en_blocked_susp);
 }
 
 void liberar_hilos()
 {
     free(hilo_corto_plazo);
     free(hilo_largo_plazo);
+    free(hilo_gestor_io);
 }
 
 /////////////////////////////////////////////////

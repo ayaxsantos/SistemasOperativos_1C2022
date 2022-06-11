@@ -29,7 +29,7 @@ typedef struct config_kernel
 typedef struct com_proceso
 {
     int socket_proceso;
-    pthread_mutex_t *mutex_socket_proceso;
+    pthread_mutex_t mutex_socket_proceso;
     pthread_t *hilo_com_proceso;
 }t_com_proceso;
 
@@ -76,7 +76,6 @@ sem_t hay_procesos_en_blocked;
 sem_t hay_procesos_en_blocked_susp;
 sem_t hay_que_ordenar_cola_ready;
 
-t_list *hilos_comunicacion;
 pthread_t *hilo_corto_plazo;
 pthread_t *hilo_largo_plazo;
 pthread_t *hilo_mediano_plazo;

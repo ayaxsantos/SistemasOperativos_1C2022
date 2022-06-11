@@ -79,8 +79,11 @@ void transicionar_proceso_a_exit()
 
     queue_destroy(proceso_en_exec->un_pcb->consola->instrucciones);
     free(proceso_en_exec->un_pcb->consola);
-    //dictionary_destroy(proceso_en_exec->un_pcb->tabla_1n);
     free(proceso_en_exec->un_pcb);
+    pthread_mutex_destroy(&proceso_en_exec->comunicacion_proceso->mutex_socket_proceso);
+    free(proceso_en_exec->comunicacion_proceso->hilo_com_proceso);
+    free(proceso_en_exec->comunicacion_proceso);
+
     free(proceso_en_exec);
 }
 

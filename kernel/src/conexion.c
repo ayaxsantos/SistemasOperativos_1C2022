@@ -17,19 +17,15 @@ void conexion(void)
     while(true)
     {
         t_com_proceso *comunicacion_proceso = malloc(sizeof(t_com_proceso));
+        pthread_mutex_init(&comunicacion_proceso->mutex_socket_proceso,NULL);
 
-        pthread_mutex_t *mutex_socket_proceso = malloc(sizeof(pthread_mutex_t));
-        pthread_mutex_init(mutex_socket_proceso,NULL);
-
-        pthread_mutex_lock(mutex_socket_proceso);
+        pthread_mutex_lock(&comunicacion_proceso->mutex_socket_proceso);
         socket_proceso = esperar_cliente(socket_kernel_serv);
-        pthread_mutex_unlock(mutex_socket_proceso);
+        pthread_mutex_unlock(&comunicacion_proceso->mutex_socket_proceso);
 
         pthread_t *hilo_proceso = malloc(sizeof(pthread_t));
-        list_add(hilos_comunicacion,hilo_proceso);
 
         comunicacion_proceso->socket_proceso = socket_proceso;
-        comunicacion_proceso->mutex_socket_proceso = mutex_socket_proceso;
         comunicacion_proceso->hilo_com_proceso = hilo_proceso;
 
         pthread_create(hilo_proceso, NULL, gestionar_comunicacion_con_proceso, (void*)comunicacion_proceso);
@@ -60,9 +56,9 @@ void *gestionar_comunicacion_con_proceso(void* com_proceso_param)
 {
     t_com_proceso *comunicacion_proceso = (t_com_proceso*) com_proceso_param;
 
-    pthread_mutex_lock(comunicacion_proceso->mutex_socket_proceso);
+    pthread_mutex_lock(&comunicacion_proceso->mutex_socket_proceso);
     codigo_operacion un_codigo = (codigo_operacion) recibir_operacion(comunicacion_proceso->socket_proceso);
-    pthread_mutex_unlock(comunicacion_proceso->mutex_socket_proceso);
+    pthread_mutex_unlock(&comunicacion_proceso->mutex_socket_proceso);
 
     switch(un_codigo)
     {
@@ -107,9 +103,9 @@ void pasar_proceso_a_new(t_proceso *un_proceso)
 
 t_pcb *inicializar_pcb(t_com_proceso *comunicacion_proceso)
 {
-    pthread_mutex_lock(comunicacion_proceso->mutex_socket_proceso);
+    pthread_mutex_lock(&comunicacion_proceso->mutex_socket_proceso);
     t_consola *una_consola = recibir_datos_consola(comunicacion_proceso->socket_proceso);
-    pthread_mutex_unlock(comunicacion_proceso->mutex_socket_proceso);
+    pthread_mutex_unlock(&comunicacion_proceso->mutex_socket_proceso);
     t_pcb *un_pcb = malloc(sizeof(t_pcb));
 
     asignar_pid(un_pcb);
