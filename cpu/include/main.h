@@ -50,6 +50,8 @@ t_log *logger_cpu;
 
 int socket_memoria, cpu_dispatch, cpu_interrupt, socket_kernel_dispatch;
 sem_t sem_interrupt, sem_execute;
+
+t_pcb *pcb;
 ////////////////////////////////////////////////////////////
 void leer_configuracion();
 void arrancar_logger();
