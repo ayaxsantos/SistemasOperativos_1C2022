@@ -3,7 +3,9 @@
 
 #include <general/carpisLib.h>
 #include <utils/serverutils.h>
+#include <stdlib.h>
 #include <pthread.h>
+#include <math.h>
 #include <semaphore.h>
 
 typedef int32_t dir_logica;
@@ -41,7 +43,7 @@ typedef struct
 } t_config_cpu;
 
 /////////////////////////////////////////////////////////////
-t_list *pcbs;
+t_pcb *pcb;
 
 t_algoritmo tipo_algoritmo_tlb;
 
@@ -66,5 +68,6 @@ void liberar_configuracion_y_log();
 
 #include "mmu.h"
 #include "cpu.h"
+#include "conector_memoria.h"
 
 #endif
