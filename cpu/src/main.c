@@ -4,7 +4,7 @@ int main() {
 
     arrancar_logger();
     leer_configuracion();
-    //iniciar_semaforos();
+    iniciar_semaforos();
     iniciar();
     return EXIT_SUCCESS;
 

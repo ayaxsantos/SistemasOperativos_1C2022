@@ -57,6 +57,7 @@ void leer_configuracion();
 void arrancar_logger();
 void conectar_a_memoria_y_recibir_config();
 void obtener_configuracion(int *socket, modulo modulo);
+void iniciar_semaforos();
 
 void setear_algoritmo_reemplazo_tlb();
 
