@@ -51,13 +51,13 @@ void *ejecutar_pcb(void *arg) {
 		/*
 		 * La cpu es una sola no?
 		 */
-		sem_post(&sem_interrupt);
+
 	}
 }
 
 
 void ciclo_de_instruccion() {
-	t_pcb *pcb = deserializar_pcb(socket_kernel_dispatch);
+	pcb = deserializar_pcb(socket_kernel_dispatch);
 
 	t_instruccion *instruccion = (t_instruccion *) queue_pop(pcb->consola->instrucciones); // FETCH
 
@@ -66,17 +66,32 @@ void ciclo_de_instruccion() {
         void *espacio_a_asignar = obtener_dato_memoria(instruccion->parametro1, pcb);
 	}
 
-	ejecutar_instruccion(instruccion, pcb);
+	ejecutar_instruccion(instruccion, pcb); // EXECUTE
 	pcb->program_counter ++;
+	sem_post(&sem_execute); // Comience el ciclo de instrucccion devuelta
 }
 
 void *ejecutar_interrupcion(void *arg) {
 	while(true) {
 		int socket_interrupt = esperar_cliente(cpu_interrupt);
-		//guardar esa interrupcion
+
 		sem_wait(&sem_interrupt);
+		int operacion = recibir_operacion(cpu_dispatch);
+
+		if(operacion == INTERRUPCION) {
+			bool hay_interrupcion =  recibir_interrupcion(socket_interrupt);
+
+			if(hay_interrupcion) {
+				t_proceso_pcb *proceso_a_enviar = malloc(sizeof(t_proceso_pcb));
+
+				proceso_a_enviar->tiempo_bloqueo = UNDEFINED;
+				proceso_a_enviar->pcb = pcb;
+
+				enviar_proceso_pcb(socket_kernel_dispatch, proceso_a_enviar, INTERRUPCION);
+			}
+		}
 		// Pasar pcb a kernel, socket dispatch
-		sem_post(&sem_execute);
+
 	}
 }
 
@@ -92,16 +107,22 @@ void ejecutar_instruccion(t_instruccion *instruccion, t_pcb *pcb) {
             resultado = usleep(config_cpu.retardo_noop * 1000);
             if(resultado == -1 )
                 log_error(logger_cpu, "Error al realizar usleep");
+            sem_post(&sem_interrupt);
            break;
         case IO: // Pedir a Kernel que bloque el proceso el tiempo que viene indicado en el param1
+
            break;
         case READ:
+        	sem_post(&sem_interrupt);
            break;
         case WRITE:
+        	sem_post(&sem_interrupt);
            break;
         case COPY:
+        	sem_post(&sem_interrupt);
            break;
-        case I_EXIT: fin_de_proceso(socket_kernel_dispatch, pcb); // Preguntar si esta bien ese socket
+        case I_EXIT: fin_de_proceso(socket_kernel_dispatch, pcb);
+        	sem_post(&sem_execute);
            break;
     }
 }
