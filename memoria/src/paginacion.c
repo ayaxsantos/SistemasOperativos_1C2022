@@ -78,6 +78,13 @@ int primera_solicitud_mmu(int id_tabla_1n, int entrada_tabla_1n){
 	return tabla_2n->id_tabla;
 }
 
+int segunda_solicitud_mmu(int id_1n, int id_2n, int nro_pag_2n){
+	t_tabla_pagina *tabla_1n = obtener_tabla_1n_por_id(id_1n);
+	t_tabla_pagina *tabla_2n = dictionary_get(tabla_1n->tabla, string_itoa(id_2n));
+	t_col_pagina *pagina = dictionary_get(tabla_2n->tabla, string_itoa(nro_pag_2n));
+	return pagina->nro_frame;
+}
+
 bool buscar_por_id(void *una_tabla, unsigned int id) {
     t_tabla_pagina *tabla_proceso = (t_tabla_pagina *) una_tabla;
     return tabla_proceso->id_tabla == id;
