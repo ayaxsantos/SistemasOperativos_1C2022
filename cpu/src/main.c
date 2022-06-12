@@ -4,7 +4,7 @@ int main() {
 
     arrancar_logger();
     leer_configuracion();
-    //iniciar_semaforos();
+    iniciar_semaforos();
     iniciar();
     return EXIT_SUCCESS;
 
@@ -32,8 +32,8 @@ void leer_configuracion() {
     
     config_cpu.ip_memoria = strdup(config_get_string_value(un_config,"IP_MEMORIA"));
     config_cpu.puerto_memoria = strdup(config_get_string_value(un_config,"PUERTO_MEMORIA"));
-    config_cpu.cantidad_entradas_tlb = config_get_int_value(un_config,"CANTIDAD_ENTRADAS_TLB");
-    config_cpu.algoritmo_reemplazo_tlb = strdup(config_get_string_value(un_config,"ALGORITMO_REEMPLAZO_TLB"));
+    config_cpu.cantidad_entradas_tlb = config_get_int_value(un_config,"ENTRADAS_TLB");
+    config_cpu.algoritmo_reemplazo_tlb = strdup(config_get_string_value(un_config,"REEMPLAZO_TLB"));
     config_cpu.retardo_noop = config_get_int_value(un_config,"RETARDO_NOOP");
     config_cpu.puerto_escucha_dispatch = strdup(config_get_string_value(un_config,"PUERTO_ESCUCHA_DISPATCH"));
     config_cpu.puerto_escucha_interrupt = strdup(config_get_string_value(un_config,"PUERTO_ESCUCHA_INTERRUPT"));
@@ -50,7 +50,7 @@ void conectar_a_memoria_y_recibir_config() {
     socket_memoria = crear_conexion(config_cpu.ip_memoria,config_cpu.puerto_memoria);
     enviar_handshake(&socket_memoria, CPU);
     int resultado = esperar_handshake(&socket_memoria, obtener_configuracion);
-    if(!resultado) {
+    if(resultado == -1) {
         log_error(logger_cpu,"No se pudo conectar con el modulo MEMORIA");
         exit(EXIT_FAILURE);
     }
@@ -59,14 +59,14 @@ void conectar_a_memoria_y_recibir_config() {
 
 void obtener_configuracion(int *socket, modulo modulo) {
     if(modulo == MEMORIA) {
-        int size;
         int desplazamiento = 0;
-        void * buffer;
-        buffer = recibir_buffer(&size, *socket);
+        void * buffer = malloc(sizeof(int) * 2);
+        recv(*socket, buffer, sizeof(int) * 2, MSG_WAITALL);
 
-        memcpy(&(config_cpu.entradas_por_tabla), buffer, sizeof(int));
+        memcpy(&config_cpu.entradas_por_tabla , buffer, sizeof(int));
         desplazamiento+=sizeof(int);
-        memcpy(&(config_cpu.tamanio_pagina), buffer+desplazamiento, sizeof(int));
+        memcpy(&config_cpu.tamanio_pagina, buffer+desplazamiento, sizeof(int));
+
         free(buffer);
     }
 }

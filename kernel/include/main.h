@@ -26,9 +26,17 @@ typedef struct config_kernel
     int tiempo_max_bloqueado;
 } t_config_kernel;
 
-typedef struct proceso
+typedef struct com_proceso
 {
     int socket_proceso;
+    pthread_mutex_t mutex_socket_proceso;
+    pthread_t *hilo_com_proceso;
+}t_com_proceso;
+
+typedef struct proceso
+{
+    t_com_proceso *comunicacion_proceso;
+    double tiempo_ejecutando_estimacion;
     t_pcb *un_pcb;
     int tiempo_a_bloquear;
 } t_proceso;
@@ -36,7 +44,10 @@ typedef struct proceso
 //////////////////////////////////////////
 
 t_log *un_logger;
+
+//Ver de poder sacar esta variable global!!
 t_config *una_config;
+
 t_config_kernel una_config_kernel;
 
 t_queue *procesos_en_new;
@@ -56,17 +67,21 @@ pthread_mutex_t mutex_procesos_en_ready;
 pthread_mutex_t mutex_procesos_en_bloq;
 pthread_mutex_t mutex_procesos_en_bloq_susp;
 pthread_mutex_t mutex_socket_dispatch;
+pthread_mutex_t mutex_contador_pid;
 
 sem_t grado_multiprog_lo_permite;
 sem_t llego_un_proceso;
 sem_t hay_procesos_en_ready;
 sem_t hay_procesos_en_blocked;
 sem_t hay_procesos_en_blocked_susp;
+sem_t hay_que_ordenar_cola_ready;
 
 pthread_t *hilo_corto_plazo;
 pthread_t *hilo_largo_plazo;
 pthread_t *hilo_mediano_plazo;
+pthread_t *hilo_gestor_io;
 
+int contador_pid;
 
 ///////////////////////////////////////////
 
@@ -82,6 +97,7 @@ void inicializar_plani_largo_plazo();
 void liberar_memoria();
 void liberar_semaforos();
 void liberar_mutex();
+void liberar_hilos();
 
 ///////////////////////////////////////////
 
@@ -89,6 +105,7 @@ void liberar_mutex();
 #include <plani_largo_plazo.h>
 #include <plani_corto_plazo.h>
 #include <plani_mediano_plazo.h>
+#include <gestor_io.h>
 
 ///////////////////////////////////////////
 

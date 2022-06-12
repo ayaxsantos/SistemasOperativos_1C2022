@@ -1,8 +1,13 @@
-//
-// Created by ayaxa on 3/6/2022.
-//
-
 #ifndef KERNEL_GESTOR_IO_H
 #define KERNEL_GESTOR_IO_H
+
+#include "main.h"
+
+//////////////////////////////////////////
+
+void *gestor_io();
+void inicializar_gestor_io();
+
+//////////////////////////////////////////
 
 #endif //KERNEL_GESTOR_IO_H
