@@ -43,6 +43,7 @@ void *ejecutar_pcb(void *arg) {
 		int operacion = recibir_operacion(cpu_dispatch);
 		switch (operacion) {
 			case PCB:
+				pcb = deserializar_pcb(socket_kernel_dispatch);
 				ciclo_de_instruccion();
 				break;
 			default:
@@ -57,8 +58,6 @@ void *ejecutar_pcb(void *arg) {
 
 
 void ciclo_de_instruccion() {
-	pcb = deserializar_pcb(socket_kernel_dispatch);
-
 	t_instruccion *instruccion = (t_instruccion *) queue_pop(pcb->consola->instrucciones); // FETCH
 
 	if(necesita_fetch_operands(instruccion->instruc)) { // DECODE
@@ -73,9 +72,9 @@ void ciclo_de_instruccion() {
 
 void *ejecutar_interrupcion(void *arg) {
 	while(true) {
+		sem_wait(&sem_interrupt);
 		int socket_interrupt = esperar_cliente(cpu_interrupt);
 
-		sem_wait(&sem_interrupt);
 		int operacion = recibir_operacion(cpu_dispatch);
 
 		if(operacion == INTERRUPCION) {
@@ -90,6 +89,8 @@ void *ejecutar_interrupcion(void *arg) {
 				enviar_proceso_pcb(socket_kernel_dispatch, proceso_a_enviar, INTERRUPCION);
 
 				free(proceso_a_enviar); // Preguntar si está OK el free acá
+			} else {
+				ciclo_de_instruccion();
 			}
 		}
 	}

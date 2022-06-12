@@ -10,12 +10,12 @@ void *obtener_dato_memoria(dir_logica dir, t_pcb *pcb) {
      *      está direccionado el marco en que se encuentra la página a la que queremos acceder
      * 2- Un segundo acceso para conocer en qué marco está la misma
      * 3- Finalmente acceder a la porción de memoria correspondiente (la dirección física).
-     */
+     
     int num_pagina = numero_pagina(dir);
     int entrada_tabla_1n = entrada_tabla_1er_nivel(num_pagina);
     int id_tabla_2n = solicitar_registro_1nivel(pcb->id_tabla_1n, entrada_tabla_1n);
     t_columna_pagina *pagina = solicitar_registro_2nivel(id_tabla_2n, entrada_tabla_2do_nivel(num_pagina));
-    return pagina;
+    return pagina;*/
 }
 /*
 char *dir_logica_a_fisica(dir_logica dir, t_pcb *pcb, t_accion accion) {
