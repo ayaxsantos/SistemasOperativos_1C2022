@@ -1,5 +1,5 @@
 # Libraries
-LIBS= carpisLib commons pthread
+LIBS= carpisLib commons pthread m
 
 # Custom libraries' paths
 SHARED_LIBPATHS=

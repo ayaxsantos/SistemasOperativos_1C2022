@@ -43,15 +43,18 @@ t_proceso *obtener_proceso_en_new()
 
 void transicionar_proceso_a_ready(t_proceso *un_proceso)
 {
+    //Agrego que se le coloque una estimacion inicial al proceso -> Carlos
+    un_proceso->un_pcb->una_estimacion = una_config_kernel.estimacion_inicial;
     pthread_mutex_lock(&mutex_procesos_en_ready);
     list_add(procesos_en_ready,(void*) un_proceso);
     pthread_mutex_unlock(&mutex_procesos_en_ready);
-    sem_post(&hay_procesos_en_ready);
-
 
     pthread_mutex_lock(&mutex_log);
-    log_info(un_logger,"Se pasa proceso a READY -> PID = %d",un_proceso->un_pcb->pid);
+    log_info(un_logger,"Se pasa proceso a READY -> PID = %u",un_proceso->un_pcb->pid);
     pthread_mutex_unlock(&mutex_log);
+
+    sem_post(&hay_que_ordenar_cola_ready);
+    sem_post(&hay_procesos_en_ready);
 }
 
 ////////////////////////////////////////////
@@ -59,18 +62,29 @@ void transicionar_proceso_a_ready(t_proceso *un_proceso)
 void finalizar_proceso_ejecutando()
 {
     pthread_mutex_lock(&mutex_log);
-    log_info(un_logger,"Se finaliza el proceso con PID = %d",proceso_en_exec->un_pcb->pid);
+    log_warning(un_logger,"Se finaliza el proceso con PID = %u",proceso_en_exec->un_pcb->pid);
     pthread_mutex_unlock(&mutex_log);
 
+    responder_fin_proceso(proceso_en_exec->comunicacion_proceso->socket_proceso);
     transicionar_proceso_a_exit();
-
     proceso_en_exec = NULL;
-    responder_fin_proceso(proceso_en_exec->socket_proceso);
 
     sem_post(&grado_multiprog_lo_permite);
 }
 
 void transicionar_proceso_a_exit()
 {
-    list_add(procesos_en_exit,proceso_en_exec);
+    // No se si va a ser necesaria la lista!
+    //list_add(procesos_en_exit,proceso_en_exec);
+
+    queue_destroy(proceso_en_exec->un_pcb->consola->instrucciones);
+    free(proceso_en_exec->un_pcb->consola);
+    free(proceso_en_exec->un_pcb);
+    pthread_mutex_destroy(&proceso_en_exec->comunicacion_proceso->mutex_socket_proceso);
+    free(proceso_en_exec->comunicacion_proceso->hilo_com_proceso);
+    free(proceso_en_exec->comunicacion_proceso);
+
+    free(proceso_en_exec);
 }
+
+/////////////////////////////////////////////////

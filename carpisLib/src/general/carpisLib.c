@@ -38,12 +38,41 @@ t_consola *recibir_datos_consola(int socket) {
     return consola;
 }
 
+bool recibir_interrupcion(int socket)
+{
+    bool valor_interrupcion = false;
+    int size;
+    void *buffer = recibir_buffer(&size,socket);
+
+    memcpy(&(valor_interrupcion),buffer,size);
+    free(buffer);
+    return valor_interrupcion;
+}
+
+void enviar_interrupcion(int socket)
+{
+    bool valor_interrupcion = true;
+
+    t_operacion *operacion = crear_operacion(INTERRUPCION);
+    setear_operacion(operacion, &valor_interrupcion);
+    enviar_operacion(operacion, socket);
+    eliminar_operacion(operacion);
+}
+
+void enviar_proceso_pcb(int socket, t_proceso_pcb *un_proceso_pcb, codigo_operacion un_codigo_operacion)
+{
+    t_operacion *operacion = crear_operacion(un_codigo_operacion);
+    setear_operacion(operacion, un_proceso_pcb);
+    enviar_operacion(operacion, socket);
+    eliminar_operacion(operacion);
+}
+
 void serializar_pcb(t_pcb *pcb, t_operacion *operacion) {
     int desplazamiento = 0;
-    int size_consola = 0, size_tabla = 0;
+    int size_consola = 0;
     void *consola_serializada = serializar_consola(pcb->consola, &size_consola);
-    void *tabla_serializada = serializar_tabla1n(pcb->tabla_1n,&size_tabla);
-    operacion->buffer->size =  size_consola + size_tabla +sizeof(int)*3;
+    //void *tabla_serializada = serializar_tabla1n(pcb->tabla_1n,&size_tabla);
+    operacion->buffer->size =  size_consola +sizeof(int)*3 + sizeof(int32_t);
     void *stream = malloc(operacion->buffer->size);
 
     memcpy(stream + desplazamiento, &(pcb->pid), sizeof(int));
@@ -56,16 +85,22 @@ void serializar_pcb(t_pcb *pcb, t_operacion *operacion) {
     desplazamiento+= sizeof(int);
     memcpy(stream + desplazamiento, consola_serializada, size_consola);
     desplazamiento+= size_consola;
-    memcpy(stream + desplazamiento, &size_tabla, sizeof(int));
-    desplazamiento+= sizeof(int);
-    memcpy(stream + desplazamiento, tabla_serializada, size_tabla);
+    memcpy(stream + desplazamiento, &(pcb->id_tabla_1n), sizeof(int32_t));
     operacion->buffer->stream = stream;
+}
+
+void serializar_proceso_pcb(t_proceso_pcb *proceso_bloqueo, t_operacion *operacion)
+{
+    serializar_pcb(proceso_bloqueo->pcb,operacion);
+    operacion->buffer->size += sizeof(int);
+    operacion->buffer->stream = realloc(operacion->buffer->stream,operacion->buffer->size);
+    memcpy(operacion->buffer->stream,&(proceso_bloqueo->tiempo_bloqueo),sizeof(int));  
 }
 
 void *serializar_consola(t_consola *consola, int *size) {
     int size_cola = 0, desplazamiento = 0;
     void *instrucciones_serializadas = serializar_instrucciones(consola->instrucciones, &size_cola);
-    *size = size_cola + sizeof(int);
+    *size = size_cola + 2 * sizeof(int);
     void *stream = malloc(*size);
     memcpy(stream, &(consola->tamanio),  sizeof(int));
     desplazamiento+=sizeof(int);
@@ -93,7 +128,7 @@ void *serializar_instrucciones(t_queue *instrucciones, int *size_cola) {
     //*size_cola = desplazamiento;
     return stream;
 }
-
+/*
 void *serializar_tabla1n(t_dictionary *tabla1n, int *size) {
     *size = dictionary_size(tabla1n) * sizeof(int); //Ej: 2 registros * Tamanio int
     int desplazamiento = 0;
@@ -111,14 +146,13 @@ void *serializar_tabla1n(t_dictionary *tabla1n, int *size) {
     }
     //*size = desplazamiento;
     return stream;
-}
+}*/
 
-t_pcb *deserializar_pcb(int socket) {
+t_pcb *recibir_pcb(int socket, void * buffer) {
     //Size aca no me sirve pero para que no rompa lo dejo
     int size;
 
     int desplazamiento = 0;
-    void * buffer;
     t_pcb *pcb = malloc(sizeof(t_pcb));
 
     buffer = recibir_buffer(&size, socket);
@@ -133,9 +167,28 @@ t_pcb *deserializar_pcb(int socket) {
     desplazamiento+=sizeof(int); //Size consola
     pcb->consola = deserializar_consola(buffer+desplazamiento);
     desplazamiento+=size;
-    memcpy(&size, buffer+desplazamiento, sizeof(int));
-    desplazamiento+=sizeof(int); //Size tabla
-    pcb->tabla_1n = deserializar_tabla1n(buffer + desplazamiento, size);
+    memcpy(&(pcb->id_tabla_1n), buffer+desplazamiento, sizeof(int32_t));;
+    return pcb;
+}
+
+t_proceso_pcb *deserializar_proceso_pcb(int socket)
+{
+    int size;
+    void *buffer = recibir_buffer(&size,socket);
+
+    t_proceso_pcb *un_proceso_pcb = malloc(sizeof(un_proceso_pcb));
+    un_proceso_pcb->pcb = recibir_pcb(socket,buffer);
+
+    memcpy(&(un_proceso_pcb->tiempo_bloqueo), buffer, sizeof(int));
+    free(buffer);
+    return un_proceso_pcb;
+}
+
+t_pcb *deserializar_pcb(int socket) {
+    //Size aca no me sirve pero para que no rompa lo dejo
+    int size;
+    void * buffer = recibir_buffer(&size, socket);
+    t_pcb *pcb = recibir_pcb(socket,buffer);
     free(buffer);
     return pcb;
 }
@@ -169,7 +222,7 @@ t_queue *deserializar_instrucciones(void *buffer, int size_cola) {
     }
     return instrucciones;
 }
-
+/*
 t_dictionary *deserializar_tabla1n(void *buffer, int size_tabla) {
     t_dictionary *tabla = dictionary_create();
     int desplazamiento = 0;
@@ -179,4 +232,4 @@ t_dictionary *deserializar_tabla1n(void *buffer, int size_tabla) {
         desplazamiento+=sizeof(int);
     }
     return tabla;
-}
+}*/

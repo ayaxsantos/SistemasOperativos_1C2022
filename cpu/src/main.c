@@ -4,7 +4,7 @@ int main() {
 
     arrancar_logger();
     leer_configuracion();
-    //iniciar_semaforos();
+    iniciar_semaforos();
     iniciar();
     return EXIT_SUCCESS;
 
@@ -28,16 +28,17 @@ void arrancar_logger() {
 void leer_configuracion() {   
     t_config *un_config;
 
-    un_config = config_create("./memoria.config");
+    un_config = config_create("./cpu.config");
     
     config_cpu.ip_memoria = strdup(config_get_string_value(un_config,"IP_MEMORIA"));
     config_cpu.puerto_memoria = strdup(config_get_string_value(un_config,"PUERTO_MEMORIA"));
-    config_cpu.cantidad_entradas_tlb = config_get_int_value(un_config,"CANTIDAD_ENTRADAS_TLB");
-    config_cpu.algoritmo_reemplazo_tlb = strdup(config_get_string_value(un_config,"ALGORITMO_REEMPLAZO_TLB"));
+    config_cpu.cantidad_entradas_tlb = config_get_int_value(un_config,"ENTRADAS_TLB");
+    config_cpu.algoritmo_reemplazo_tlb = strdup(config_get_string_value(un_config,"REEMPLAZO_TLB"));
     config_cpu.retardo_noop = config_get_int_value(un_config,"RETARDO_NOOP");
     config_cpu.puerto_escucha_dispatch = strdup(config_get_string_value(un_config,"PUERTO_ESCUCHA_DISPATCH"));
     config_cpu.puerto_escucha_interrupt = strdup(config_get_string_value(un_config,"PUERTO_ESCUCHA_INTERRUPT"));
     config_cpu.log_habilitado = config_get_int_value(un_config,"LOG_HABILITADO");
+    config_cpu.ip_cpu = strdup(config_get_string_value(un_config,"IP_CPU"));
     habilitar_log(logger_cpu, config_cpu.log_habilitado);
     
     config_destroy(un_config);
@@ -49,7 +50,7 @@ void conectar_a_memoria_y_recibir_config() {
     socket_memoria = crear_conexion(config_cpu.ip_memoria,config_cpu.puerto_memoria);
     enviar_handshake(&socket_memoria, CPU);
     int resultado = esperar_handshake(&socket_memoria, obtener_configuracion);
-    if(!resultado) {
+    if(resultado == -1) {
         log_error(logger_cpu,"No se pudo conectar con el modulo MEMORIA");
         exit(EXIT_FAILURE);
     }
@@ -71,7 +72,8 @@ void obtener_configuracion(int *socket, modulo modulo) {
 }
 
 void iniciar_semaforos() {
-
+	sem_init(&sem_execute, 0, 1);  // Preguntar si el 2do parametro está bien(en ambos)
+	sem_init(&sem_interrupt, 0, 0);
 }
 
 void setear_algoritmo_reemplazo_tlb() {
@@ -84,6 +86,12 @@ void setear_algoritmo_reemplazo_tlb() {
     else {
         log_error(logger_cpu,"No se pudieron setear las estructuras de CPU. Error en el archivo config.");
     } 
+}
+
+void liberar_semaforos()
+{
+    sem_destroy(&sem_execute);
+    sem_destroy(&sem_interrupt);
 }
 
 void liberar_configuracion_y_log() {

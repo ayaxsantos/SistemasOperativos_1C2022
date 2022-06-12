@@ -2,7 +2,7 @@ include settings.mk
 
 ################################################################################
 
-filename = kernel.out
+filename = cpu.out
 
 define compile_bin
 gcc $(CFLAGS) -o "$@" $^ $(IDIRS:%=-I%) $(LIBDIRS:%=-L%) $(LIBS:%=-l%)
@@ -52,7 +52,7 @@ watch:
 	done
 
 $(BIN): $(OBJS) | $(dir $(BIN))
-	$(call compile_bin)
+	$(call compile_bin) -lm
 
 obj/%.o: src/%.c $(SRCS_H) $(DEPS) | $(dir $(OBJS))
 	$(call compile_objs)
