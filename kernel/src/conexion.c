@@ -9,7 +9,7 @@ void conexion(void)
 
     int socket_proceso = 0;
 
-    //conectar_con_cpu(socket_kernel_serv);
+    conectar_con_cpu(socket_kernel_serv);
 
     // Aca tendriamos que conectarnos con MEMORIA y CPU
     // En caso de no poder realizar la conexion, error!! Kernel Panic (?
@@ -114,7 +114,7 @@ t_pcb *inicializar_pcb(t_com_proceso *comunicacion_proceso)
     un_pcb->un_estado = NEW;
     un_pcb->consola = una_consola;
 
-    un_pcb->tabla_1n = NULL;
+    un_pcb->id_tabla_1n = UNDEFINED;
 
     //probar_comunicacion_instrucciones(un_pcb);
     return un_pcb;

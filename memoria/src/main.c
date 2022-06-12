@@ -59,6 +59,39 @@ void setear_estructuras_de_memoria() {
     };
 }
 
+void esperar_handshake_cpu(int server) {
+    log_info(logger_memoria,"Iniciando handshake con modulo CPU ... ");
+    socket_cpu = esperar_cliente(server);
+    int resultado = esperar_handshake(&socket_cpu, validar_modulo);
+    if(resultado == -1) {
+        log_error(logger_memoria,"No se pudo conectar con el modulo MEMORIA");
+        exit(EXIT_FAILURE);
+    }
+    log_info(logger_memoria,"MEMORIA Conectada");
+}
+
+void validar_modulo(int *socket, modulo modulo_solicitante) {
+    if(modulo_solicitante == CPU) {
+        void *buffer = malloc(sizeof(int)*4);
+        codigo_operacion handshake = HANDSHAKE;
+        int modulo_actual = MEMORIA;
+        int desplazamiento = 0;
+        memcpy(buffer, &handshake, sizeof(int));
+        desplazamiento += sizeof(int);
+        memcpy(buffer + desplazamiento, &modulo_actual, sizeof(int));
+        desplazamiento += sizeof(int);
+        memcpy(buffer + desplazamiento, &(config_memoria.entradas_por_tabla), sizeof(int));
+        desplazamiento += sizeof(int);
+        memcpy(buffer + desplazamiento, &(config_memoria.tamanio_pagina), sizeof(int));
+
+        send(*socket, buffer, sizeof(int)*4, 0);
+        log_info(logger_memoria,"CPU Conectada");
+        free(buffer);
+        return;
+    }
+    log_error(logger_memoria,"Error de handshake con CPU");
+}
+
 void iniciar_particionamiento_en_frames() {
     int i, desplazamiento = 0;
     memoria_principal->frames = list_create();

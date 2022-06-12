@@ -45,7 +45,7 @@ t_algoritmo tipo_algoritmo_tlb;
 t_config_cpu config_cpu;
 t_log *logger_cpu;
 
-int socket_memoria, cpu_dispatch, cpu_interrupt, socket_kernel_dispatch;
+int socket_memoria, cpu_dispatch, cpu_interrupt, socket_kernel_dispatch, socket_kernel_interrupt;
 sem_t sem_interrupt, sem_execute;
 
 t_pcb *pcb;

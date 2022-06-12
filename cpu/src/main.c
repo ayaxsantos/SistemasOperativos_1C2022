@@ -59,14 +59,14 @@ void conectar_a_memoria_y_recibir_config() {
 
 void obtener_configuracion(int *socket, modulo modulo) {
     if(modulo == MEMORIA) {
-        int size;
         int desplazamiento = 0;
-        void * buffer;
-        buffer = recibir_buffer(&size, *socket);
+        void * buffer = malloc(sizeof(int) * 2);
+        recv(*socket, buffer, sizeof(int) * 2, MSG_WAITALL);
 
-        memcpy(&(config_cpu.entradas_por_tabla), buffer, sizeof(int));
+        memcpy(&config_cpu.entradas_por_tabla , buffer, sizeof(int));
         desplazamiento+=sizeof(int);
-        memcpy(&(config_cpu.tamanio_pagina), buffer+desplazamiento, sizeof(int));
+        memcpy(&config_cpu.tamanio_pagina, buffer+desplazamiento, sizeof(int));
+
         free(buffer);
     }
 }

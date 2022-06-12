@@ -2,9 +2,10 @@
 
 void iniciar_memoria() {
     tablas_primer_nivel = list_create();
-    // int server = iniciar_servidor(config_memoria.puerto_escucha);
+    int server = iniciar_servidor("127.0.0.1",config_memoria.puerto_escucha);
     setear_estructuras_de_memoria();
-
+    //esperar_handshake_kernel(server); TODO: Los chicos de kernel
+    esperar_handshake_cpu(server);
 	/*log_info(logger_memoria,"Memoria a la espera de conexiones ...");
 
 	int socket_cliente;

@@ -70,12 +70,6 @@ typedef struct t_tabla_pagina
 
 typedef enum
 {   
-    MEM_READ,
-    MEM_WRITE
-} accion;
-
-typedef enum
-{   
     CLOCK,
     CLOCKM
 } algoritmo;
@@ -86,6 +80,8 @@ t_config_memoria config_memoria;
 t_log *logger_memoria;
 algoritmo tipo_algoritmo;
 int cantidad_maxima_frames;
+
+int socket_cpu, socket_kernel;
 
 /************ESTRUCTURAS DE MEMORIA*******/
 
@@ -105,5 +101,11 @@ void finalizar_memoria();
 void eliminar_frames(void *arg);
 void liberar_memoria();
 void liberar_configuracion_y_log();
+
+void esperar_handshake_cpu(int server);
+void validar_modulo(int *socket, modulo modulo);
+
+#include "memoria.h"
+#include "swap.h"
 
 #endif /* MAIN_H_INCLUDED */

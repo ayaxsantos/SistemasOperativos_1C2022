@@ -13,6 +13,7 @@ void iniciar() {
 void esperar_a_kernel() {
     log_info(logger_cpu,"CPU a la espera de Kernel");
     socket_kernel_dispatch = esperar_cliente(cpu_dispatch);
+    socket_kernel_interrupt = esperar_cliente(cpu_interrupt);
     esperar_handshake(&socket_kernel_dispatch, enviar_confirmacion);
     pthread_t hilo_dispatch, hilo_interrupt;
     pthread_create(&hilo_dispatch, NULL, &ejecutar_pcb, NULL);
@@ -73,12 +74,10 @@ void ciclo_de_instruccion() {
 void *ejecutar_interrupcion(void *arg) {
 	while(true) {
 		sem_wait(&sem_interrupt);
-		int socket_interrupt = esperar_cliente(cpu_interrupt);
-
 		int operacion = recibir_operacion(cpu_dispatch);
 
 		if(operacion == INTERRUPCION) {
-			bool hay_interrupcion =  recibir_interrupcion(socket_interrupt);
+			bool hay_interrupcion =  recibir_interrupcion(socket_kernel_interrupt);
 
 			if(hay_interrupcion) {
 				t_proceso_pcb *proceso_a_enviar = malloc(sizeof(t_proceso_pcb));
