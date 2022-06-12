@@ -72,8 +72,10 @@ int iniciar_proceso_en_memoria(int tamanio){
 	return tabla_proceso->id_tabla;
 }
 
-int obtener_tabla_2n(int entrada_tabla_1n){
-
+int primera_solicitud_mmu(int id_tabla_1n, int entrada_tabla_1n){
+	t_tabla_pagina *tabla_1n = obtener_tabla_1n_por_id(id_tabla_1n);
+	t_tabla_pagina *tabla_2n = dictionary_get(tabla_1n->tabla, string_itoa(entrada_tabla_1n));
+	return tabla_2n->id_tabla;
 }
 
 bool buscar_por_id(void *una_tabla, unsigned int id) {
@@ -81,7 +83,7 @@ bool buscar_por_id(void *una_tabla, unsigned int id) {
     return tabla_proceso->id_tabla == id;
 }
 
-t_tabla_pagina* obtener_tabla_por_id(unsigned int id_buscado){
+t_tabla_pagina* obtener_tabla_1n_por_id(unsigned int id_buscado){
     //pthread_mutex_lock(&mutex_lista_tablas_paginas);
     bool _buscar_por_id(void *una_tabla) {
         return buscar_por_id(buscar_por_id, id);
