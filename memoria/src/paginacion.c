@@ -85,6 +85,43 @@ int segunda_solicitud_mmu(int id_1n, int id_2n, int nro_pag_2n){
 	return pagina->nro_frame;
 }
 
+void tercera_solicitud_mmu(int nro_frame, int desplazamiento, int accion, void* dato){
+	// TODO Chequear validez (que el frame esté en RAM)
+	t_frame *frame = list_get(memoria_principal->frames, nro_frame);
+	char * dir_fisica_exacta = string_atoi(frame->base +desplazamiento);
+	int respuesta = -1;
+
+	switch (accion)
+	{
+		case READ_ACCION:
+			respuesta = leer_dato(dir_fisica_exacta);
+			break;
+		case WRITE_ACCION:
+			respuesta = escribir_dato(dir_fisica_exacta, dato);
+			break;
+		default:
+			log_error(logger_memoria, "La acción que se intenta ejecutar es inválida.");
+	}
+}
+
+int leer_dato(char *dir_fisica){
+    int dato;
+
+    memcpy(dato, dir_fisica, sizeof(int));
+
+    return dato;
+}
+
+int escribir_dato(char *dir_fisica, int dato){
+	int status = -1;
+
+	memcpy(dir_fisica, dato, sizeof(int));
+	status = 200; // ver el tema status
+
+	return status;
+}
+
+/* ---------- Auxiliares ---------- */
 bool buscar_por_id(void *una_tabla, unsigned int id) {
     t_tabla_pagina *tabla_proceso = (t_tabla_pagina *) una_tabla;
     return tabla_proceso->id_tabla == id;
@@ -99,10 +136,6 @@ t_tabla_pagina* obtener_tabla_1n_por_id(unsigned int id_buscado){
     //pthread_mutex_unlock(&mutex_lista_tablas_paginas);
     if(tabla_pagina == NULL) { return false; }		// ¿Se encontró una tabla asociada al ID? TODO: Debugear
     return tabla_pagina;
-}
-
-t_frame* get_frame(uint32_t dir_logica) {
-	/*  */
 }
 
 void modificar_bit_de_presencia_pagina(t_frame *frame, int valor){
