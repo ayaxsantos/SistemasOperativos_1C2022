@@ -23,7 +23,14 @@ void* planificador_largo_plazo(void)
         log_info(un_logger,"Se pasa proceso a READY, grado multiprogramacion: %d",valor_semaforo_multiprog);
         pthread_mutex_unlock(&mutex_log);
 
-        un_proceso = obtener_proceso_en_new();
+        if(false/*hay_susp_bloq*/)
+        {
+            //Paso a ready el susp bloq que haya primero en su lista
+        }
+        else
+        {
+            un_proceso = obtener_proceso_en_new();
+        }
         transicionar_proceso_a_ready(un_proceso);
     }
 }
@@ -43,8 +50,8 @@ t_proceso *obtener_proceso_en_new()
 
 void transicionar_proceso_a_ready(t_proceso *un_proceso)
 {
-    //Agrego que se le coloque una estimacion inicial al proceso -> Carlos
-    un_proceso->un_pcb->una_estimacion = una_config_kernel.estimacion_inicial;
+
+
     pthread_mutex_lock(&mutex_procesos_en_ready);
     list_add(procesos_en_ready,(void*) un_proceso);
     pthread_mutex_unlock(&mutex_procesos_en_ready);

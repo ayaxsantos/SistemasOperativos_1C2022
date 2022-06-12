@@ -174,7 +174,7 @@ void pasar_proceso_a_bloqueado()
     proceso_a_bloquear->un_pcb->un_estado = BLOCKED;
 
     pthread_mutex_lock(&mutex_procesos_en_bloq);
-    queue_push(procesos_en_bloq,(void*) proceso_a_bloquear);
+    list_add(procesos_en_bloq,(void*) proceso_a_bloquear);
     pthread_mutex_unlock(&mutex_procesos_en_bloq);
     sem_post(&hay_procesos_en_blocked);
 }

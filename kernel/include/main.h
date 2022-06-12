@@ -39,6 +39,8 @@ typedef struct proceso
     double tiempo_ejecutando_estimacion;
     t_pcb *un_pcb;
     int tiempo_a_bloquear;
+    double tiempo_bloqueado;
+    pthread_mutex_t mutex_proceso;
 } t_proceso;
 
 //////////////////////////////////////////
@@ -52,9 +54,7 @@ t_config_kernel una_config_kernel;
 
 t_queue *procesos_en_new;
 t_list *procesos_en_ready;
-t_queue *procesos_en_bloq;
-t_queue *procesos_en_bloq_susp;
-t_queue *procesos_en_ready_susp;
+t_list *procesos_en_bloq;
 t_list *procesos_en_exit;
 
 t_proceso *proceso_en_exec;
@@ -65,7 +65,6 @@ pthread_mutex_t mutex_log;
 pthread_mutex_t mutex_procesos_en_new;
 pthread_mutex_t mutex_procesos_en_ready;
 pthread_mutex_t mutex_procesos_en_bloq;
-pthread_mutex_t mutex_procesos_en_bloq_susp;
 pthread_mutex_t mutex_socket_dispatch;
 pthread_mutex_t mutex_contador_pid;
 
