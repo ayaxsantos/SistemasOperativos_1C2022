@@ -12,9 +12,40 @@ void *obtener_dato_memoria(dir_logica dir, t_pcb *pcb) {
      * 3- Finalmente acceder a la porción de memoria correspondiente (la dirección física).
      */
     int num_pagina = numero_pagina(dir);
+    if(num_pagina > config_cpu.tamanio_pagina) {
+       return NULL;
+    }
     int entrada_tabla_1n = entrada_tabla_1er_nivel(num_pagina);
     int id_tabla_2n = solicitar_registro_1nivel(pcb->id_tabla_1n, entrada_tabla_1n);
     t_columna_pagina *pagina = solicitar_registro_2nivel(id_tabla_2n, entrada_tabla_2do_nivel(num_pagina));
+    int resultado = obtener_nro_frame_de_tlb(num_pagina, pcb->id_tabla_1n);
+    if(resultado != -1) {
+        //Obtener el frame de memoria?
+        if(accion == WRITE)
+            //frame->modificado = accion;
+        //frame->usado = true;
+        //tabla_carpincho->cantidad_hit++;
+        //actualizar_tiempo_usado(frame);
+        //return frame->base + desplazamiento;
+    }
+    else {
+        if(pagina->presencia) {
+            //frame = list_get(memoria_principal->frames, pagina->nro_frame);
+            //Obtener el frame de memoria?
+            if(accion == WRITE)
+                //frame->modificado = accion;
+            //frame->usado = true;
+            //actualizar_tiempo_usado(frame);
+            //monitorear_tabla_carpincho(tabla_carpincho);
+            //actualizar_tlb(pagina->nro_frame, dir_nro_pagina, tabla_carpincho->pid);
+            //return frame->base + desplazamiento;
+        }
+        frame = realizar_algoritmo(tabla_carpincho, pagina, accion, dir_nro_pagina);
+        monitorear_tabla_carpincho(tabla_carpincho);
+        actualizar_tlb(frame->nro_frame, dir_nro_pagina, tabla_carpincho->pid);
+        free(nro_pagina);
+        return frame->base + desplazamiento;
+    }
     return pagina;
 }
 /*

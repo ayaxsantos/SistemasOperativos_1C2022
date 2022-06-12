@@ -9,13 +9,6 @@
 #include <semaphore.h>
 
 typedef int32_t dir_logica;
-
-typedef enum
-{
-    READ_ACCION,
-    WRITE_ACCION
-}t_accion;
-
 /**
  * @DESC Quizas este en carpisLib
  *
@@ -65,6 +58,7 @@ void liberar_configuracion_y_log();
 
 #include "mmu.h"
 #include "cpu.h"
+#include "tlb.h"
 #include "conector_memoria.h"
 
 #endif
