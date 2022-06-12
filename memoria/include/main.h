@@ -61,6 +61,7 @@ typedef struct t_col_pagina
 
 typedef struct t_tabla_pagina
 {
+	int id_tabla;
     int tamanio_proceso;
     t_dictionary *tabla;
     int puntero;
@@ -80,6 +81,7 @@ t_config_memoria config_memoria;
 t_log *logger_memoria;
 algoritmo tipo_algoritmo;
 int cantidad_maxima_frames;
+int cantidad_tablas_1n;
 
 int socket_cpu, socket_kernel;
 

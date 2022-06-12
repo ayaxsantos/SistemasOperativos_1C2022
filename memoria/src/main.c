@@ -1,6 +1,7 @@
 #include "../include/main.h"
 
 int main() {
+	cantidad_tablas_1n = 0;
     arrancar_logger();
     leer_configuracion();
     habilitar_log(logger_memoria, 1);

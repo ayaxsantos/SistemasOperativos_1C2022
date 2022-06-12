@@ -1,7 +1,12 @@
 #include "../include/paginacion.h"
 
+/* ---------- Inicialización ----------*/
+
 t_tabla_pagina *crear_tabla_principal(int tamanio){
 	t_tabla_pagina *tabla_principal = inicializar_tabla(tamanio);
+	tabla_principal = cantidad_tablas_1n;
+	cantidad_tablas_1n++;
+
 	crear_tablas_segundo_nivel(tabla_principal);
 
 	return tabla_principal;
@@ -19,6 +24,7 @@ void crear_tablas_segundo_nivel(t_tabla_pagina *tabla_principal){
 
 t_tabla_pagina *inicializar_tabla(int tamanio){
 	t_tabla_pagina* nueva_tabla = malloc(sizeof(t_tabla_pagina));
+	nueva_tabla->id_tabla = 0;
 	nueva_tabla->tabla = dictionary_create();
 	nueva_tabla->tamanio_proceso = tamanio;
 	nueva_tabla->puntero = 0;
@@ -30,6 +36,7 @@ t_tabla_pagina *inicializar_tabla(int tamanio){
 
 int agregar_pag_a_tabla_1n(t_tabla_pagina *tabla_proceso, char *nro_pag){
 	t_tabla_pagina *tabla_2n_aux = inicializar_tabla(tabla_proceso->tamanio_proceso);
+	tabla_2n_aux->id_tabla = nro_pag;
 	int i, resultado;
 
     for (i=0; i < config_memoria.entradas_por_tabla; i++){
@@ -58,9 +65,35 @@ int agregar_pag_a_tabla_2n(t_tabla_pagina *tabla_2n, char *nro_pag){
     return 0;
 }
 
-int get_frame(uint32_t dir_logica) {
-	// TODO: Chequear qué dirección lógica pasa CPU
-	return 0;
+/* ---------- Utilización ---------- */
+
+int iniciar_proceso_en_memoria(int tamanio){
+	t_tabla_pagina * tabla_proceso = crear_tabla_principal(tamanio);
+	return tabla_proceso->id_tabla;
+}
+
+int obtener_tabla_2n(int entrada_tabla_1n){
+
+}
+
+bool buscar_por_id(void *una_tabla, unsigned int id) {
+    t_tabla_pagina *tabla_proceso = (t_tabla_pagina *) una_tabla;
+    return tabla_proceso->id_tabla == id;
+}
+
+t_tabla_pagina* obtener_tabla_por_id(unsigned int id_buscado){
+    //pthread_mutex_lock(&mutex_lista_tablas_paginas);
+    bool _buscar_por_id(void *una_tabla) {
+        return buscar_por_id(buscar_por_id, id);
+    }
+    t_tabla_pagina *tabla_pagina = (t_tabla_pagina *)list_find(tablas_primer_nivel, _buscar_por_id);
+    //pthread_mutex_unlock(&mutex_lista_tablas_paginas);
+    if(tabla_pagina == NULL) { return false; }		// ¿Se encontró una tabla asociada al ID? TODO: Debugear
+    return tabla_pagina;
+}
+
+t_frame* get_frame(uint32_t dir_logica) {
+	/*  */
 }
 
 void modificar_bit_de_presencia_pagina(t_frame *frame, int valor){
@@ -68,6 +101,8 @@ void modificar_bit_de_presencia_pagina(t_frame *frame, int valor){
     t_col_pagina *registro = (t_col_pagina *) dictionary_get(tabla_paginas->tabla, string_itoa(frame->nro_pagina_asignada));
     registro->presencia = valor;
 }
+
+/* ---------- Cierre ----------*/
 
 void liberar_todas_las_paginas_del_proceso(t_tabla_pagina* tabla_proceso){
     char *nro_pagina;
