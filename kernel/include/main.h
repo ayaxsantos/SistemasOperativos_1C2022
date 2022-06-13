@@ -81,7 +81,7 @@ pthread_t *hilo_largo_plazo;
 pthread_t *hilo_mediano_plazo;
 pthread_t *hilo_gestor_io;
 
-int contador_pid;
+unsigned int contador_pid;
 
 ///////////////////////////////////////////
 

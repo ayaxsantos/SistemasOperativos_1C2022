@@ -38,6 +38,7 @@ typedef struct
 } t_config_cpu;
 
 /////////////////////////////////////////////////////////////
+//t_proceso_pcb *proceso_pcb;
 t_pcb *pcb;
 
 t_algoritmo tipo_algoritmo_tlb;

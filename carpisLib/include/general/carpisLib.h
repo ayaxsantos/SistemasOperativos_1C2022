@@ -16,7 +16,6 @@
 
 #define ERROR -1
 #define UNDEFINED -100
-#define DATO (>0)
 
 /*** ENUMS ***/
 typedef enum
@@ -117,7 +116,7 @@ typedef struct t_tercera_solictud
     unsigned int desplazamiento;
     unsigned int nro_frame;
     accion accion_solicitada;
-    unsigned int dato; //Suponemos un entero no signado de 4bytes
+    uint32_t dato; //Suponemos un entero no signado de 4bytes
 } __attribute__((packed)) t_tercera_solictud;
 
 typedef struct proceso_pcb
@@ -152,14 +151,13 @@ void enviar_interrupcion(int socket);
 bool recibir_interrupcion(int socket);
 
 void *serializar_consola(t_consola *consola, int *size);
-t_pcb *deserializar_pcb_enviar(int socket, void * buffer);
-void serializar_pcb(t_pcb *pcb, t_operacion *operacion);
+void *serializar_pcb(t_pcb *pcb, int *size_pcb);
 void *serializar_instrucciones(t_queue *instrucciones, int *size_cola);
 void *serializar_tabla1n(t_dictionary *tabla1n, int *size);
 void enviar_proceso_pcb(int socket, t_proceso_pcb *un_proceso_pcb, codigo_operacion un_codigo_operacion);
 void serializar_proceso_pcb(t_proceso_pcb *proceso_bloqueo, t_operacion *operacion);
 
-t_pcb *deserializar_pcb(int socket);
+t_pcb *deserializar_pcb(void *buffer);
 t_consola *deserializar_consola(void *buffer);
 t_queue *deserializar_instrucciones(void *buffer, int size_cola);
 t_dictionary *deserializar_tabla1n(void *buffer, int size_tabla);
