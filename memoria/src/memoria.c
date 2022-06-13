@@ -55,11 +55,3 @@ void gestionar_lectura(int socket_cliente){
 void gestionar_escritura(int socket_cliente){
 	// TODO Completar
 }
-
-void leer_dato() {
-	// TODO Completar
-}
-
-void escribir_dato() {
-	// TODO Completar
-}
