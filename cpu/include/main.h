@@ -43,13 +43,16 @@ t_algoritmo tipo_algoritmo_tlb;
 t_config_cpu config_cpu;
 t_log *logger_cpu;
 
-int socket_memoria, cpu_dispatch, cpu_interrupt, socket_kernel_dispatch;
+int socket_memoria, cpu_dispatch, cpu_interrupt, socket_kernel_dispatch, socket_kernel_interrupt;
 sem_t sem_interrupt, sem_execute;
+
+t_pcb *pcb;
 ////////////////////////////////////////////////////////////
 void leer_configuracion();
 void arrancar_logger();
 void conectar_a_memoria_y_recibir_config();
 void obtener_configuracion(int *socket, modulo modulo);
+void iniciar_semaforos();
 
 void setear_algoritmo_reemplazo_tlb();
 
@@ -58,7 +61,11 @@ void liberar_configuracion_y_log();
 
 #include "mmu.h"
 #include "cpu.h"
+<<<<<<< HEAD
 #include "tlb.h"
 #include "conector_memoria.h"
+=======
+//#include "conector_memoria.h"
+>>>>>>> 1-estructura-memoria
 
 #endif

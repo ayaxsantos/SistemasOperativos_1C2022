@@ -1,5 +1,5 @@
 #include "../include/conector_memoria.h"
-
+/*
 int solicitar_registro_1nivel(int id_tabla_1n, int entrada_tabla_1n) {
     t_request_tabla *request = malloc(sizeof(t_request_tabla));
     request->id_tabla_1n = id_tabla_1n;
@@ -50,3 +50,4 @@ t_columna_pagina *recibir_registro_2nivel(int socket) {
     void *buffer = recibir_buffer(&size, socket);
     return (t_columna_pagina *)buffer;
 }
+*/
