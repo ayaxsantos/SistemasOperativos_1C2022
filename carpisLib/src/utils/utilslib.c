@@ -51,11 +51,20 @@ void setear_operacion(t_operacion *operacion, void *valor) {
 			operacion->buffer->size = size;
             operacion->buffer->stream = stream;
 			break;
-      /*  case REQUEST_TABLA:
-            size = sizeof(int) * 3;
+        case PRIMERA_SOLICITUD:
+        case SEGUNDA_SOLICITUD:
+            size = sizeof(int32_t) * 3 + sizeof(unsigned int);
+            stream = malloc(size);
+            memcpy(stream, valor, size);
             operacion->buffer->size = size;
-            operacion->buffer->stream = valor;
-            break; */
+            operacion->buffer->stream = stream;
+            break;
+        case TERCERA_SOLICITUD:
+            size = sizeof(uint32_t) + sizeof(unsigned int)*2 + sizeof(int)*2;
+            stream = malloc(size);
+            memcpy(stream, valor, size);
+            operacion->buffer->size = size;
+            operacion->buffer->stream = stream;
     }
     return;
 }

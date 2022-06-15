@@ -128,25 +128,6 @@ void *serializar_instrucciones(t_queue *instrucciones, int *size_cola) {
     //*size_cola = desplazamiento;
     return stream;
 }
-/*
-void *serializar_tabla1n(t_dictionary *tabla1n, int *size) {
-    *size = dictionary_size(tabla1n) * sizeof(int); //Ej: 2 registros * Tamanio int
-    int desplazamiento = 0;
-    void *stream = malloc(*size);
-    int nro_tabla = 0;
-    int i = 0;
-    char *index;
-    while (!dictionary_is_empty(tabla1n)) {
-        index = string_itoa(i);
-        nro_tabla = *((int *) dictionary_get(tabla1n,index));
-        memcpy(stream + desplazamiento, &nro_tabla, sizeof(int));
-        desplazamiento+= sizeof(int);
-        free(index);
-        i++;
-    }
-    //*size = desplazamiento;
-    return stream;
-}*/
 
 t_pcb *recibir_pcb(int socket, void * buffer) {
     //Size aca no me sirve pero para que no rompa lo dejo
@@ -222,6 +203,26 @@ t_queue *deserializar_instrucciones(void *buffer, int size_cola) {
     }
     return instrucciones;
 }
+
+/*** CPU + MEMORIA ***/
+t_solicitud *recibir_solicitud(int socket) {
+    int size;
+    void *buffer = recibir_buffer(&size, socket);
+    t_solicitud *solicitud = malloc(sizeof(t_solicitud));
+    memcpy(solicitud, buffer, size);
+    free(buffer);
+    return solicitud;
+}
+
+t_tercera_solictud *recibir_tercera_solicitud(int socket) {
+    int size;
+    void *buffer = recibir_buffer(&size, socket);
+    t_tercera_solictud *solicitud = malloc(sizeof(t_tercera_solictud));
+    memcpy(solicitud, buffer, size);
+    free(buffer);
+    return solicitud;
+}
+
 /*
 t_dictionary *deserializar_tabla1n(void *buffer, int size_tabla) {
     t_dictionary *tabla = dictionary_create();
@@ -232,4 +233,23 @@ t_dictionary *deserializar_tabla1n(void *buffer, int size_tabla) {
         desplazamiento+=sizeof(int);
     }
     return tabla;
+}*/
+/*
+void *serializar_tabla1n(t_dictionary *tabla1n, int *size) {
+    *size = dictionary_size(tabla1n) * sizeof(int); //Ej: 2 registros * Tamanio int
+    int desplazamiento = 0;
+    void *stream = malloc(*size);
+    int nro_tabla = 0;
+    int i = 0;
+    char *index;
+    while (!dictionary_is_empty(tabla1n)) {
+        index = string_itoa(i);
+        nro_tabla = *((int *) dictionary_get(tabla1n,index));
+        memcpy(stream + desplazamiento, &nro_tabla, sizeof(int));
+        desplazamiento+= sizeof(int);
+        free(index);
+        i++;
+    }
+    //*size = desplazamiento;
+    return stream;
 }*/
