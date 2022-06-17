@@ -40,6 +40,8 @@ typedef struct proceso
     t_pcb *un_pcb;
     int tiempo_bloqueo;
     double tiempo_acumulado;
+    time_t tiempoI;
+    time_t tiempoF;
     pthread_mutex_t mutex_proceso;
 } t_proceso;
 

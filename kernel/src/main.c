@@ -93,7 +93,6 @@ void iniciar_hilos()
     hilo_largo_plazo = malloc(sizeof(pthread_t));
     hilo_mediano_plazo = malloc(sizeof(pthread_t));
     hilo_gestor_io = malloc(sizeof(pthread_t));
-    hilo_mediano_plazo = malloc(sizeof(pthread_t));
 }
 
 /////////////////////////////////////////////////

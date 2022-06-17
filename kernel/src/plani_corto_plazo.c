@@ -63,6 +63,8 @@ void *algoritmo_fifo(void * args)
 
         gestionar_pcb_para_probar_sin_cpu();
         //gestionar_pcb();
+
+        free(un_proceso_pcb);
     }
 }
 
@@ -176,6 +178,7 @@ void pasar_proceso_a_bloqueado()
 
     proceso_en_exec = NULL;
     proceso_a_bloquear->un_pcb->un_estado = BLOCKED;
+    time(&proceso_a_bloquear->tiempoI);
 
     pthread_mutex_lock(&mutex_procesos_en_bloq);
     list_add(procesos_en_bloq,(void*) proceso_a_bloquear);
