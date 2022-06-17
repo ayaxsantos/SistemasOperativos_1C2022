@@ -9,7 +9,7 @@ void conexion(void)
 
     int socket_proceso = 0;
 
-    conectar_con_cpu(socket_kernel_serv);
+    //conectar_con_cpu(socket_kernel_serv);
 
     // Aca tendriamos que conectarnos con MEMORIA y CPU
     // En caso de no poder realizar la conexion, error!! Kernel Panic (?
@@ -86,7 +86,8 @@ void inicializar_proceso(t_com_proceso *comunicacion_proceso)
     un_proceso->un_pcb = inicializar_pcb(comunicacion_proceso);
     un_proceso->comunicacion_proceso = comunicacion_proceso;
     un_proceso->tiempo_ejecutando_estimacion = 0;
-    un_proceso->tiempo_bloqueado = 0;
+    un_proceso->tiempo_bloqueo = UNDEFINED;
+    un_proceso->tiempo_acumulado = 0;
     pthread_mutex_init(&un_proceso->mutex_proceso,NULL);
 
     pasar_proceso_a_new(un_proceso);

@@ -55,14 +55,14 @@ void *algoritmo_fifo(void * args)
 
         t_proceso_pcb *un_proceso_pcb = malloc(sizeof(t_proceso_pcb));
         un_proceso_pcb->pcb = proceso_en_exec->un_pcb;
-        un_proceso_pcb->tiempo_bloqueo = UNDEFINED;
+        un_proceso_pcb->tiempo_bloqueo = proceso_en_exec->tiempo_bloqueo;
 
         pthread_mutex_lock(&mutex_socket_dispatch);
-        enviar_proceso_pcb(socket_dispatch, un_proceso_pcb,PCB);
+        //enviar_proceso_pcb(socket_dispatch, un_proceso_pcb,PCB);
         pthread_mutex_unlock(&mutex_socket_dispatch);
 
-        //gestionar_pcb_para_probar_sin_cpu();
-        gestionar_pcb();
+        gestionar_pcb_para_probar_sin_cpu();
+        //gestionar_pcb();
     }
 }
 
@@ -93,14 +93,16 @@ void *algoritmo_sjf_con_desalojo(void *args)
         pthread_create(hilo_monitoreo_tiempos, NULL, rutina_monitoreo_desalojo, NULL);
         pthread_detach(*hilo_monitoreo_tiempos);
 
+        t_proceso_pcb *un_proceso_pcb = malloc(sizeof(t_proceso_pcb));
+        un_proceso_pcb->pcb = proceso_en_exec->un_pcb;
+        un_proceso_pcb->tiempo_bloqueo = proceso_en_exec->tiempo_bloqueo;
 
         pthread_mutex_lock(&mutex_socket_dispatch);
-        enviar_proceso_pcb(socket_dispatch, proceso_en_exec->un_pcb,PCB);
+        //enviar_proceso_pcb(socket_dispatch, un_proceso_pcb,PCB);
         pthread_mutex_unlock(&mutex_socket_dispatch);
 
-
-        //gestionar_pcb_para_probar_sin_cpu();
-        gestionar_pcb();
+        gestionar_pcb_para_probar_sin_cpu();
+        //gestionar_pcb();
     }
 }
 
@@ -211,7 +213,7 @@ void gestionar_pcb()
             pthread_mutex_unlock(&mutex_socket_dispatch);
 
             proceso_en_exec->un_pcb = un_proceso_pcb->pcb;
-            proceso_en_exec->tiempo_a_bloquear = un_proceso_pcb->tiempo_bloqueo;
+            proceso_en_exec->tiempo_bloqueo = un_proceso_pcb->tiempo_bloqueo;
 
             // CUANDO SE DESALOJA NO SE VUELVE A ESTIMAR!!
             //proceso_en_exec->un_pcb->una_estimacion = calcular_estimacion(tiempoF,tiempoI,proceso_en_exec);
@@ -228,7 +230,7 @@ void gestionar_pcb()
             pthread_mutex_unlock(&mutex_socket_dispatch);
 
             proceso_en_exec->un_pcb = proceso_para_bloquear->pcb;
-            proceso_en_exec->tiempo_a_bloquear = proceso_para_bloquear->tiempo_bloqueo;
+            proceso_en_exec->tiempo_bloqueo = proceso_para_bloquear->tiempo_bloqueo;
 
             // Esto solo deberia ejecutarse con SJF, por ahora aqui pues no afecta!!
             proceso_en_exec->un_pcb->una_estimacion = calcular_estimacion(tiempoF,tiempoI,proceso_en_exec);
@@ -244,7 +246,7 @@ void gestionar_pcb()
             pthread_mutex_unlock(&mutex_socket_dispatch);
 
             proceso_en_exec->un_pcb = un_proceso_pcb->pcb;
-            proceso_en_exec->tiempo_a_bloquear = un_proceso_pcb->tiempo_bloqueo;
+            proceso_en_exec->tiempo_bloqueo = un_proceso_pcb->tiempo_bloqueo;
 
             finalizar_proceso_ejecutando();
             break;
@@ -329,8 +331,8 @@ void gestionar_pcb_para_probar_sin_cpu()
             log_info(un_logger, "Volvio un PCB para bloquear!!");
             pthread_mutex_unlock(&mutex_log);
 
-            proceso_en_exec->tiempo_a_bloquear = una_instruccion->parametro1;
-            proceso_en_exec->un_pcb->una_estimacion = calcular_estimacion(tiempoF, tiempoI, proceso_en_exec);
+            proceso_en_exec->tiempo_bloqueo = una_instruccion->parametro1;
+            //proceso_en_exec->un_pcb->una_estimacion = calcular_estimacion(tiempoF, tiempoI, proceso_en_exec);
 
             free(una_instruccion);
             pasar_proceso_a_bloqueado();
@@ -357,6 +359,9 @@ void gestionar_pcb_para_probar_sin_cpu()
             pthread_mutex_unlock(&mutex_flag_interrupt);
         }
         free(una_instruccion);
+
+
+
     }
 }
 

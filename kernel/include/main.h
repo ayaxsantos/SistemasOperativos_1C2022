@@ -38,8 +38,8 @@ typedef struct proceso
     t_com_proceso *comunicacion_proceso;
     double tiempo_ejecutando_estimacion;
     t_pcb *un_pcb;
-    int tiempo_a_bloquear;
-    double tiempo_bloqueado;
+    int tiempo_bloqueo;
+    double tiempo_acumulado;
     pthread_mutex_t mutex_proceso;
 } t_proceso;
 

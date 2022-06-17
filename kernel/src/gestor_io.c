@@ -23,18 +23,25 @@ void *gestor_io(void)
         pthread_mutex_unlock(&mutex_procesos_en_bloq);
         int pepito = 0;
         pthread_mutex_lock(&mutex_log);
-        log_info(un_logger,"El proceso con PID: %u hace su I/O de %d segundos",
+        log_info(un_logger,"El proceso con PID: %u hace su I/O de %d milisegundos",
                  un_proceso->un_pcb->pid,
-                 un_proceso->tiempo_a_bloquear);
+                 un_proceso->tiempo_bloqueo);
         pthread_mutex_unlock(&mutex_log);
         pthread_mutex_lock(&un_proceso->mutex_proceso);
-        pepito = un_proceso->tiempo_a_bloquear * 1000;
+        pepito = un_proceso->tiempo_bloqueo * 1000;
         pthread_mutex_unlock(&un_proceso->mutex_proceso);
         usleep(pepito);
+        pthread_mutex_lock(&mutex_log);
+        log_error(un_logger,"El proceso con PID: %u salio del I/O",un_proceso->un_pcb->pid);
+        pthread_mutex_unlock(&mutex_log);
 
         pthread_mutex_lock(&mutex_procesos_en_bloq);
         un_proceso = list_remove(procesos_en_bloq,0);
         pthread_mutex_unlock(&mutex_procesos_en_bloq);
+
+        pthread_mutex_lock(&mutex_log);
+        log_error(un_logger,"El proceso con PID: %u va a comparar y su tiempo acumulado es: %f ",un_proceso->un_pcb->pid, un_proceso->tiempo_acumulado);
+        pthread_mutex_unlock(&mutex_log);
 
         if((un_proceso->un_pcb->un_estado) == SUSP_BLOCKED)
         {
@@ -52,7 +59,7 @@ void *gestor_io(void)
         {
             //Pasar a ready
             pthread_mutex_lock(&mutex_log);
-            log_info(un_logger,"El proceso con PID: %u pasa a ready",un_proceso->un_pcb->pid);
+            log_warning(un_logger,"El proceso con PID: %u pasa a ready",un_proceso->un_pcb->pid);
             pthread_mutex_unlock(&mutex_log);
             un_proceso->un_pcb->un_estado = READY; //Faltan semaforos
             pthread_mutex_lock(&mutex_procesos_en_ready);
@@ -77,9 +84,11 @@ void *mediano_plazo(void)
         bool el_proceso_no_esta_suspendido_inner(void *un_proceso) {
             return el_proceso_no_esta_suspendido((t_proceso *) un_proceso);
         }
+
         pthread_mutex_lock(&mutex_procesos_en_bloq);
         lista_auxiliar = list_filter(procesos_en_bloq, el_proceso_no_esta_suspendido_inner);
         pthread_mutex_unlock(&mutex_procesos_en_bloq);
+
         if (!list_is_empty(lista_auxiliar)) {
             while (!list_is_empty(lista_auxiliar)) {
                 pthread_mutex_lock(&proceso_auxiliar->mutex_proceso);
@@ -94,16 +103,14 @@ void *mediano_plazo(void)
         }
         pthread_mutex_lock(&mutex_procesos_en_bloq);
         while (!list_is_empty(procesos_en_bloq)) {
-            pthread_mutex_lock(&proceso_auxiliar->mutex_proceso);
             proceso_auxiliar = list_remove(procesos_en_bloq, 0);
-            pthread_mutex_unlock(&proceso_auxiliar->mutex_proceso);
             time(&tiempoF);
-            proceso_auxiliar->tiempo_bloqueado += difftime(tiempoF,tiempoI);
+            proceso_auxiliar->tiempo_acumulado += difftime(tiempoF,tiempoI);
             list_add(lista_auxiliar, proceso_auxiliar);
         }
+        time(&tiempoI);
         procesos_en_bloq = lista_auxiliar;
         pthread_mutex_unlock(&mutex_procesos_en_bloq);
-        time(&tiempoI);
     }
 }
 
@@ -118,7 +125,7 @@ bool el_proceso_no_esta_suspendido(t_proceso *un_proceso)
 
 bool el_proceso_tiene_que_suspenderse(t_proceso *un_proceso)
 {
-    return un_proceso->tiempo_bloqueado > una_config_kernel.tiempo_max_bloqueado;
+    return un_proceso->tiempo_acumulado > una_config_kernel.tiempo_max_bloqueado;
 }
 
 //////////////////////////////////////////
