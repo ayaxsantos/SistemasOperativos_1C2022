@@ -16,7 +16,6 @@
 
 #define ERROR -1
 #define UNDEFINED -100
-#define DATO (>0)
 
 /*** ENUMS ***/
 typedef enum
@@ -69,6 +68,14 @@ typedef enum
     WRITE_ACCION
 } accion;
 
+typedef enum
+{
+    READ_FAULT = -6,
+    WRITE_FAULT = -7,
+    READ_OK = 6,
+    WRITE_OK = 7
+} estado_memoria;
+
 /*** Generales ***/
 typedef struct
 {
@@ -104,12 +111,20 @@ typedef struct
     int32_t id_tabla_1n;
 } t_pcb;
 
+typedef struct proceso_pcb
+{
+    int tiempo_bloqueo;
+    t_pcb *pcb;
+} t_proceso_pcb;
+
+
 /*** CPU + MEMORIA ***/
 typedef struct t_solicitud
 {
     int32_t id_tabla_1n;
     int32_t entrada_tabla;
-    int32_t tabla2n;
+    int32_t id_tabla_2n;
+    unsigned int nro_frame;
 } __attribute__((packed)) t_solicitud;
 
 typedef struct t_tercera_solictud
@@ -117,14 +132,9 @@ typedef struct t_tercera_solictud
     unsigned int desplazamiento;
     unsigned int nro_frame;
     accion accion_solicitada;
-    unsigned int dato; //Suponemos un entero no signado de 4bytes
+    uint32_t dato; //Suponemos un entero no signado de 4bytes
+    estado_memoria estado_memo;
 } __attribute__((packed)) t_tercera_solictud;
-
-typedef struct proceso_pcb
-{
-    int tiempo_bloqueo;
-    t_pcb *pcb;
-} t_proceso_pcb;
 
 /**
  * @name habilitar_log
@@ -164,6 +174,11 @@ t_consola *deserializar_consola(void *buffer);
 t_queue *deserializar_instrucciones(void *buffer, int size_cola);
 t_dictionary *deserializar_tabla1n(void *buffer, int size_tabla);
 t_proceso_pcb *deserializar_proceso_pcb(int socket);
+
+/*** CPU + MEMORIA ***/
+
+t_solicitud *recibir_solicitud(int socket);
+t_tercera_solictud  *recibir_tercera_solicitud(int socket);
 
 #include "../utils/utilslib.h"
 
