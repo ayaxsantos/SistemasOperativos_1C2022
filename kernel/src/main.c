@@ -62,7 +62,7 @@ void iniciar_estructuras()
 {
     procesos_en_new = queue_create();
     procesos_en_ready = list_create();
-    procesos_en_bloq = queue_create();
+    procesos_en_bloq = list_create();
     procesos_en_exit = list_create();
 }
 
@@ -85,7 +85,6 @@ void iniciar_mutex()
 
     //Estos pueden estar demas...
     pthread_mutex_init(&mutex_socket_dispatch,NULL);
-    pthread_mutex_init(&mutex_procesos_en_bloq_susp,NULL);
 }
 
 void iniciar_hilos()
@@ -94,6 +93,7 @@ void iniciar_hilos()
     hilo_largo_plazo = malloc(sizeof(pthread_t));
     hilo_mediano_plazo = malloc(sizeof(pthread_t));
     hilo_gestor_io = malloc(sizeof(pthread_t));
+    hilo_mediano_plazo = malloc(sizeof(pthread_t));
 }
 
 /////////////////////////////////////////////////
@@ -104,7 +104,7 @@ void liberar_memoria()
 
     queue_destroy(procesos_en_new);
     list_destroy(procesos_en_ready);
-    queue_destroy(procesos_en_bloq);
+    list_destroy(procesos_en_bloq);
     list_destroy(procesos_en_exit);
 
     log_destroy(un_logger);
