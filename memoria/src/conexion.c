@@ -1,6 +1,7 @@
 #include "../include/conexion.h"
 
 void *gestionar_conexion(void *arg) {
+    /*
     int socket_cliente = *((int *)arg);
     mate_instance request_carpincho;
     while (true) {
@@ -53,9 +54,33 @@ void *gestionar_conexion(void *arg) {
                 pthread_mutex_unlock(&mutex_logger);
                 break;
 		}
-    }
+    }*/
 }
 
+void *gestionar_conexion_cpu(void *arg) {
+    while (true) {
+        codigo_operacion cod_op = recibir_operacion(socket_cpu);
+        switch (cod_op) {
+            case PRIMERA_SOLICITUD:
+                gestionar_primera_solicitud();
+                break;
+            case SEGUNDA_SOLICITUD:
+                gestionar_segunda_solicitud();
+                break;
+            case TERCERA_SOLICITUD:
+                gestionar_tercera_solicitud();
+                break;
+            default:
+                pthread_mutex_lock(&mutex_logger);
+                log_warning(logger_memoria, "Operacion desconocida.");
+                pthread_mutex_unlock(&mutex_logger);
+                break;
+        }
+    }
+}
+/*
+ * Logica repetida, se puede mejorar @Jume, Vos podes
+ */
 void esperar_handshake_kernel(int server) {
     log_info(logger_memoria,"Iniciando handshake con modulo KERNEL ... ");
     socket_cpu = esperar_cliente(server);
@@ -68,16 +93,19 @@ void esperar_handshake_kernel(int server) {
 }
 
 void esperar_handshake_cpu(int server) {
-    log_info(logger_memoria,"Iniciando handshake con modulo CPU ... ");
+    log_info(logger_memoria,"Esperando handshake con modulo CPU ... ");
     socket_cpu = esperar_cliente(server);
     int resultado = esperar_handshake(&socket_cpu, validar_modulo);
     if(resultado == -1) {
-        log_error(logger_memoria,"No se pudo conectar con el modulo MEMORIA");
+        log_error(logger_memoria,"No se pudo conectar con el modulo CPU");
         exit(EXIT_FAILURE);
     }
-    log_info(logger_memoria,"MEMORIA Conectada");
+    log_info(logger_memoria,"CPU Conectada");
 }
 
+/*
+ * Hasta aca
+ */
 void validar_modulo(int *socket, modulo modulo_solicitante) {
     if(modulo_solicitante == CPU) {
         void *buffer = malloc(sizeof(int)*4);
@@ -100,29 +128,31 @@ void validar_modulo(int *socket, modulo modulo_solicitante) {
     log_error(logger_memoria,"Error de handshake con CPU");
 }
 
-void iniciar_proceso(int socket) {
-	t_tabla_pagina* tabla_principal_del_proceso = crear_tabla_principal();
-    list_add(tablas_primer_nivel, tabla_principal_del_proceso);
-    int index_tabla = list_size(tablas_primer_nivel)-1;
+void gestionar_primera_solicitud() {
+    t_solicitud *request = recibir_solicitud(socket_cpu);
+    //primera_solicitud_mmu(request);
+    request->id_tabla_2n = 3;
 
-    // TODO Agregar index al paquete que devuelvo
-    // t_funcion *funcion = crear_funcion(INICIAR);
-	// setear_funcion(funcion,index_tabla);
-	// enviar_funcion(funcion,socket_cliente);
-	// eliminar_funcion(funcion);
-
-    crear_archivo(index_tabla, tabla_principal_del_proceso->tamanio_proceso);
+    t_operacion *operacion = crear_operacion(PRIMERA_SOLICITUD);
+    setear_operacion(operacion, request);
+    enviar_operacion(operacion, socket_cpu);
+    eliminar_operacion(operacion);
+    free(request);
 }
 
-void terminar_proceso(int socket) {
-	int nada;
-	void *buffer = recibir_buffer(&nada,socket);
-	int index_tabla = socket;		// TODO Obtener id de tabla
-	t_tabla_pagina* tabla_1n = list_get(tablas_primer_nivel, index_tabla);
-	// liberar_todas_las_paginas(tabla_1n);
-	free(buffer);
+void gestionar_segunda_solicitud() {
+    t_solicitud *request = recibir_solicitud(socket_cpu);
+    //segunda_solicitud_mmu(request);
+    request->nro_frame = 3;
+
+    t_operacion *operacion = crear_operacion(SEGUNDA_SOLICITUD);
+    setear_operacion(operacion, request);
+    enviar_operacion(operacion, socket_cpu);
+    eliminar_operacion(operacion);
+    free(request);
 }
 
-unsigned int get_thread_id() {
-    return syscall(SYS_gettid);
+void gestionar_tercera_solicitud() {
+    t_tercera_solicitud *request = recibir_tercera_solicitud(socket_cpu);
+    tercera_solicitud_mmu(request);
 }

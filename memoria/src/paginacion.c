@@ -75,12 +75,12 @@ int iniciar_proceso_en_memoria(int tamanio){
 void primera_solicitud_mmu(t_solicitud* solicitud){
 	t_tabla_pagina *tabla_1n = obtener_tabla_1n_por_id(solicitud->id_tabla_1n);
 	t_tabla_pagina *tabla_2n = dictionary_get(tabla_1n->tabla, string_itoa(solicitud->entrada_tabla));
-	solicitud->tabla2n = tabla_2n->id_tabla;
+	solicitud->id_tabla_1n = tabla_2n->id_tabla;
 }
 
 void segunda_solicitud_mmu(t_solicitud* solicitud){
 	t_tabla_pagina *tabla_1n = obtener_tabla_1n_por_id(solicitud->id_tabla_1n);
-	t_tabla_pagina *tabla_2n = dictionary_get(tabla_1n->tabla, string_itoa(solicitud->tabla2n));
+	t_tabla_pagina *tabla_2n = dictionary_get(tabla_1n->tabla, string_itoa(solicitud->id_tabla_2n));
 	t_col_pagina *pagina = dictionary_get(tabla_2n->tabla, string_itoa(solicitud->entrada_tabla));
 	if (pagina->presencia){
 		int nro_frame = pagina->nro_frame;

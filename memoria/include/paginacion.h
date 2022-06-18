@@ -2,10 +2,6 @@
 #define PAGINACION_H_INCLUDED
 
 #include "main.h"
-#include "swap.h"
-#include "swap_controlador.h"
-#include "memoria_controlador.h"
-#include <general/carpisLib.h>
 
 /* ---------- Inicialización ---------- */
 t_tabla_pagina * crear_tabla_principal(int tamanio);
