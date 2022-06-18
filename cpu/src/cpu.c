@@ -54,10 +54,6 @@ void *ejecutar_pcb(void *arg) {
 			default:
 				break;
 		}
-		/*
-		 * La cpu es una sola no?
-		 */
-
 	}
 }
 
@@ -76,21 +72,21 @@ void ciclo_de_instruccion() {
 }
 
 void *ejecutar_interrupcion(void *arg) {
-    socket_kernel_interrupt = esperar_cliente(cpu_interrupt);
+    //socket_kernel_interrupt = esperar_cliente(cpu_interrupt);
 	while(true) {
 		sem_wait(&sem_interrupt);
-		int operacion = recibir_operacion(cpu_dispatch);
-
+		//int operacion = recibir_operacion(socket_kernel_interrupt);
+		int operacion = INTERRUPCION; // BORRAR
 		if(operacion == INTERRUPCION) {
-			bool hay_interrupcion =  recibir_interrupcion(socket_kernel_interrupt);
-
+			//bool hay_interrupcion =  recibir_interrupcion(socket_kernel_interrupt);
+			bool hay_interrupcion = false; // BORRAR
 			if(hay_interrupcion) {
 				t_proceso_pcb *proceso_a_enviar = malloc(sizeof(t_proceso_pcb));
 
 				proceso_a_enviar->tiempo_bloqueo = UNDEFINED;
 				proceso_a_enviar->pcb = pcb;
 
-				enviar_proceso_pcb(socket_kernel_dispatch, proceso_a_enviar, INTERRUPCION);
+				//enviar_proceso_pcb(socket_kernel_dispatch, proceso_a_enviar, INTERRUPCION);
 
 				free(proceso_a_enviar); // Preguntar si está OK el free acá
 			} else {
@@ -119,7 +115,8 @@ void ejecutar_instruccion(t_instruccion *instruccion) {
 
         case IO: // Pedir a Kernel que bloque el proceso el tiempo que viene indicado en el param1
         	proceso_a_enviar->tiempo_bloqueo = instruccion->parametro1;
-        	enviar_proceso_pcb(socket_kernel_dispatch, proceso_a_enviar, BLOQUEO);
+        	int tipo_operacion = BLOQUEO;
+        	//enviar_proceso_pcb(socket_kernel_dispatch, proceso_a_enviar, BLOQUEO);
            break;
 
         case READ:
