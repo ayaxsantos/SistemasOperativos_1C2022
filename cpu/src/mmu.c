@@ -4,61 +4,55 @@ void iniciar_mmu() {
     
 }
 
-void *obtener_dato_memoria(dir_logica dir, t_pcb *pcb) {
-    /*
-     * 1- Un primer acceso para conocer en qué tabla de páginas de 2do nivel
-     *      está direccionado el marco en que se encuentra la página a la que queremos acceder
-     * 2- Un segundo acceso para conocer en qué marco está la misma
-     * 3- Finalmente acceder a la porción de memoria correspondiente (la dirección física).
-     
-    int num_pagina = numero_pagina(dir);
-    int entrada_tabla_1n = entrada_tabla_1er_nivel(num_pagina);
-    int id_tabla_2n = solicitar_registro_1nivel(pcb->id_tabla_1n, entrada_tabla_1n);
-    t_columna_pagina *pagina = solicitar_registro_2nivel(id_tabla_2n, entrada_tabla_2do_nivel(num_pagina));
-    return pagina;*/
+uint32_t obtener_dato_memoria(dir_logica dir) {
+    return procesar_solicitud(dir,READ,0);
 }
-/*
-char *dir_logica_a_fisica(dir_logica dir, t_pcb *pcb, t_accion accion) {
-    int cantidad_paginas = dictionary_size(pcb->tabla_1n);
-    int dir_nro_pagina = get_nro_pagina(dir);
-    if(dir_nro_pagina >= cantidad_paginas) {
-        //No se encontro la direccion logica;
-        return "-100";
+
+int escribir_dato_memoria(dir_logica dir, uint32_t dato) {
+    return procesar_solicitud(dir, WRITE, dato);
+}
+
+int procesar_solicitud(dir_logica dir, accion accion_pedida, uint32_t dato) {
+    /*
+     * Si esta en TLB -> HIT Devolver Dato
+     * Sino -> MISS realizar accesos
+     */
+    /*
+    * 1- Un primer acceso para conocer en qué tabla de páginas de 2do nivel
+    *      está direccionado el marco en que se encuentra la página a la que queremos acceder
+    * 2- Un segundo acceso para conocer en qué marco está la misma
+    * 3- Finalmente acceder a la porción de memoria correspondiente (la dirección física).
+    */
+    int num_pagina = numero_pagina(dir);
+    if(num_pagina > config_cpu.tamanio_pagina) {
+        return ERROR;
     }
-    int desplazamiento = dir - config_memoria.tamanio_pagina * dir_nro_pagina;
-    int resultado = obtener_nro_frame_de_tlb(dir_nro_pagina, tabla_carpincho->pid);
-    t_frame *frame;
-    if(resultado != -1) {
-        frame = list_get(memoria_principal->frames, resultado);
-        if(accion == WRITE)
-            frame->modificado = accion;
-        frame->usado = true;
-        tabla_carpincho->cantidad_hit++;
-        actualizar_tiempo_usado(frame);
-        return frame->base + desplazamiento;
+    int resultado = obtener_nro_frame_de_tlb(num_pagina,pcb->id_tabla_1n);
+    if(resultado != ERROR) {
+        if(accion_pedida == WRITE_ACCION) {
+            estado_memoria res = enviar_dato_memoria(calcular_desplazamiento(dir, num_pagina), resultado, dato);
+            return res;
+        }
+        else {
+            uint32_t dato = solicitar_dato(calcular_desplazamiento(dir, num_pagina), resultado);
+            return dato;
+        }
     }
     else {
-        char *nro_pagina = string_itoa(dir_nro_pagina);
-        tabla_carpincho->cantidad_miss++;
-        t_columna_pagina *pagina = (t_columna_pagina *)dictionary_get(tabla_carpincho->tabla, nro_pagina);
-        if(pagina->presencia) {
-            frame = list_get(memoria_principal->frames, pagina->nro_frame);
-            if(accion == WRITE)
-                frame->modificado = accion;
-            frame->usado = true;
-            actualizar_tiempo_usado(frame);
-            monitorear_tabla_carpincho(tabla_carpincho);
-            actualizar_tlb(pagina->nro_frame, dir_nro_pagina, tabla_carpincho->pid);
-            free(nro_pagina);
-            return frame->base + desplazamiento;
+        int entrada_tabla_1n = entrada_tabla_1er_nivel(num_pagina);
+        int32_t id_tabla_2n = solicitar_registro_1nivel(pcb->id_tabla_1n, entrada_tabla_1n);
+        unsigned int nro_frame = solicitar_registro_2nivel(id_tabla_2n, entrada_tabla_2do_nivel(num_pagina));
+        actualizar_tlb(nro_frame, num_pagina, pcb->id_tabla_1n);
+        if(accion_pedida == WRITE_ACCION) {
+            estado_memoria res = enviar_dato_memoria(calcular_desplazamiento(dir, num_pagina), nro_frame, dato);
+            return res;
         }
-        frame = realizar_algoritmo(tabla_carpincho, pagina, accion, dir_nro_pagina);
-        monitorear_tabla_carpincho(tabla_carpincho);
-        actualizar_tlb(frame->nro_frame, dir_nro_pagina, tabla_carpincho->pid);
-        free(nro_pagina);
-        return frame->base + desplazamiento;
+        else {
+            uint32_t dato = solicitar_dato(calcular_desplazamiento(dir, num_pagina), nro_frame);
+            return dato;
+        }
     }
-}*/
+}
 
 ////////////////////////////////////////////////////////
 int numero_pagina(dir_logica dir) {
