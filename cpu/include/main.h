@@ -45,7 +45,6 @@ typedef struct t_columna_tlb {
 }t_columna_tlb;
 
 /////////////////////////////////////////////////////////////
-//t_proceso_pcb *proceso_pcb;
 t_pcb *pcb;
 int operacion_a_enviar;
 t_proceso_pcb *proceso_a_enviar;
@@ -57,7 +56,8 @@ t_config_cpu config_cpu;
 t_log *logger_cpu;
 
 int socket_memoria, cpu_dispatch, cpu_interrupt, socket_kernel_dispatch, socket_kernel_interrupt;
-sem_t sem_interrupt, sem_execute;
+
+sem_t sem_interrupt, sem_ciclo_de_instruccion, sem_busqueda_proceso_nuevo;
 ////////////////////////////////////////////////////////////
 void leer_configuracion();
 void arrancar_logger();
