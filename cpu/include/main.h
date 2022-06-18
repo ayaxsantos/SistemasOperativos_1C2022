@@ -9,8 +9,6 @@
 #include <semaphore.h>
 
 typedef int32_t dir_logica;
-
-
 /**
  * @DESC Quizas este en carpisLib
  *
@@ -37,10 +35,20 @@ typedef struct
     int log_habilitado;
 } t_config_cpu;
 
+typedef struct t_columna_tlb {
+    int entrada;
+    bool is_free;
+    int id_tabla_1n;
+    int pagina;
+    int nro_marco;
+    long tiempo_usado;
+}t_columna_tlb;
+
 /////////////////////////////////////////////////////////////
 //t_proceso_pcb *proceso_pcb;
 t_pcb *pcb;
 
+t_list *tlb;
 t_algoritmo tipo_algoritmo_tlb;
 
 t_config_cpu config_cpu;
@@ -48,8 +56,6 @@ t_log *logger_cpu;
 
 int socket_memoria, cpu_dispatch, cpu_interrupt, socket_kernel_dispatch, socket_kernel_interrupt;
 sem_t sem_interrupt, sem_execute;
-
-t_pcb *pcb;
 ////////////////////////////////////////////////////////////
 void leer_configuracion();
 void arrancar_logger();
@@ -64,6 +70,7 @@ void liberar_configuracion_y_log();
 
 #include "mmu.h"
 #include "cpu.h"
-//#include "conector_memoria.h"
+#include "tlb.h"
+#include "conector_memoria.h"
 
 #endif

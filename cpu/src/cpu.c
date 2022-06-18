@@ -67,7 +67,7 @@ void ciclo_de_instruccion() {
 
 	if(necesita_fetch_operands(instruccion->instruc)) { // DECODE
 		// TODO
-        void *espacio_a_asignar = obtener_dato_memoria(instruccion->parametro1, pcb);
+        uint32_t espacio_a_asignar = obtener_dato_memoria(instruccion->parametro1);
 	}
 	pcb->program_counter ++; // Incremento pc acá  porque sino, si tengo que enviar pcb a kernel, se va a mandar pc desactualizado
 	ejecutar_instruccion(instruccion); // EXECUTE
