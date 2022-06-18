@@ -47,6 +47,8 @@ typedef struct t_columna_tlb {
 /////////////////////////////////////////////////////////////
 //t_proceso_pcb *proceso_pcb;
 t_pcb *pcb;
+int operacion_a_enviar;
+t_proceso_pcb *proceso_a_enviar;
 
 t_list *tlb;
 t_algoritmo tipo_algoritmo_tlb;

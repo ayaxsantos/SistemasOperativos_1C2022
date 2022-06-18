@@ -2,8 +2,6 @@
 
 
 void iniciar() {
-    //pcbs = list_create();
-
     cpu_dispatch = iniciar_servidor(config_cpu.ip_cpu, config_cpu.puerto_escucha_dispatch);
     cpu_interrupt = iniciar_servidor(config_cpu.ip_cpu, config_cpu.puerto_escucha_interrupt);
     //conectar_a_memoria_y_recibir_config();
@@ -60,13 +58,18 @@ void *ejecutar_pcb(void *arg) {
 
 void ciclo_de_instruccion() {
 	t_instruccion *instruccion = (t_instruccion *) queue_pop(pcb->consola->instrucciones); // FETCH
+	operacion_a_enviar = UNDEFINED;
+	proceso_a_enviar = malloc(sizeof(t_proceso_pcb));
 
 	if(necesita_fetch_operands(instruccion->instruc)) { // DECODE
 		// TODO
         uint32_t espacio_a_asignar = obtener_dato_memoria(instruccion->parametro1);
 	}
-	pcb->program_counter ++; // Incremento pc acá  porque sino, si tengo que enviar pcb a kernel, se va a mandar pc desactualizado
+
 	ejecutar_instruccion(instruccion); // EXECUTE
+	pcb->program_counter ++;
+
+	enviar_pcb();
 
 	sem_post(&sem_execute); // Comience el ciclo de instrucccion devuelta
 }
@@ -77,20 +80,16 @@ void *ejecutar_interrupcion(void *arg) {
 		sem_wait(&sem_interrupt);
 		//int operacion = recibir_operacion(socket_kernel_interrupt);
 		int operacion = INTERRUPCION; // BORRAR
+
 		if(operacion == INTERRUPCION) {
 			//bool hay_interrupcion =  recibir_interrupcion(socket_kernel_interrupt);
 			bool hay_interrupcion = false; // BORRAR
 			if(hay_interrupcion) {
-				t_proceso_pcb *proceso_a_enviar = malloc(sizeof(t_proceso_pcb));
-
 				proceso_a_enviar->tiempo_bloqueo = UNDEFINED;
-				proceso_a_enviar->pcb = pcb;
+				operacion_a_enviar = INTERRUPCION;
 
-				//enviar_proceso_pcb(socket_kernel_dispatch, proceso_a_enviar, INTERRUPCION);
-
-				free(proceso_a_enviar); // Preguntar si está OK el free acá
 			} else {
-				ciclo_de_instruccion();
+				ciclo_de_instruccion(); //VER, me parece que de esta forma comienza el sgte ciclo sin terminar el anterior
 			}
 		}
 	}
@@ -102,8 +101,6 @@ int necesita_fetch_operands(instruccion instruction) {
 
 void ejecutar_instruccion(t_instruccion *instruccion) {
 	int resultado;
-	t_proceso_pcb *proceso_a_enviar = malloc(sizeof(t_proceso_pcb));
-	proceso_a_enviar->pcb = pcb;
 
     switch (instruccion->instruc) {
         case NO_OP:
@@ -113,10 +110,9 @@ void ejecutar_instruccion(t_instruccion *instruccion) {
             sem_post(&sem_interrupt);
            break;
 
-        case IO: // Pedir a Kernel que bloque el proceso el tiempo que viene indicado en el param1
+        case IO:
         	proceso_a_enviar->tiempo_bloqueo = instruccion->parametro1;
-        	int tipo_operacion = BLOQUEO;
-        	//enviar_proceso_pcb(socket_kernel_dispatch, proceso_a_enviar, BLOQUEO);
+        	operacion_a_enviar = BLOQUEO;
            break;
 
         case READ:
@@ -133,9 +129,18 @@ void ejecutar_instruccion(t_instruccion *instruccion) {
 
         case I_EXIT:
 			proceso_a_enviar->tiempo_bloqueo = UNDEFINED;
-			enviar_proceso_pcb(socket_kernel_dispatch, proceso_a_enviar, FIN_PROCESO);
+			operacion_a_enviar = FIN_PROCESO;
            break;
     }
-    free(proceso_a_enviar);
+}
+
+void enviar_pcb() {
+	if(operacion_a_enviar != UNDEFINED) {
+		proceso_a_enviar->pcb = pcb;
+		enviar_proceso_pcb(socket_kernel_dispatch, proceso_a_enviar, operacion_a_enviar);
+		// Si se envia el proceso, hay desalojo de cpu, buscar oto pcb de socket ===> sem_post(&sem_execute)
+	}
+
+	free(proceso_a_enviar);// Preguntar si está OK el free acá
 }
 

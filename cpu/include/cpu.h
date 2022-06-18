@@ -11,5 +11,6 @@ void *ejecutar_interrupcion(void *arg);
 void ciclo_de_instruccion();
 int necesita_fetch_operands(instruccion instruction);
 void ejecutar_instruccion(t_instruccion *instruccion);
+void enviar_pcb();
 
 #endif /* CPU_H_INCLUDED */
