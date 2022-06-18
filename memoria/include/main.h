@@ -24,6 +24,7 @@
 typedef struct config_memoria
 {
     char* puerto_escucha;
+    char* ip_memoria;
     int tamanio_memoria;
     int tamanio_pagina;
     int entradas_por_tabla;

@@ -1,15 +1,11 @@
 #include "../include/conexion.h"
 
 void *gestionar_conexion(void *arg) {
-    /*
     int socket_cliente = *((int *)arg);
-    mate_instance request_carpincho;
     while (true) {
-
-		int cod_op = recibir_operacion(socket_cliente);
-
+		codigo_operacion cod_op = recibir_operacion(socket_cliente);
 		switch (cod_op) {
-            case MATE_INIT:
+            case READY:
                 request_carpincho = recibir_mate_instance(socket_cliente);
                 iniciar_carpincho(&request_carpincho, socket_cliente);
                 break;
@@ -70,9 +66,14 @@ void *gestionar_conexion_cpu(void *arg) {
             case TERCERA_SOLICITUD:
                 gestionar_tercera_solicitud();
                 break;
+            case -1:
+                pthread_mutex_lock(&mutex_logger);
+                log_error(logger_memoria, "CPU se desconecto. Terminando Hilo.");
+                pthread_mutex_unlock(&mutex_logger);
+                return EXIT_FAILURE;
             default:
                 pthread_mutex_lock(&mutex_logger);
-                log_warning(logger_memoria, "Operacion desconocida.");
+                log_warning(logger_memoria, "Operacion desconocida de CPU.");
                 pthread_mutex_unlock(&mutex_logger);
                 break;
         }
