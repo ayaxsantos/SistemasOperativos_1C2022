@@ -11,11 +11,14 @@ void iniciar() {
 void esperar_a_kernel() {
     log_info(logger_cpu,"CPU a la espera de Kernel");
     pthread_t hilo_dispatch, hilo_interrupt;
+    pthread_t hilo_ciclo_de_instruccion;
     pthread_create(&hilo_dispatch, NULL, &ejecutar_pcb, NULL);
-    //pthread_create(&hilo_interrupt, NULL, &ejecutar_interrupcion, NULL);
+    pthread_create(&hilo_interrupt, NULL, &ejecutar_interrupcion, NULL);
+    pthread_create(&hilo_ciclo_de_instruccion, NULL, &ciclo_de_instruccion, NULL);
 
-    pthread_join(hilo_dispatch, NULL);
-    //pthread_join(hilo_interrupt, NULL);
+    pthread_detach(hilo_dispatch);
+    pthread_detach(hilo_interrupt);
+    pthread_detach(hilo_ciclo_de_instruccion);
 }
 
 void enviar_confirmacion(int *socket, modulo modulo_solicitante) {
@@ -39,7 +42,7 @@ void *ejecutar_pcb(void *arg) {
 
 	while(true) {
 
-		sem_wait(&sem_execute);
+		sem_wait(&sem_busqueda_proceso_nuevo);
 		int operacion = recibir_operacion(socket_kernel_dispatch);
         t_proceso_pcb *proceso_pcb;
         switch (operacion) {
@@ -47,7 +50,8 @@ void *ejecutar_pcb(void *arg) {
                 proceso_pcb = deserializar_proceso_pcb(socket_kernel_dispatch);
                 pcb = proceso_pcb->pcb;
                 free(proceso_pcb);
-				ciclo_de_instruccion();
+
+                sem_post(&sem_ciclo_de_instruccion);
 				break;
 			default:
 				break;
@@ -56,7 +60,10 @@ void *ejecutar_pcb(void *arg) {
 }
 
 
-void ciclo_de_instruccion() {
+void *ciclo_de_instruccion(void *arg) {
+
+	sem_wait(&sem_ciclo_de_instruccion);
+
 	t_instruccion *instruccion = (t_instruccion *) queue_pop(pcb->consola->instrucciones); // FETCH
 	operacion_a_enviar = UNDEFINED;
 	proceso_a_enviar = malloc(sizeof(t_proceso_pcb));
@@ -69,9 +76,12 @@ void ciclo_de_instruccion() {
 	ejecutar_instruccion(instruccion); // EXECUTE
 	pcb->program_counter ++;
 
-	enviar_pcb();
-
-	sem_post(&sem_execute); // Comience el ciclo de instrucccion devuelta
+	if(hay_que_desalojar_cpu()) {
+		desalojar_cpu();
+	} else {
+		free(proceso_a_enviar);// Preguntar si está OK el free acá
+		sem_post(&sem_ciclo_de_instruccion);
+	}
 }
 
 void *ejecutar_interrupcion(void *arg) {
@@ -88,8 +98,6 @@ void *ejecutar_interrupcion(void *arg) {
 				proceso_a_enviar->tiempo_bloqueo = UNDEFINED;
 				operacion_a_enviar = INTERRUPCION;
 
-			} else {
-				ciclo_de_instruccion(); //VER, me parece que de esta forma comienza el sgte ciclo sin terminar el anterior
 			}
 		}
 	}
@@ -134,13 +142,15 @@ void ejecutar_instruccion(t_instruccion *instruccion) {
     }
 }
 
-void enviar_pcb() {
-	if(operacion_a_enviar != UNDEFINED) {
+void desalojar_cpu() {
 		proceso_a_enviar->pcb = pcb;
 		enviar_proceso_pcb(socket_kernel_dispatch, proceso_a_enviar, operacion_a_enviar);
-		// Si se envia el proceso, hay desalojo de cpu, buscar oto pcb de socket ===> sem_post(&sem_execute)
-	}
+		free(proceso_a_enviar);// Preguntar si está OK el free acá
 
-	free(proceso_a_enviar);// Preguntar si está OK el free acá
+		sem_post(&sem_busqueda_proceso_nuevo);
+}
+
+bool hay_que_desalojar_cpu() {
+	return operacion_a_enviar != UNDEFINED;
 }
 
