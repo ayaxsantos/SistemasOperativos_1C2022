@@ -5,11 +5,11 @@ void iniciar_mmu() {
 }
 
 uint32_t obtener_dato_memoria(dir_logica dir) {
-    return procesar_solicitud(dir,READ,0);
+    return procesar_solicitud(dir,READ_ACCION,0);
 }
 
 int escribir_dato_memoria(dir_logica dir, uint32_t dato) {
-    return procesar_solicitud(dir, WRITE, dato);
+    return procesar_solicitud(dir, WRITE_ACCION, dato);
 }
 
 int procesar_solicitud(dir_logica dir, accion accion_pedida, uint32_t dato) {
@@ -27,7 +27,8 @@ int procesar_solicitud(dir_logica dir, accion accion_pedida, uint32_t dato) {
     if(num_pagina > config_cpu.tamanio_pagina) {
         return ERROR;
     }
-    int resultado = obtener_nro_frame_de_tlb(num_pagina,pcb->id_tabla_1n);
+    //int resultado = obtener_nro_frame_de_tlb(num_pagina,pcb->id_tabla_1n);
+    int resultado = ERROR;
     if(resultado != ERROR) {
         if(accion_pedida == WRITE_ACCION) {
             estado_memoria res = enviar_dato_memoria(calcular_desplazamiento(dir, num_pagina), resultado, dato);

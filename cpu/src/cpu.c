@@ -2,12 +2,10 @@
 
 
 void iniciar() {
-    //pcbs = list_create();
-
     cpu_dispatch = iniciar_servidor(config_cpu.ip_cpu, config_cpu.puerto_escucha_dispatch);
     cpu_interrupt = iniciar_servidor(config_cpu.ip_cpu, config_cpu.puerto_escucha_interrupt);
-    //conectar_a_memoria_y_recibir_config();
-    esperar_a_kernel();
+    conectar_a_memoria_y_recibir_config();
+    //esperar_a_kernel();
 }
 
 void esperar_a_kernel() {

@@ -5,6 +5,7 @@ int32_t solicitar_registro_1nivel(int id_tabla_1n, int entrada_tabla_1n) {
     request->id_tabla_1n = id_tabla_1n;
     request->id_tabla_2n = UNDEFINED;
     request->entrada_tabla = entrada_tabla_1n;
+    request->nro_frame = UNDEFINED;
     request = (t_solicitud *)gestionar_solicitud(request, PRIMERA_SOLICITUD);
     int32_t  id_tabla_2n = request->id_tabla_2n;
     free(request);
@@ -23,26 +24,26 @@ unsigned int solicitar_registro_2nivel(int tabla2n, int entrada_tabla_2n) {
 }
 
 uint32_t solicitar_dato(int desplazamiento, unsigned int nro_frame) {
-    t_tercera_solictud *request = malloc(sizeof(t_tercera_solictud));
+    t_tercera_solicitud *request = malloc(sizeof(t_tercera_solicitud));
     request->desplazamiento = desplazamiento;
     request->nro_frame = nro_frame;
     request->accion_solicitada = READ_ACCION;
     request->dato = UNDEFINED;
     request->estado_memo = READ_OK;
-    request = (t_tercera_solictud *)gestionar_solicitud(request, TERCERA_SOLICITUD);
+    request = (t_tercera_solicitud *)gestionar_solicitud(request, TERCERA_SOLICITUD);
     uint32_t dato = request->dato;
     free(request);
     return dato;
 }
 
 int enviar_dato_memoria(int desplazamiento, unsigned int nro_frame, uint32_t dato) {
-    t_tercera_solictud *request = malloc(sizeof(t_tercera_solictud));
+    t_tercera_solicitud *request = malloc(sizeof(t_tercera_solicitud));
     request->desplazamiento = desplazamiento;
     request->nro_frame = nro_frame;
     request->accion_solicitada = WRITE_ACCION;
     request->dato = dato;
     request->estado_memo = WRITE_OK;
-    request = (t_tercera_solictud *)gestionar_solicitud(request, TERCERA_SOLICITUD);
+    request = (t_tercera_solicitud *)gestionar_solicitud(request, TERCERA_SOLICITUD);
     estado_memoria estado_memo = request->estado_memo;
     free(request);
     return estado_memo;

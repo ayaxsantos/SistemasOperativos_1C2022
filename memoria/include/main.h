@@ -89,6 +89,8 @@ int socket_cpu, socket_kernel;
 
 t_memoria *memoria_principal;
 t_list *tablas_primer_nivel;
+/************SEMAFOROS*******************/
+pthread_mutex_t mutex_logger;
 
 ////////////////////////////////////////////////
 
@@ -109,5 +111,7 @@ void validar_modulo(int *socket, modulo modulo);
 
 #include "memoria.h"
 #include "swap.h"
+#include "conexion.h"
+#include "paginacion.h"
 
 #endif /* MAIN_H_INCLUDED */
