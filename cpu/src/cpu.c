@@ -7,25 +7,27 @@ void iniciar() {
     socket_kernel_dispatch = esperar_cliente(cpu_dispatch);
     socket_kernel_interrupt = esperar_cliente(cpu_interrupt);*/
     //conectar_a_memoria_y_recibir_config();
-    esperar_a_kernel(0, 0);
+    esperar_a_kernel(0, 0); // TODO ¿
 }
 
 void esperar_a_kernel(int cpu_dispatch, int cpu_interrupt) {
     log_info(logger_cpu,"CPU a la espera de Kernel");
+
     pthread_t *hilo_dispatch = malloc(sizeof(pthread_t));
     pthread_t *hilo_interrupt = malloc(sizeof(pthread_t));
     pthread_t *hilo_ciclo_de_instruccion = malloc(sizeof(pthread_t));
+
     pthread_create(hilo_dispatch, NULL, &ejecutar_pcb, &cpu_dispatch);
     pthread_create(hilo_interrupt, NULL, &ejecutar_interrupcion, &cpu_interrupt);
     pthread_create(hilo_ciclo_de_instruccion, NULL, &ciclo_de_instruccion, NULL);
 
     pthread_join(*hilo_interrupt, NULL);
     pthread_join(*hilo_dispatch, NULL);
-
     pthread_join(*hilo_ciclo_de_instruccion, NULL);
 }
 
 void enviar_confirmacion(int *socket, modulo modulo_solicitante) {
+
     if(modulo_solicitante == KERNEL) {
         log_info(logger_cpu,"HANDSHAKE con Kernel realizado");
         void *buffer = malloc(sizeof(int)*2);
@@ -34,8 +36,7 @@ void enviar_confirmacion(int *socket, modulo modulo_solicitante) {
         memcpy(buffer, &handshake, sizeof(int));
         memcpy(buffer + sizeof(int), &modulo_actual, sizeof(int));
         send(*socket, buffer, sizeof(int)*2, 0);
-    }
-    else {
+    } else {
         log_error(logger_cpu, "Error al realizar el HANDSHAKE con Kernel");
     }
 }
@@ -74,14 +75,14 @@ void *ciclo_de_instruccion(void *arg) {
         hay_interrupcion = false;
         operacion_a_enviar = UNDEFINED;
         proceso_a_enviar = malloc(sizeof(t_proceso_pcb));
-
+        uint32_t valor_a_copiar;
 
         if(necesita_fetch_operands(instruccion->instruc)) { // DECODE
             // TODO
-            uint32_t espacio_a_asignar = obtener_dato_memoria(instruccion->parametro1);
+        	valor_a_copiar = obtener_dato_memoria(instruccion->parametro2); // VER, si está OK el parametro!!
         }
 
-        ejecutar_instruccion(instruccion); // EXECUTE
+        ejecutar_instruccion(instruccion, valor_a_copiar); // EXECUTE
         pcb->program_counter ++;
 
         if(hay_que_desalojar_cpu()) {
@@ -121,7 +122,7 @@ int necesita_fetch_operands(instruccion instruction) {
 	return instruction == COPY;
 }
 
-void ejecutar_instruccion(t_instruccion *instruccion) {
+void ejecutar_instruccion(t_instruccion *instruccion, uint32_t valor_a_copiar) {
 	int resultado;
 
     switch (instruccion->instruc) {
@@ -144,12 +145,12 @@ void ejecutar_instruccion(t_instruccion *instruccion) {
            break;
 
         case WRITE:
-
+        	escribir_dato_memoria(instruccion->parametro1, instruccion->parametro2);
         	chequear_si_hay_interrupcion();
            break;
 
         case COPY:
-
+        	escribir_dato_memoria(instruccion->parametro1, valor_a_copiar);
         	chequear_si_hay_interrupcion();
            break;
 

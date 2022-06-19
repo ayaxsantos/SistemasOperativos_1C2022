@@ -12,7 +12,7 @@ void *ejecutar_interrupcion(void *arg);
 void *ciclo_de_instruccion(void *arg);
 
 int necesita_fetch_operands(instruccion instruction);
-void ejecutar_instruccion(t_instruccion *instruccion);
+void ejecutar_instruccion(t_instruccion *instruccion, uint32_t valor_a_copiar) ;
 void desalojar_cpu();
 bool hay_que_desalojar_cpu();
 void chequear_si_hay_interrupcion();
