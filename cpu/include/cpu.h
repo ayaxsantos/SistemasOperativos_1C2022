@@ -4,7 +4,7 @@
 #include "main.h"
 
 void iniciar();
-void esperar_a_kernel();
+void esperar_a_kernel(int, int);
 void enviar_confirmacion(int *socket, modulo modulo_solicitante);
 
 void *ejecutar_pcb(void *arg);

@@ -2,23 +2,27 @@
 
 
 void iniciar() {
-    cpu_dispatch = iniciar_servidor(config_cpu.ip_cpu, config_cpu.puerto_escucha_dispatch);
-    cpu_interrupt = iniciar_servidor(config_cpu.ip_cpu, config_cpu.puerto_escucha_interrupt);
+   /* int cpu_dispatch = iniciar_servidor(config_cpu.ip_cpu, config_cpu.puerto_escucha_dispatch);
+    int cpu_interrupt = iniciar_servidor(config_cpu.ip_cpu, config_cpu.puerto_escucha_interrupt);
+    socket_kernel_dispatch = esperar_cliente(cpu_dispatch);
+    socket_kernel_interrupt = esperar_cliente(cpu_interrupt);*/
     //conectar_a_memoria_y_recibir_config();
-    esperar_a_kernel();
+    esperar_a_kernel(0, 0);
 }
 
-void esperar_a_kernel() {
+void esperar_a_kernel(int cpu_dispatch, int cpu_interrupt) {
     log_info(logger_cpu,"CPU a la espera de Kernel");
-    pthread_t hilo_dispatch, hilo_interrupt;
-    pthread_t hilo_ciclo_de_instruccion;
-    pthread_create(&hilo_dispatch, NULL, &ejecutar_pcb, NULL);
-    pthread_create(&hilo_interrupt, NULL, &ejecutar_interrupcion, NULL);
-    pthread_create(&hilo_ciclo_de_instruccion, NULL, &ciclo_de_instruccion, NULL);
+    pthread_t *hilo_dispatch = malloc(sizeof(pthread_t));
+    pthread_t *hilo_interrupt = malloc(sizeof(pthread_t));
+    pthread_t *hilo_ciclo_de_instruccion = malloc(sizeof(pthread_t));
+    pthread_create(hilo_dispatch, NULL, &ejecutar_pcb, &cpu_dispatch);
+    pthread_create(hilo_interrupt, NULL, &ejecutar_interrupcion, &cpu_interrupt);
+    pthread_create(hilo_ciclo_de_instruccion, NULL, &ciclo_de_instruccion, NULL);
 
-    pthread_detach(hilo_dispatch);
-    pthread_detach(hilo_interrupt);
-    pthread_detach(hilo_ciclo_de_instruccion);
+    pthread_join(*hilo_interrupt, NULL);
+    pthread_join(*hilo_dispatch, NULL);
+
+    pthread_join(*hilo_ciclo_de_instruccion, NULL);
 }
 
 void enviar_confirmacion(int *socket, modulo modulo_solicitante) {
@@ -37,6 +41,7 @@ void enviar_confirmacion(int *socket, modulo modulo_solicitante) {
 }
 
 void *ejecutar_pcb(void *arg) {
+    int cpu_dispatch = iniciar_servidor(config_cpu.ip_cpu, config_cpu.puerto_escucha_dispatch);
     socket_kernel_dispatch = esperar_cliente(cpu_dispatch);
     esperar_handshake(&socket_kernel_dispatch, enviar_confirmacion);
 
@@ -61,45 +66,51 @@ void *ejecutar_pcb(void *arg) {
 
 
 void *ciclo_de_instruccion(void *arg) {
+    while (true) {
+        sem_wait(&sem_ciclo_de_instruccion);
 
-	sem_wait(&sem_ciclo_de_instruccion);
+        t_instruccion *instruccion = (t_instruccion *) queue_pop(pcb->consola->instrucciones); // FETCH
+        operacion_a_enviar = UNDEFINED;
+        proceso_a_enviar = malloc(sizeof(t_proceso_pcb));
 
-	t_instruccion *instruccion = (t_instruccion *) queue_pop(pcb->consola->instrucciones); // FETCH
-	operacion_a_enviar = UNDEFINED;
-	proceso_a_enviar = malloc(sizeof(t_proceso_pcb));
+        if(necesita_fetch_operands(instruccion->instruc)) { // DECODE
+            // TODO
+            uint32_t espacio_a_asignar = obtener_dato_memoria(instruccion->parametro1);
+        }
 
-	if(necesita_fetch_operands(instruccion->instruc)) { // DECODE
-		// TODO
-        uint32_t espacio_a_asignar = obtener_dato_memoria(instruccion->parametro1);
-	}
+        ejecutar_instruccion(instruccion); // EXECUTE
+        pcb->program_counter ++;
 
-	ejecutar_instruccion(instruccion); // EXECUTE
-	pcb->program_counter ++;
-
-	if(hay_que_desalojar_cpu()) {
-		desalojar_cpu();
-	} else {
-		free(proceso_a_enviar);// Preguntar si está OK el free acá
-		sem_post(&sem_ciclo_de_instruccion);
-	}
+        if(hay_que_desalojar_cpu()) {
+            desalojar_cpu();
+        } else {
+            free(proceso_a_enviar);// Preguntar si está OK el free acá
+            sem_post(&sem_ciclo_de_instruccion);
+        }
+    }
 }
 
 void *ejecutar_interrupcion(void *arg) {
-    //socket_kernel_interrupt = esperar_cliente(cpu_interrupt);
+    //int *cpu_interrupt = (int *)arg;
+    int cpu_interrupt = iniciar_servidor(config_cpu.ip_cpu, config_cpu.puerto_escucha_interrupt);
+    socket_kernel_interrupt = esperar_cliente(cpu_interrupt);
 	while(true) {
-		sem_wait(&sem_interrupt);
-		//int operacion = recibir_operacion(socket_kernel_interrupt);
-		int operacion = INTERRUPCION; // BORRAR
+
+		int operacion = recibir_operacion(socket_kernel_interrupt);
+        //hay_interrupcion = true;
 
 		if(operacion == INTERRUPCION) {
-			//bool hay_interrupcion =  recibir_interrupcion(socket_kernel_interrupt);
-			bool hay_interrupcion = false; // BORRAR
+			bool hay_interrupcion =  recibir_interrupcion(socket_kernel_interrupt);
+            //sem_wait(&sem_interrupt);
 			if(hay_interrupcion) {
 				proceso_a_enviar->tiempo_bloqueo = UNDEFINED;
 				operacion_a_enviar = INTERRUPCION;
-
 			}
 		}
+        else if(operacion == UNDEFINED) {
+            printf("Hola");
+            //sem_post(&sem_ciclo_de_instruccion);
+        }
 	}
 }
 

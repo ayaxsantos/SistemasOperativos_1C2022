@@ -36,8 +36,9 @@ void conexion(void)
 int conectar_con_cpu(int socket_kernel_serv)
 {
     socket_dispatch = crear_conexion(una_config_kernel.ip_cpu, una_config_kernel.puerto_cpu_dispatch);
-    //socket_interrupt = crear_conexion(una_config_kernel.ip_cpu, una_config_kernel.puerto_cpu_interrupt);
+    socket_interrupt = crear_conexion(una_config_kernel.ip_cpu, una_config_kernel.puerto_cpu_interrupt);
     log_info(un_logger, "Enviando HANDSHAKE a CPU \n");
+    enviar_interrupcion(socket_interrupt);
     enviar_handshake(&socket_dispatch, KERNEL);
     return esperar_handshake(&socket_dispatch, confirmar_modulo);
 }

@@ -7,6 +7,7 @@
 #include <pthread.h>
 #include <math.h>
 #include <semaphore.h>
+#include <errno.h>
 
 typedef int32_t dir_logica;
 /**
@@ -55,7 +56,7 @@ t_algoritmo tipo_algoritmo_tlb;
 t_config_cpu config_cpu;
 t_log *logger_cpu;
 
-int socket_memoria, cpu_dispatch, cpu_interrupt, socket_kernel_dispatch, socket_kernel_interrupt;
+int socket_memoria, socket_kernel_dispatch, socket_kernel_interrupt;
 
 sem_t sem_interrupt, sem_ciclo_de_instruccion, sem_busqueda_proceso_nuevo;
 ////////////////////////////////////////////////////////////
