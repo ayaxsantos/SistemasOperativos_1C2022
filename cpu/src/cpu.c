@@ -138,7 +138,8 @@ void ejecutar_instruccion(t_instruccion *instruccion) {
            break;
 
         case READ:
-
+        	log_info(logger_cpu, "Valor leido de memoria: %i ", obtener_dato_memoria(instruccion->parametro1));
+        	//printf("Valor leido de memoria: %i \n", obtener_dato_memoria(instruccion->parametro1));
         	chequear_si_hay_interrupcion();
            break;
 
