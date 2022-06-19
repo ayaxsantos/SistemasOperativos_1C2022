@@ -10,15 +10,12 @@ void iniciar() {
 
 void esperar_a_kernel() {
     log_info(logger_cpu,"CPU a la espera de Kernel");
-    socket_kernel_dispatch = esperar_cliente(cpu_dispatch);
-    socket_kernel_interrupt = esperar_cliente(cpu_interrupt);
-    esperar_handshake(&socket_kernel_dispatch, enviar_confirmacion);
     pthread_t hilo_dispatch, hilo_interrupt;
     pthread_create(&hilo_dispatch, NULL, &ejecutar_pcb, NULL);
-    pthread_create(&hilo_interrupt, NULL, &ejecutar_interrupcion, NULL);
+    //pthread_create(&hilo_interrupt, NULL, &ejecutar_interrupcion, NULL);
 
-    pthread_detach(hilo_dispatch);
-    pthread_detach(hilo_interrupt);
+    pthread_join(hilo_dispatch, NULL);
+    //pthread_join(hilo_interrupt, NULL);
 }
 
 void enviar_confirmacion(int *socket, modulo modulo_solicitante) {
@@ -37,12 +34,19 @@ void enviar_confirmacion(int *socket, modulo modulo_solicitante) {
 }
 
 void *ejecutar_pcb(void *arg) {
+    socket_kernel_dispatch = esperar_cliente(cpu_dispatch);
+    esperar_handshake(&socket_kernel_dispatch, enviar_confirmacion);
+
 	while(true) {
+
 		sem_wait(&sem_execute);
-		int operacion = recibir_operacion(cpu_dispatch);
-		switch (operacion) {
+		int operacion = recibir_operacion(socket_kernel_dispatch);
+        t_proceso_pcb *proceso_pcb;
+        switch (operacion) {
 			case PCB:
-				pcb = deserializar_pcb(socket_kernel_dispatch);
+                proceso_pcb = deserializar_proceso_pcb(socket_kernel_dispatch);
+                pcb = proceso_pcb->pcb;
+                free(proceso_pcb);
 				ciclo_de_instruccion();
 				break;
 			default:
@@ -70,6 +74,7 @@ void ciclo_de_instruccion() {
 }
 
 void *ejecutar_interrupcion(void *arg) {
+    socket_kernel_interrupt = esperar_cliente(cpu_interrupt);
 	while(true) {
 		sem_wait(&sem_interrupt);
 		int operacion = recibir_operacion(cpu_dispatch);

@@ -45,6 +45,7 @@ typedef struct t_columna_tlb {
 }t_columna_tlb;
 
 /////////////////////////////////////////////////////////////
+//t_proceso_pcb *proceso_pcb;
 t_pcb *pcb;
 
 t_list *tlb;

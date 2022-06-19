@@ -45,20 +45,24 @@ void *algoritmo_fifo(void * args)
         sem_wait(&hay_procesos_en_ready);
         pthread_mutex_lock(&mutex_procesos_en_ready);
         proceso_en_exec = list_remove(procesos_en_ready, 0);
+        proceso_en_exec->un_pcb->un_estado = EXEC;
         pthread_mutex_unlock(&mutex_procesos_en_ready);
 
         pthread_mutex_lock(&mutex_log);
         log_info(un_logger,"Se pasa a EXEC el proceso PID = %u",proceso_en_exec->un_pcb->pid);
         pthread_mutex_unlock(&mutex_log);
 
-        /*
-        pthread_mutex_lock(&mutex_socket_dispatch);
-        enviar_pcb(socket_dispatch, proceso_en_exec->un_pcb,PCB);
-        pthread_mutex_unlock(&mutex_socket_dispatch);
-         */
 
-        gestionar_pcb_para_probar_sin_cpu();
-        //gestionar_pcb();
+        t_proceso_pcb *un_proceso_pcb = malloc(sizeof(t_proceso_pcb));
+        un_proceso_pcb->pcb = proceso_en_exec->un_pcb;
+        un_proceso_pcb->tiempo_bloqueo = UNDEFINED;
+
+        pthread_mutex_lock(&mutex_socket_dispatch);
+        enviar_proceso_pcb(socket_dispatch, un_proceso_pcb,PCB);
+        pthread_mutex_unlock(&mutex_socket_dispatch);
+
+        //gestionar_pcb_para_probar_sin_cpu();
+        gestionar_pcb();
     }
 }
 
@@ -90,15 +94,13 @@ void *algoritmo_sjf_con_desalojo(void *args)
         pthread_detach(*hilo_monitoreo_tiempos);
 
 
-
-        /*
         pthread_mutex_lock(&mutex_socket_dispatch);
-        enviar_pcb(socket_dispatch, proceso_en_exec->un_pcb,PCB);
+        enviar_proceso_pcb(socket_dispatch, proceso_en_exec->un_pcb,PCB);
         pthread_mutex_unlock(&mutex_socket_dispatch);
-         */
 
-        gestionar_pcb_para_probar_sin_cpu();
-        //gestionar_pcb();
+
+        //gestionar_pcb_para_probar_sin_cpu();
+        gestionar_pcb();
     }
 }
 
