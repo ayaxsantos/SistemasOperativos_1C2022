@@ -49,6 +49,7 @@ typedef struct t_columna_tlb {
 t_pcb *pcb;
 int operacion_a_enviar;
 t_proceso_pcb *proceso_a_enviar;
+bool hay_interrupcion;
 
 t_list *tlb;
 t_algoritmo tipo_algoritmo_tlb;
@@ -56,10 +57,16 @@ t_algoritmo tipo_algoritmo_tlb;
 t_config_cpu config_cpu;
 t_log *logger_cpu;
 
-int socket_memoria, socket_kernel_dispatch, socket_kernel_interrupt;
+int socket_memoria;
+int socket_kernel_dispatch;
+int socket_kernel_interrupt;
 
-sem_t sem_interrupt, sem_ciclo_de_instruccion, sem_busqueda_proceso_nuevo;
+sem_t sem_interrupt;
+sem_t sem_ciclo_de_instruccion;
+sem_t sem_busqueda_proceso_nuevo;
+
 ////////////////////////////////////////////////////////////
+
 void leer_configuracion();
 void arrancar_logger();
 void conectar_a_memoria_y_recibir_config();

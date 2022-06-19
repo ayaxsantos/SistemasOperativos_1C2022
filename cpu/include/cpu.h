@@ -15,5 +15,6 @@ int necesita_fetch_operands(instruccion instruction);
 void ejecutar_instruccion(t_instruccion *instruccion);
 void desalojar_cpu();
 bool hay_que_desalojar_cpu();
+void chequear_si_hay_interrupcion();
 
 #endif /* CPU_H_INCLUDED */

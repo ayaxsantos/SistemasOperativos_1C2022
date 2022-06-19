@@ -70,8 +70,11 @@ void *ciclo_de_instruccion(void *arg) {
         sem_wait(&sem_ciclo_de_instruccion);
 
         t_instruccion *instruccion = (t_instruccion *) queue_pop(pcb->consola->instrucciones); // FETCH
+
+        hay_interrupcion = false;
         operacion_a_enviar = UNDEFINED;
         proceso_a_enviar = malloc(sizeof(t_proceso_pcb));
+
 
         if(necesita_fetch_operands(instruccion->instruc)) { // DECODE
             // TODO
@@ -97,20 +100,20 @@ void *ejecutar_interrupcion(void *arg) {
 	while(true) {
 
 		int operacion = recibir_operacion(socket_kernel_interrupt);
-        //hay_interrupcion = true;
 
 		if(operacion == INTERRUPCION) {
-			bool hay_interrupcion =  recibir_interrupcion(socket_kernel_interrupt);
-            //sem_wait(&sem_interrupt);
-			if(hay_interrupcion) {
+			hay_interrupcion =  recibir_interrupcion(socket_kernel_interrupt);
+            sem_wait(&sem_interrupt);
+
+			if(hay_interrupcion) { // Creeria que este booleano cuando ejecute esta linea SIEMPRE va a ser true
 				proceso_a_enviar->tiempo_bloqueo = UNDEFINED;
 				operacion_a_enviar = INTERRUPCION;
 			}
 		}
-        else if(operacion == UNDEFINED) {
+/*        else if(operacion == UNDEFINED) {
             printf("Hola");
             //sem_post(&sem_ciclo_de_instruccion);
-        }
+        }*/
 	}
 }
 
@@ -126,7 +129,7 @@ void ejecutar_instruccion(t_instruccion *instruccion) {
             resultado = usleep(config_cpu.retardo_noop * 1000);
             if(resultado == -1 )
                 log_error(logger_cpu, "Error al realizar usleep");
-            sem_post(&sem_interrupt);
+            chequear_si_hay_interrupcion();
            break;
 
         case IO:
@@ -135,15 +138,18 @@ void ejecutar_instruccion(t_instruccion *instruccion) {
            break;
 
         case READ:
-        	sem_post(&sem_interrupt);
+
+        	chequear_si_hay_interrupcion();
            break;
 
         case WRITE:
-        	sem_post(&sem_interrupt);
+
+        	chequear_si_hay_interrupcion();
            break;
 
         case COPY:
-        	sem_post(&sem_interrupt);
+
+        	chequear_si_hay_interrupcion();
            break;
 
         case I_EXIT:
@@ -163,5 +169,14 @@ void desalojar_cpu() {
 
 bool hay_que_desalojar_cpu() {
 	return operacion_a_enviar != UNDEFINED;
+}
+
+void chequear_si_hay_interrupcion() {
+
+	if(hay_interrupcion) {
+		sem_post(&sem_interrupt);
+	} else {
+		sem_post(&sem_ciclo_de_instruccion);
+	}
 }
 
