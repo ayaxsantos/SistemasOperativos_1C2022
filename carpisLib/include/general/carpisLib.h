@@ -41,6 +41,8 @@ typedef enum
     PRIMERA_SOLICITUD,
     SEGUNDA_SOLICITUD,
     TERCERA_SOLICITUD,
+    INICIO_PROCESO,
+    SUSPENSION_PROCESO,
 	MSJ
     /*A definir*/
 } codigo_operacion;
@@ -178,6 +180,9 @@ t_proceso_pcb *deserializar_proceso_pcb(int socket);
 
 t_solicitud *recibir_solicitud(int socket);
 t_tercera_solicitud  *recibir_tercera_solicitud(int socket);
+
+int32_t recibir_entero(int socket);
+
 
 #include "../utils/utilslib.h"
 

@@ -1,47 +1,20 @@
 #include "../include/conexion.h"
 
-void *gestionar_conexion(void *arg) {
-    /*
+void *gestionar_conexion_kernel(void *arg) {
     int socket_cliente = *((int *)arg);
-    mate_instance request_carpincho;
     while (true) {
-
-		int cod_op = recibir_operacion(socket_cliente);
-
+		codigo_operacion cod_op = recibir_operacion(socket_cliente);
 		switch (cod_op) {
-            case MATE_INIT:
-                request_carpincho = recibir_mate_instance(socket_cliente);
-                iniciar_carpincho(&request_carpincho, socket_cliente);
-                break;
-            case MATE_CLOSE:
+            case INICIO_PROCESO:
                 pthread_mutex_lock(&mutex_logger);
-                log_info(logger_memoria,"Me llego un mate close");
+                log_info(logger_memoria,"Llego un INICIO_PROCESO");
                 pthread_mutex_unlock(&mutex_logger);
-                gestionar_mate_close(socket_cliente);
+                iniciar_proceso(socket_cliente);
                 break;
-            case MEM_ALLOC:
+            case FIN_PROCESO:
                 pthread_mutex_lock(&mutex_logger);
-                log_info(logger_memoria, "Me llego un mate alloc.");
+                log_info(logger_memoria,"Llego un FIN_PROCESO");
                 pthread_mutex_unlock(&mutex_logger);
-                gestionar_mem_alloc(socket_cliente);
-                break;
-            case MEM_FREE:
-                pthread_mutex_lock(&mutex_logger);
-                log_info(logger_memoria, "Me llego un mate free.");
-                pthread_mutex_unlock(&mutex_logger);
-                gestionar_mem_free(socket_cliente);
-                break;
-            case MEM_READ:
-            	pthread_mutex_lock(&mutex_logger);
-            	log_info(logger_memoria,"Me llego un mem read.");
-            	pthread_mutex_unlock(&mutex_logger);
-            	gestionar_mem_read(socket_cliente);
-                break;
-            case MEM_WRITE:
-            	pthread_mutex_lock(&mutex_logger);
-            	log_info(logger_memoria,"Me llego un mem write.");
-            	pthread_mutex_unlock(&mutex_logger);
-            	gestionar_mem_write(socket_cliente);
                 break;
             case -1:
                 pthread_mutex_lock(&mutex_logger);
@@ -54,7 +27,7 @@ void *gestionar_conexion(void *arg) {
                 pthread_mutex_unlock(&mutex_logger);
                 break;
 		}
-    }*/
+    }
 }
 
 void *gestionar_conexion_cpu(void *arg) {
@@ -70,26 +43,34 @@ void *gestionar_conexion_cpu(void *arg) {
             case TERCERA_SOLICITUD:
                 gestionar_tercera_solicitud();
                 break;
+            case -1:
+                pthread_mutex_lock(&mutex_logger);
+                log_error(logger_memoria, "CPU se desconecto. Terminando Hilo.");
+                pthread_mutex_unlock(&mutex_logger);
+                return EXIT_FAILURE;
             default:
                 pthread_mutex_lock(&mutex_logger);
-                log_warning(logger_memoria, "Operacion desconocida.");
+                log_warning(logger_memoria, "Operacion desconocida de CPU.");
                 pthread_mutex_unlock(&mutex_logger);
                 break;
         }
     }
 }
-/*
- * Logica repetida, se puede mejorar @Jume, Vos podes
- */
+
 void esperar_handshake_kernel(int server) {
     log_info(logger_memoria,"Iniciando handshake con modulo KERNEL ... ");
-    socket_cpu = esperar_cliente(server);
-    int resultado = esperar_handshake(&socket_cpu, validar_modulo);
+    socket_kernel = esperar_cliente(server);
+    void validar_modulo_kernel(int *socket, modulo modulo_solicitante) {
+        if(modulo_solicitante == KERNEL) {
+            log_info(logger_memoria,"KERNEL Conectado");
+            return;
+        }
+    }
+    int resultado = esperar_handshake(&socket_cpu, validar_modulo_kernel);
     if(resultado == -1) {
-        log_error(logger_memoria,"No se pudo conectar con el modulo MEMORIA");
+        log_error(logger_memoria,"No se pudo conectar con el modulo KERNEL");
         exit(EXIT_FAILURE);
     }
-    log_info(logger_memoria,"MEMORIA Conectada");
 }
 
 void esperar_handshake_cpu(int server) {
@@ -103,9 +84,6 @@ void esperar_handshake_cpu(int server) {
     log_info(logger_memoria,"CPU Conectada");
 }
 
-/*
- * Hasta aca
- */
 void validar_modulo(int *socket, modulo modulo_solicitante) {
     if(modulo_solicitante == CPU) {
         void *buffer = malloc(sizeof(int)*4);

@@ -31,6 +31,7 @@ void leer_configuracion() {
     un_config = config_create("./memoria.config");
     
     config_memoria.puerto_escucha = strdup(config_get_string_value(un_config,"PUERTO_ESCUCHA"));
+    config_memoria.ip_memoria = strdup(config_get_string_value(un_config,"IP_MEMORIA"));
     config_memoria.tamanio_memoria = config_get_int_value(un_config,"TAM_MEMORIA");
     config_memoria.tamanio_pagina = config_get_int_value(un_config,"TAM_PAGINA");
     config_memoria.entradas_por_tabla = config_get_int_value(un_config,"ENTRADAS_POR_TABLA");
