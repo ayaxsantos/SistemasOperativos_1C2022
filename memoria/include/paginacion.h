@@ -5,10 +5,11 @@
 
 /* ---------- Inicialización ---------- */
 t_tabla_pagina * crear_tabla_principal(int tamanio);
-t_tabla_pagina *inicializar_tabla();
-int agregar_pag_a_tabla_1n(t_tabla_pagina *tabla_proceso, char *nro_pag);
 void crear_tablas_segundo_nivel(t_tabla_pagina *tabla_principal);
+int agregar_pag_a_tabla_1n(t_tabla_pagina *tabla_proceso, char *nro_pag);
+int agregar_ultima_pag_a_tabla_1n(t_tabla_pagina *tabla_proceso, int nro_ultima_pag);
 int agregar_pag_a_tabla_2n(t_tabla_pagina *tabla_proceso, char *nro_pag);
+t_tabla_pagina *inicializar_tabla();
 
 /* ---------- Utilización ---------- */
 int iniciar_proceso_en_memoria(int tamanio);

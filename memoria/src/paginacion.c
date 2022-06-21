@@ -16,44 +16,57 @@ void crear_tablas_segundo_nivel(t_tabla_pagina *tabla_principal){
 	char *nro_pag;
 	int i;
 
-	for (i=0; i < config_memoria.entradas_por_tabla; i++){
-		nro_pag = string_itoa(i);
-		agregar_pag_a_tabla_1n(tabla_principal, nro_pag);
+	div_t tablas_2n_necesarias = div(tabla_principal->pags_necesarias, config_memoria.entradas_por_tabla);
+	int direccionamiento_max = config_memoria.entradas_por_tabla * config_memoria.entradas_por_tabla;
+
+	if (tabla_principal->pags_necesarias <= direccionamiento_max){
+		for (i=0; i < tablas_2n_necesarias.quot; i++){
+			nro_pag = string_itoa(i);
+			agregar_pag_a_tabla_1n(tabla_principal, nro_pag);
+		}
+
+		if (tablas_2n_necesarias.rem > 0){
+			agregar_ultima_pag_a_tabla_1n(tabla_principal, atoi(nro_pag) + 1);
+		}
+	}
+	else
+	{
+		pthread_mutex_lock(&mutex_logger);
+		log_error(logger_memoria, "El proceso que se intenta cargar en memoria es demasiado grande para la configuracion ingresada");
+		pthread_mutex_unlock(&mutex_logger);
 	}
 };
-
-t_tabla_pagina *inicializar_tabla(int tamanio){
-	t_tabla_pagina* nueva_tabla = malloc(sizeof(t_tabla_pagina));
-	nueva_tabla->id_tabla = 0;
-	nueva_tabla->tabla = dictionary_create();
-	nueva_tabla->tamanio_proceso = tamanio;
-	nueva_tabla->puntero = 0;
-	nueva_tabla->cantidad_hit = 0;
-	nueva_tabla->cantidad_miss = 0;
-
-	return nueva_tabla;
-}
 
 int agregar_pag_a_tabla_1n(t_tabla_pagina *tabla_proceso, char *nro_pag){
 	t_tabla_pagina *tabla_2n_aux = inicializar_tabla(tabla_proceso->tamanio_proceso);
 	tabla_2n_aux->id_tabla = atoi(nro_pag);
-	int i, resultado;
+	int i;
+	char *nro_pag_2n;
 
     for (i=0; i < config_memoria.entradas_por_tabla; i++){
-    		nro_pag = string_itoa(i);
-    		resultado = agregar_pag_a_tabla_2n(tabla_proceso, nro_pag);
-
-    		if(resultado == -1) {
-    			// pthread_mutex_lock(&mutex_logger);
-    			log_error(logger_memoria, "El espacio de memoria del proceso está lleno.");
-    			// pthread_mutex_unlock(&mutex_logger);
-    			liberar_todas_las_paginas_del_proceso(tabla_proceso);
-    			return -1;
-    		}
-    	}
+		nro_pag_2n = string_itoa(i);
+		agregar_pag_a_tabla_2n(tabla_proceso, nro_pag_2n);
+    }
 
     dictionary_put(tabla_proceso->tabla, nro_pag, tabla_2n_aux);
     return 0;
+}
+
+int agregar_ultima_pag_a_tabla_1n(t_tabla_pagina *tabla_proceso, int nro_ultima_pag){
+	t_tabla_pagina *tabla_2n_aux = inicializar_tabla(tabla_proceso->tamanio_proceso);
+	tabla_2n_aux->id_tabla = nro_ultima_pag;
+	int i;
+	char *nro_pag_2n;
+
+	int pags_necesarias_ultima_tabla = tabla_proceso->pags_necesarias - config_memoria.entradas_por_tabla * (nro_ultima_pag-1);
+
+	for (i=0; i < pags_necesarias_ultima_tabla; i++){
+		nro_pag_2n = string_itoa(i);
+		agregar_pag_a_tabla_2n(tabla_proceso, nro_pag_2n);
+	}
+
+	dictionary_put(tabla_proceso->tabla, string_itoa(nro_ultima_pag), tabla_2n_aux);
+	return 0;
 }
 
 int agregar_pag_a_tabla_2n(t_tabla_pagina *tabla_2n, char *nro_pag){
@@ -63,6 +76,19 @@ int agregar_pag_a_tabla_2n(t_tabla_pagina *tabla_2n, char *nro_pag){
     frame->nro_pagina_asignada = atoi(nro_pag);
     frame->is_free = false;
     return 0;
+}
+
+t_tabla_pagina *inicializar_tabla(int tamanio){
+	t_tabla_pagina* nueva_tabla = malloc(sizeof(t_tabla_pagina));
+	nueva_tabla->id_tabla = 0;
+	nueva_tabla->tabla = dictionary_create();
+	nueva_tabla->tamanio_proceso = tamanio;
+	nueva_tabla->pags_necesarias = tamanio / config_memoria.tamanio_pagina;
+	nueva_tabla->puntero = 0;
+	nueva_tabla->cantidad_hit = 0;
+	nueva_tabla->cantidad_miss = 0;
+
+	return nueva_tabla;
 }
 
 /* ---------- Utilización ---------- */
@@ -130,12 +156,12 @@ bool buscar_por_id(void *una_tabla, unsigned int id) {
 }
 
 t_tabla_pagina* obtener_tabla_1n_por_id(unsigned int id_buscado){
-    //pthread_mutex_lock(&mutex_lista_tablas_paginas);
+    pthread_mutex_lock(&mutex_lista_tablas_paginas);
     bool _buscar_por_id(void *una_tabla) {
         return buscar_por_id(buscar_por_id, id_buscado);
     }
     t_tabla_pagina *tabla_pagina = (t_tabla_pagina *)list_find(tablas_primer_nivel, _buscar_por_id);
-    //pthread_mutex_unlock(&mutex_lista_tablas_paginas);
+    pthread_mutex_unlock(&mutex_lista_tablas_paginas);
     if(tabla_pagina == NULL) { return false; }		// ¿Se encontró una tabla asociada al ID? TODO: Debugear
     return tabla_pagina;
 }

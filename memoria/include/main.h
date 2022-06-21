@@ -64,6 +64,7 @@ typedef struct t_tabla_pagina
 {
 	int id_tabla;
     int tamanio_proceso;
+    int pags_necesarias;
     t_dictionary *tabla;
     int puntero;
     int cantidad_hit;
@@ -90,8 +91,10 @@ int socket_cpu, socket_kernel;
 
 t_memoria *memoria_principal;
 t_list *tablas_primer_nivel;
+
 /************SEMAFOROS*******************/
 pthread_mutex_t mutex_logger;
+pthread_mutex_t mutex_lista_tablas_paginas;
 
 ////////////////////////////////////////////////
 
