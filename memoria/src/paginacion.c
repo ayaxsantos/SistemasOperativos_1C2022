@@ -187,7 +187,6 @@ void liberar_todas_las_paginas_del_proceso(t_tabla_pagina* tabla_proceso){
         free(pagina);
     }
     dictionary_clean_and_destroy_elements(tabla_proceso->tabla, eliminar_columna_tabla);
-    //TODO: Liberar en swap
 }
 
 void eliminar_columna_tabla(void *arg) {

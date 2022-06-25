@@ -15,6 +15,7 @@ void *gestionar_conexion_kernel(void *arg) {
                 pthread_mutex_lock(&mutex_logger);
                 log_info(logger_memoria,"Llego un FIN_PROCESO");
                 pthread_mutex_unlock(&mutex_logger);
+                terminar_proceso(socket_cliente);
                 break;
             case -1:
                 pthread_mutex_lock(&mutex_logger);
