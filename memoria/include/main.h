@@ -67,8 +67,7 @@ typedef struct t_tabla_pagina
     int pags_necesarias;
     t_dictionary *tabla;
     int puntero;
-    int cantidad_hit;
-    int cantidad_miss;
+    int frames_asignados;
 } t_tabla_pagina;
 
 typedef enum
@@ -117,5 +116,6 @@ void validar_modulo(int *socket, modulo modulo);
 #include "swap.h"
 #include "conexion.h"
 #include "paginacion.h"
+#include "memoria_controlador.h"
 
 #endif /* MAIN_H_INCLUDED */

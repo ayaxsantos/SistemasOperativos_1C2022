@@ -45,7 +45,7 @@ int agregar_pag_a_tabla_1n(t_tabla_pagina *tabla_proceso, char *nro_pag){
 
     for (i=0; i < config_memoria.entradas_por_tabla; i++){
 		nro_pag_2n = string_itoa(i);
-		agregar_pag_a_tabla_2n(tabla_proceso, nro_pag_2n);
+        agregar_pag_a_tabla_2n(tabla_2n_aux, nro_pag_2n, tabla_proceso->frames_asignados);
     }
 
     dictionary_put(tabla_proceso->tabla, nro_pag, tabla_2n_aux);
@@ -62,17 +62,29 @@ int agregar_ultima_pag_a_tabla_1n(t_tabla_pagina *tabla_proceso, int nro_ultima_
 
 	for (i=0; i < pags_necesarias_ultima_tabla; i++){
 		nro_pag_2n = string_itoa(i);
-		agregar_pag_a_tabla_2n(tabla_proceso, nro_pag_2n);
+		agregar_pag_a_tabla_2n(tabla_2n_aux, nro_pag_2n, tabla_proceso->frames_asignados);
 	}
 
 	dictionary_put(tabla_proceso->tabla, string_itoa(nro_ultima_pag), tabla_2n_aux);
 	return 0;
 }
 
-int agregar_pag_a_tabla_2n(t_tabla_pagina *tabla_2n, char *nro_pag){
+int agregar_pag_a_tabla_2n(t_tabla_pagina *tabla_2n, char *nro_pag, int frames_asignados) {
     t_col_pagina *col = malloc(sizeof(t_col_pagina));
-    t_frame *frame = obtener_frame_libre(tabla_2n, col, atoi(nro_pag));
+    t_frame *frame;
+    if(frames_asignados < config_memoria.marcos_por_proceso) {
+        frame = recorrer_frames(tabla_2n);
+    }
+    else {
+        frame = realizar_algoritmo(tabla_2n,col,READ_ACCION, atoi(nro_pag));
+    }
+    col->presencia = true;
+    col->nro_frame = frame->nro_frame;
+
     dictionary_put(tabla_2n->tabla, nro_pag, col);
+
+    frame->usado = 1;
+    frame->modificado = READ_ACCION;
     frame->nro_pagina_asignada = atoi(nro_pag);
     frame->is_free = false;
     return 0;
@@ -85,8 +97,6 @@ t_tabla_pagina *inicializar_tabla(int tamanio){
 	nueva_tabla->tamanio_proceso = tamanio;
 	nueva_tabla->pags_necesarias = tamanio / config_memoria.tamanio_pagina;
 	nueva_tabla->puntero = 0;
-	nueva_tabla->cantidad_hit = 0;
-	nueva_tabla->cantidad_miss = 0;
 
 	return nueva_tabla;
 }
