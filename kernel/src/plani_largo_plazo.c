@@ -23,16 +23,31 @@ void* planificador_largo_plazo(void)
         log_info(un_logger,"Se pasa proceso a READY, grado multiprogramacion: %d",valor_semaforo_multiprog);
         pthread_mutex_unlock(&mutex_log);
 
-        if(false/*hay_susp_bloq*/)
+
+        if(hay_al_menos_un_proceso_susp_ready())
         {
-            //Paso a ready el susp bloq que haya primero en su lista
+            //Paso a ready el susp bloq que haya primero en su list
+
+            pthread_mutex_lock(&mutex_procesos_en_susp_ready);
+            un_proceso = queue_pop(procesos_en_susp_ready);
+            pthread_mutex_unlock(&mutex_procesos_en_susp_ready);
         }
         else
         {
             un_proceso = obtener_proceso_en_new();
         }
+
         transicionar_proceso_a_ready(un_proceso);
     }
+}
+
+bool hay_al_menos_un_proceso_susp_ready()
+{
+    pthread_mutex_lock(&mutex_procesos_en_susp_ready);
+    bool un_resultado = queue_is_empty(procesos_en_susp_ready);
+    pthread_mutex_unlock(&mutex_procesos_en_susp_ready);
+
+    return !un_resultado;
 }
 
 ////////////////////////////////////////////

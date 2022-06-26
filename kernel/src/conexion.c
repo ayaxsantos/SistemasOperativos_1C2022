@@ -10,6 +10,7 @@ void conexion(void)
     int socket_proceso = 0;
 
     //conectar_con_cpu(socket_kernel_serv);
+    //conectar_con_memoria(socket_kernel_serv);
 
     // Aca tendriamos que conectarnos con MEMORIA y CPU
     // En caso de no poder realizar la conexion, error!! Kernel Panic (?
@@ -36,19 +37,44 @@ void conexion(void)
 int conectar_con_cpu(int socket_kernel_serv)
 {
     socket_dispatch = crear_conexion(una_config_kernel.ip_cpu, una_config_kernel.puerto_cpu_dispatch);
-    //socket_interrupt = crear_conexion(una_config_kernel.ip_cpu, una_config_kernel.puerto_cpu_interrupt);
+    socket_interrupt = crear_conexion(una_config_kernel.ip_cpu, una_config_kernel.puerto_cpu_interrupt);
     log_info(un_logger, "Enviando HANDSHAKE a CPU \n");
     enviar_handshake(&socket_dispatch, KERNEL);
     return esperar_handshake(&socket_dispatch, confirmar_modulo);
 }
 
-void confirmar_modulo(int *socket, modulo modulo) {
-    if(modulo == CPU) {
-        log_info(un_logger, "HANDSHAKE exitoso con CPU \n");
+int conectar_con_memoria(int socket_kernel_serv)
+{
+    socket_memoria = crear_conexion(una_config_kernel.ip_memoria,una_config_kernel.puerto_memoria);
+    log_info(un_logger,"Enviando HANDSHAKE a MEMORIA");
+    enviar_handshake(&socket_memoria,KERNEL);
+    return esperar_handshake(&socket_memoria,confirmar_modulo);
+}
+
+void confirmar_modulo(int *socket, modulo un_modulo) {
+    if(un_modulo == CPU) {
+        log_info(un_logger, "HANDSHAKE exitoso con CPU");
+    }
+    else if(un_modulo == MEMORIA) {
+        log_info(un_logger,"HANDSHAKE exitoso con MEMORIA");
     }
     else {
-        log_error(un_logger,"KERNEL PANIC -> Error al realizar el HANDSHAKE con CPU");
+        log_error(un_logger,"KERNEL PANIC -> Error al realizar el HANDSHAKE %s",
+                  obtener_nombre_modulo(un_modulo));
         exit(EXIT_FAILURE);
+    }
+}
+
+char* obtener_nombre_modulo(modulo un_modulo)
+{
+    switch (un_modulo)
+    {
+        case CPU:
+            return "CPU";
+        case MEMORIA:
+            return "MEMORIA";
+        default:
+            return "ERROR";
     }
 }
 
@@ -87,7 +113,6 @@ void inicializar_proceso(t_com_proceso *comunicacion_proceso)
     un_proceso->comunicacion_proceso = comunicacion_proceso;
     un_proceso->tiempo_ejecutando_estimacion = 0;
     un_proceso->tiempo_bloqueo = UNDEFINED;
-    un_proceso->tiempo_acumulado = 0;
     pthread_mutex_init(&un_proceso->mutex_proceso,NULL);
 
     pasar_proceso_a_new(un_proceso);

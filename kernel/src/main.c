@@ -15,10 +15,12 @@ int main(void)
 
     socket_dispatch = 0;
     socket_interrupt = 0;
+    socket_memoria = 0;
 
     inicializar_plani_largo_plazo();
     inicializar_plani_corto_plazo();
     inicializar_gestor_io();
+    inicializar_plani_mediano_plazo();
 
     conexion();
 
@@ -55,13 +57,14 @@ void iniciar_config()
     una_config_kernel.estimacion_inicial = config_get_int_value(una_config,"ESTIMACION_INICIAL");
     una_config_kernel.alfa_plani = config_get_int_value(una_config,"ALFA");
     una_config_kernel.grado_multiprogramacion = config_get_int_value(una_config,"GRADO_MULTIPROGRAMACION");
-    una_config_kernel.tiempo_max_bloqueado = config_get_int_value(una_config,"TIEMPO_MAXIMO_BLOQUEADO");
+    una_config_kernel.tiempo_max_bloqueado = config_get_int_value(una_config,"TIEMPO_MAXIMO_BLOQUEADO") / 1000;
 }
 
 void iniciar_estructuras()
 {
     procesos_en_new = queue_create();
     procesos_en_ready = list_create();
+    procesos_en_susp_ready = queue_create();
     procesos_en_bloq = list_create();
     procesos_en_exit = list_create();
 }
@@ -80,6 +83,7 @@ void iniciar_mutex()
     pthread_mutex_init(&mutex_log,NULL);
     pthread_mutex_init(&mutex_procesos_en_new,NULL);
     pthread_mutex_init(&mutex_procesos_en_ready,NULL);
+    pthread_mutex_init(&mutex_procesos_en_susp_ready,NULL);
     pthread_mutex_init(&mutex_procesos_en_bloq,NULL);
     pthread_mutex_init(&mutex_contador_pid,NULL);
 
@@ -103,6 +107,7 @@ void liberar_memoria()
 
     queue_destroy(procesos_en_new);
     list_destroy(procesos_en_ready);
+    queue_destroy(procesos_en_susp_ready);
     list_destroy(procesos_en_bloq);
     list_destroy(procesos_en_exit);
 
@@ -119,6 +124,7 @@ void liberar_mutex()
     pthread_mutex_destroy(&mutex_log);
     pthread_mutex_destroy(&mutex_procesos_en_new);
     pthread_mutex_destroy(&mutex_procesos_en_ready);
+    pthread_mutex_destroy(&mutex_procesos_en_susp_ready);
 }
 
 void liberar_semaforos()
@@ -128,13 +134,13 @@ void liberar_semaforos()
     sem_destroy(&hay_procesos_en_ready);
     sem_destroy(&hay_procesos_en_blocked);
     sem_destroy(&hay_que_ordenar_cola_ready);
-    sem_destroy(&hay_procesos_en_blocked_susp);
 }
 
 void liberar_hilos()
 {
     free(hilo_corto_plazo);
     free(hilo_largo_plazo);
+    free(hilo_mediano_plazo);
     free(hilo_gestor_io);
 }
 

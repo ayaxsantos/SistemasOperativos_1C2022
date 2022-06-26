@@ -9,7 +9,7 @@ void* planificador_largo_plazo();
 t_proceso *obtener_proceso_en_new();
 void transicionar_proceso_a_ready(t_proceso *);
 void transicionar_proceso_a_exit();
-
+bool hay_al_menos_un_proceso_susp_ready();
 void finalizar_proceso_ejecutando();
 
 ////////////////////////////////////////////

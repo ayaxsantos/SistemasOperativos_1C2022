@@ -13,6 +13,7 @@ void inicializar_proceso(t_com_proceso *);
 t_pcb *inicializar_pcb(t_com_proceso *);
 void pasar_proceso_a_new(t_proceso *);
 int conectar_con_cpu(int);
+int conectar_con_memoria(int);
 void confirmar_modulo(int *socket, modulo modulo);
 
 unsigned int obtener_tamanio(int);
@@ -23,6 +24,7 @@ void responder_fin_proceso(int);
 void responder_handshake(int);
 
 void mapeador(int *,modulo);
+char* obtener_nombre_modulo(modulo);
 
 /////////////// Auxiliares ////////////////
 

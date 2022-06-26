@@ -39,7 +39,6 @@ typedef struct proceso
     double tiempo_ejecutando_estimacion;
     t_pcb *un_pcb;
     int tiempo_bloqueo;
-    double tiempo_acumulado;
     time_t tiempoI;
     time_t tiempoF;
     pthread_mutex_t mutex_proceso;
@@ -56,16 +55,16 @@ t_config_kernel una_config_kernel;
 
 t_queue *procesos_en_new;
 t_list *procesos_en_ready;
+t_queue *procesos_en_susp_ready;
 t_list *procesos_en_bloq;
 t_list *procesos_en_exit;
 
 t_proceso *proceso_en_exec;
-t_proceso *proceso_en_bloq;
-t_proceso *proceso_en_bloq_susp;
 
 pthread_mutex_t mutex_log;
 pthread_mutex_t mutex_procesos_en_new;
 pthread_mutex_t mutex_procesos_en_ready;
+pthread_mutex_t mutex_procesos_en_susp_ready;
 pthread_mutex_t mutex_procesos_en_bloq;
 pthread_mutex_t mutex_socket_dispatch;
 pthread_mutex_t mutex_contador_pid;
@@ -74,7 +73,6 @@ sem_t grado_multiprog_lo_permite;
 sem_t llego_un_proceso;
 sem_t hay_procesos_en_ready;
 sem_t hay_procesos_en_blocked;
-sem_t hay_procesos_en_blocked_susp;
 sem_t hay_que_ordenar_cola_ready;
 
 pthread_t *hilo_corto_plazo;
@@ -112,6 +110,7 @@ void liberar_hilos();
 
 int socket_dispatch;
 int socket_interrupt;
+int socket_memoria;
 
 ///////////////////////////////////////////
 
