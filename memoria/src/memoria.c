@@ -56,9 +56,9 @@ void terminar_proceso(int socket_cliente) {
 
 void suspender_proceso(int socket_cliente) {
 	uint32_t id = recibir_entero(socket_cliente);
-	t_tabla_pagina* tabla_1n = list_get(tablas_primer_nivel, id);
+	// t_tabla_pagina* tabla_1n = list_get(tablas_primer_nivel, id);
 
-	// swapear_tabla_completa(tabla_1n);
+	// swapear_tabla_completa(tabla_1n); TODO
 
 	t_operacion *operacion = crear_operacion(SUSPENSION_PROCESO);
 	setear_operacion(operacion,&id);

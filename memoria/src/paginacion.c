@@ -111,33 +111,37 @@ int iniciar_proceso_en_memoria(int tamanio){
 void primera_solicitud_mmu(t_solicitud* solicitud){
 	t_tabla_pagina *tabla_1n = obtener_tabla_1n_por_id(solicitud->id_tabla_1n);
 	t_tabla_pagina *tabla_2n = dictionary_get(tabla_1n->tabla, string_itoa(solicitud->entrada_tabla));
-	solicitud->id_tabla_1n = tabla_2n->id_tabla;
+
+	solicitud->id_tabla_2n = tabla_2n->id_tabla;
 }
 
 void segunda_solicitud_mmu(t_solicitud* solicitud){
 	t_tabla_pagina *tabla_1n = obtener_tabla_1n_por_id(solicitud->id_tabla_1n);
 	t_tabla_pagina *tabla_2n = dictionary_get(tabla_1n->tabla, string_itoa(solicitud->id_tabla_2n));
 	t_col_pagina *pagina = dictionary_get(tabla_2n->tabla, string_itoa(solicitud->entrada_tabla));
+
 	if (pagina->presencia){
-		int nro_frame = pagina->nro_frame;
-	} else {
-		// TODO: Traer de swap y responder
+		solicitud->nro_frame = pagina->nro_frame;
+	}
+	else{
+		t_frame *frame = realizar_algoritmo(tabla_2n, pagina, READ_ACCION, solicitud->entrada_tabla);
+		solicitud->nro_frame = frame->nro_frame;
 	}
 }
 
 void tercera_solicitud_mmu(t_tercera_solicitud *solicitud){
-	t_frame *frame = list_get(memoria_principal->frames, solicitud->nro_frame);
-	int dir_fisica = atoi(frame->base) + solicitud->desplazamiento;
-	char *dir_fisica_exacta = string_itoa(dir_fisica);
-	int respuesta;
-
-	if (solicitud->accion_solicitada == READ_ACCION){
-		respuesta = leer_dato_de_memoria(dir_fisica_exacta);
-	} else if (solicitud->accion_solicitada == WRITE_ACCION){
-		respuesta = escribir_dato_en_memoria(dir_fisica_exacta, solicitud->dato);
-	} else {
-		respuesta = ERROR;
-	}
+	//t_frame *frame = list_get(memoria_principal->frames, solicitud->nro_frame);
+//	int dir_fisica = atoi(frame->base) + solicitud->desplazamiento;
+//	char *dir_fisica_exacta = string_itoa(dir_fisica);
+//	int respuesta;
+//
+//	if (solicitud->accion_solicitada == READ_ACCION){
+//		respuesta = leer_dato_de_memoria(dir_fisica_exacta);
+//	} else if (solicitud->accion_solicitada == WRITE_ACCION){
+//		respuesta = escribir_dato_en_memoria(dir_fisica_exacta, solicitud->dato);
+//	} else {
+//		respuesta = ERROR;
+//	}
 
 	// Enviar paquete de respuesta
 }

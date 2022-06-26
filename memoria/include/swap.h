@@ -73,6 +73,6 @@ void formatear_swap();
 void crear_archivo(int id, int tamanio_proceso);
 t_list* formatear_pags_en_archivo(int tamanio_proceso);
 
-void destruir_archivo(id_tabla);
+void destruir_archivo(int id_tabla);
 
 #endif /* INCLUDE_SWAP_H_ */
