@@ -6,34 +6,39 @@ int32_t solicitar_registro_1nivel(int id_tabla_1n, int entrada_tabla_1n) {
     request->id_tabla_2n = UNDEFINED;
     request->entrada_tabla = entrada_tabla_1n;
     request->nro_frame = UNDEFINED;
+    //SIMULO ENVIAR UN VALOR UNDEFINED como string
+    request->tamanio_direccion_base = 5;
+    request->direccion_base = "-100";
     request = (t_solicitud *)gestionar_solicitud(request, PRIMERA_SOLICITUD);
     int32_t  id_tabla_2n = request->id_tabla_2n;
     free(request);
     return id_tabla_2n;
 }
 
-unsigned int solicitar_registro_2nivel(int tabla2n, int entrada_tabla_2n) {
+t_solicitud *solicitar_registro_2nivel(int tabla2n, int entrada_tabla_2n) {
     t_solicitud *request = malloc(sizeof(t_solicitud));
     request->id_tabla_1n = pcb->id_tabla_1n;
     request->id_tabla_2n = tabla2n;
     request->entrada_tabla = entrada_tabla_2n;
+    request->nro_frame = UNDEFINED;
+    //SIMULO ENVIAR UN VALOR UNDEFINED como string
+    request->tamanio_direccion_base = 5;
+    request->direccion_base = "-100";
     request = (t_solicitud *)gestionar_solicitud(request, SEGUNDA_SOLICITUD);
-    unsigned int nro_frame = request->nro_frame;
-    free(request);
-    return nro_frame;
+    return request;
 }
 
-uint32_t solicitar_dato(int desplazamiento, unsigned int nro_frame) {
+t_tercera_solicitud *solicitar_dato(char *direccion_fisica, unsigned int nro_frame, int32_t size){
     t_tercera_solicitud *request = malloc(sizeof(t_tercera_solicitud));
-    request->desplazamiento = desplazamiento;
     request->nro_frame = nro_frame;
     request->accion_solicitada = READ_ACCION;
-    request->dato = UNDEFINED;
     request->estado_memo = READ_OK;
+
+    request->tamanio = size; //Lo que memoria va a leer en el frame
+    request->tamanio_direccion_fisica = string_length(direccion_fisica) + 1;
+    request->direccion_fisica = direccion_fisica;
     request = (t_tercera_solicitud *)gestionar_solicitud(request, TERCERA_SOLICITUD);
-    uint32_t dato = request->dato;
-    free(request);
-    return dato;
+    return request;
 }
 
 int enviar_dato_memoria(int desplazamiento, unsigned int nro_frame, uint32_t dato) {
