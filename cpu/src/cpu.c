@@ -2,23 +2,20 @@
 
 
 void iniciar() {
-   /* int cpu_dispatch = iniciar_servidor(config_cpu.ip_cpu, config_cpu.puerto_escucha_dispatch);
-    int cpu_interrupt = iniciar_servidor(config_cpu.ip_cpu, config_cpu.puerto_escucha_interrupt);
-    socket_kernel_dispatch = esperar_cliente(cpu_dispatch);
-    socket_kernel_interrupt = esperar_cliente(cpu_interrupt);*/
+
     //conectar_a_memoria_y_recibir_config();
-    esperar_a_kernel(0, 0); // TODO ¿
+    esperar_a_kernel();
 }
 
-void esperar_a_kernel(int cpu_dispatch, int cpu_interrupt) {
+void esperar_a_kernel() {
     log_info(logger_cpu,"CPU a la espera de Kernel");
 
     pthread_t *hilo_dispatch = malloc(sizeof(pthread_t));
     pthread_t *hilo_interrupt = malloc(sizeof(pthread_t));
     pthread_t *hilo_ciclo_de_instruccion = malloc(sizeof(pthread_t));
 
-    pthread_create(hilo_dispatch, NULL, &ejecutar_pcb, &cpu_dispatch);
-    pthread_create(hilo_interrupt, NULL, &ejecutar_interrupcion, &cpu_interrupt);
+    pthread_create(hilo_dispatch, NULL, &ejecutar_pcb, NULL);
+    pthread_create(hilo_interrupt, NULL, &ejecutar_interrupcion, NULL);
     pthread_create(hilo_ciclo_de_instruccion, NULL, &ciclo_de_instruccion, NULL);
 
     pthread_join(*hilo_interrupt, NULL);
@@ -78,7 +75,7 @@ void *ciclo_de_instruccion(void *arg) {
         uint32_t valor_a_copiar;
 
         if(necesita_fetch_operands(instruccion->instruc)) { // DECODE
-            // TODO
+
         	valor_a_copiar = obtener_dato_memoria(instruccion->parametro2); // VER, si está OK el parametro!!
         }
 
@@ -106,15 +103,10 @@ void *ejecutar_interrupcion(void *arg) {
 			hay_interrupcion =  recibir_interrupcion(socket_kernel_interrupt);
             sem_wait(&sem_interrupt);
 
-			if(hay_interrupcion) { // Creeria que este booleano cuando ejecute esta linea SIEMPRE va a ser true
-				proceso_a_enviar->tiempo_bloqueo = UNDEFINED;
-				operacion_a_enviar = INTERRUPCION;
-			}
+			proceso_a_enviar->tiempo_bloqueo = UNDEFINED;
+			operacion_a_enviar = INTERRUPCION;
+
 		}
-/*        else if(operacion == UNDEFINED) {
-            printf("Hola");
-            //sem_post(&sem_ciclo_de_instruccion);
-        }*/
 	}
 }
 
