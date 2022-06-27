@@ -10,7 +10,7 @@ void conexion(void)
     int socket_proceso = 0;
 
     conectar_con_cpu(socket_kernel_serv);
-    conectar_con_memoria(socket_kernel_serv);
+    //conectar_con_memoria(socket_kernel_serv);
 
     // Aca tendriamos que conectarnos con MEMORIA y CPU
     // En caso de no poder realizar la conexion, error!! Kernel Panic (?
@@ -36,8 +36,8 @@ void conexion(void)
 
 int conectar_con_cpu(int socket_kernel_serv)
 {
-    socket_dispatch = crear_conexion(una_config_kernel.ip_cpu, una_config_kernel.puerto_cpu_dispatch);
     socket_interrupt = crear_conexion(una_config_kernel.ip_cpu, una_config_kernel.puerto_cpu_interrupt);
+    socket_dispatch = crear_conexion(una_config_kernel.ip_cpu, una_config_kernel.puerto_cpu_dispatch);
     log_info(un_logger, "Enviando HANDSHAKE a CPU \n");
     enviar_interrupcion(socket_interrupt);
     enviar_handshake(&socket_dispatch, KERNEL);

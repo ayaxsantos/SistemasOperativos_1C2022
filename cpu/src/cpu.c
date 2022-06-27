@@ -3,7 +3,7 @@
 
 void iniciar() {
 
-    conectar_a_memoria_y_recibir_config();
+    //conectar_a_memoria_y_recibir_config();
     esperar_a_kernel();
     iniciar_tlb();
 }
@@ -77,8 +77,14 @@ void *ejecutar_pcb(void *arg) {
 
 
 void *ciclo_de_instruccion(void *arg) {
+    int valor_sem = 0;
     while (true) {
         sem_wait(&sem_ciclo_de_instruccion);
+        sem_getvalue(&sem_ciclo_de_instruccion,&valor_sem);
+
+        pthread_mutex_lock(&mutex_logger);
+        log_info(logger_cpu,"SemVal: %d",valor_sem);
+        pthread_mutex_unlock(&mutex_logger);
 
         pthread_mutex_lock(&mutex_logger);
         log_info(logger_cpu,"Iniciando ciclo de instruccion");
@@ -103,7 +109,7 @@ void *ciclo_de_instruccion(void *arg) {
             desalojar_cpu();
         } else {
             free(proceso_a_enviar);// Preguntar si está OK el free acá
-            sem_post(&sem_ciclo_de_instruccion);
+            //sem_post(&sem_ciclo_de_instruccion);
         }
     }
 }

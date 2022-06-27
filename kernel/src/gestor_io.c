@@ -21,13 +21,13 @@ void *gestor_io(void)
         pthread_mutex_unlock(&mutex_procesos_en_bloq);
         int pepito = 0;
         pthread_mutex_lock(&mutex_log);
-        log_warning(un_logger,"El proceso con PID: %u hace su I/O de %d milisegundos",
+        log_warning(un_logger,"El proceso con PID: %u hace su I/O de %d segundos",
                  un_proceso->un_pcb->pid,
                  un_proceso->tiempo_bloqueo);
         pthread_mutex_unlock(&mutex_log);
 
         pthread_mutex_lock(&un_proceso->mutex_proceso);
-        pepito = un_proceso->tiempo_bloqueo * 1000;
+        pepito = un_proceso->tiempo_bloqueo * 1000000;
         pthread_mutex_unlock(&un_proceso->mutex_proceso);
 
         usleep(pepito);

@@ -5,21 +5,13 @@ void iniciar_memoria() {
     tablas_primer_nivel = list_create();
     int server = iniciar_servidor(config_memoria.ip_memoria,config_memoria.puerto_escucha);
     setear_estructuras_de_memoria();
-<<<<<<< HEAD
-    esperar_handshake_cpu(server);
-	esperar_handshake_kernel(server);
-	/*log_info(logger_memoria,"Memoria a la espera de conexiones ...");
-
-	int socket_cliente;
-=======
+	esperar_handshake_cpu(server);
     esperar_handshake_kernel(server);
-    esperar_handshake_cpu(server);
 	log_info(logger_memoria,"Memoria a la espera de conexiones ...");
     pthread_t *hilo_cpu = malloc(sizeof(pthread_t));
     pthread_create(hilo_cpu, NULL, &gestionar_conexion_cpu, NULL);
     pthread_detach(*hilo_cpu);
     int *socket_cliente;
->>>>>>> bc0c57ce1d53a656c8e429519950230132577b60
 	while(true) {
         socket_cliente = malloc(sizeof(int));
         *socket_cliente = esperar_cliente(server);

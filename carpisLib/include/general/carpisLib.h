@@ -136,7 +136,7 @@ typedef struct t_tercera_solicitud
     accion accion_solicitada;
     uint32_t dato; //Suponemos un entero no signado de 4bytes
     estado_memoria estado_memo;
-} __attribute__((packed)) t_tercera_solictud;
+} __attribute__((packed)) t_tercera_solicitud;
 
 /**
  * @name habilitar_log
