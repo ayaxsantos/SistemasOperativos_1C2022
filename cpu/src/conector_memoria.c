@@ -1,53 +1,73 @@
 #include "../include/conector_memoria.h"
-/*
-int solicitar_registro_1nivel(int id_tabla_1n, int entrada_tabla_1n) {
-    t_request_tabla *request = malloc(sizeof(t_request_tabla));
+
+int32_t solicitar_registro_1nivel(int id_tabla_1n, int entrada_tabla_1n) {
+    t_solicitud *request = malloc(sizeof(t_solicitud));
     request->id_tabla_1n = id_tabla_1n;
-    request->tabla2n = UNDEFINED;
+    request->id_tabla_2n = UNDEFINED;
     request->entrada_tabla = entrada_tabla_1n;
-    int32_t *id_tabla_2n = (int32_t *) gestionar_solicitud(request, RESPONSE_TABLA);
-    return *id_tabla_2n;
+    request = (t_solicitud *)gestionar_solicitud(request, PRIMERA_SOLICITUD);
+    int32_t  id_tabla_2n = request->id_tabla_2n;
+    free(request);
+    return id_tabla_2n;
 }
 
-t_columna_pagina *solicitar_registro_2nivel(int tabla2n, int entrada_tabla_2n) {
-
-    t_request_tabla *request = malloc(sizeof(t_request_tabla));
+unsigned int solicitar_registro_2nivel(int tabla2n, int entrada_tabla_2n) {
+    t_solicitud *request = malloc(sizeof(t_solicitud));
     request->id_tabla_1n = pcb->id_tabla_1n;
-    request->tabla2n = tabla2n;
+    request->id_tabla_2n = tabla2n;
     request->entrada_tabla = entrada_tabla_2n;
-    t_columna_pagina *registro = (t_columna_pagina *)gestionar_solicitud(request, RESPONSE_REGISTRO);
-    return registro;
+    request = (t_solicitud *)gestionar_solicitud(request, SEGUNDA_SOLICITUD);
+    unsigned int nro_frame = request->nro_frame;
+    free(request);
+    return nro_frame;
 }
 
-void *gestionar_solicitud(t_request_tabla *request, codigo_operacion codigo_response) {
-    t_operacion *operacion = crear_operacion(REQUEST_TABLA);
+uint32_t solicitar_dato(int desplazamiento, unsigned int nro_frame) {
+    t_tercera_solictud *request = malloc(sizeof(t_tercera_solictud));
+    request->desplazamiento = desplazamiento;
+    request->nro_frame = nro_frame;
+    request->accion_solicitada = READ_ACCION;
+    request->dato = UNDEFINED;
+    request->estado_memo = READ_OK;
+    request = (t_tercera_solictud *)gestionar_solicitud(request, TERCERA_SOLICITUD);
+    uint32_t dato = request->dato;
+    free(request);
+    return dato;
+}
+
+int enviar_dato_memoria(int desplazamiento, unsigned int nro_frame, uint32_t dato) {
+    t_tercera_solictud *request = malloc(sizeof(t_tercera_solictud));
+    request->desplazamiento = desplazamiento;
+    request->nro_frame = nro_frame;
+    request->accion_solicitada = WRITE_ACCION;
+    request->dato = dato;
+    request->estado_memo = WRITE_OK;
+    request = (t_tercera_solictud *)gestionar_solicitud(request, TERCERA_SOLICITUD);
+    estado_memoria estado_memo = request->estado_memo;
+    free(request);
+    return estado_memo;
+}
+
+void *gestionar_solicitud(void *request, codigo_operacion codigo) {
+    t_operacion *operacion = crear_operacion(codigo);
     setear_operacion(operacion, request);
     enviar_operacion(operacion, socket_memoria);
     eliminar_operacion(operacion);
+    free(request);
 
     //Espera de retorno
-    int codigo_operacion = recibir_operacion(socket_memoria);
-    if(codigo_operacion == codigo_response && codigo_response == RESPONSE_TABLA) {
-        int32_t *id_tabla_2n = recibir_registro_1nivel(socket_memoria);
-        return id_tabla_2n;
+    int codigo_retorno = recibir_operacion(socket_memoria);
+    switch (codigo_retorno) {
+        case PRIMERA_SOLICITUD:
+        case SEGUNDA_SOLICITUD:
+            request = recibir_solicitud(socket_memoria);
+            return request;
+            break;
+        case TERCERA_SOLICITUD:
+            request = recibir_tercera_solicitud(socket_memoria);
+            return request;
+            break;
     }
-    else if (codigo_operacion == codigo_response && codigo_response == RESPONSE_REGISTRO) {
-        t_columna_pagina *registro = recibir_registro_2nivel(socket_memoria);
-        return registro;
-    }
-    log_error(logger_cpu,"Error al realizar %d", codigo_response);
+    log_error(logger_cpu,"Error al realizar %d", codigo);
     return NULL;
 }
-
-int32_t *recibir_registro_1nivel(int socket) {
-    int size;
-    void *buffer = recibir_buffer(&size, socket);
-    return (int32_t *)buffer;
-}
-
-t_columna_pagina *recibir_registro_2nivel(int socket) {
-    int size;
-    void *buffer = recibir_buffer(&size, socket);
-    return (t_columna_pagina *)buffer;
-}
-*/
