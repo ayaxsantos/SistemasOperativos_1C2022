@@ -31,6 +31,7 @@ void leer_configuracion() {
     un_config = config_create("./memoria.config");
     
     config_memoria.puerto_escucha = strdup(config_get_string_value(un_config,"PUERTO_ESCUCHA"));
+    config_memoria.ip_memoria = strdup(config_get_string_value(un_config,"IP_MEMORIA"));
     config_memoria.tamanio_memoria = config_get_int_value(un_config,"TAM_MEMORIA");
     config_memoria.tamanio_pagina = config_get_int_value(un_config,"TAM_PAGINA");
     config_memoria.entradas_por_tabla = config_get_int_value(un_config,"ENTRADAS_POR_TABLA");
@@ -83,28 +84,6 @@ void esperar_handshake_kernel(int server)
     log_info(logger_memoria,"KERNEL Conectada");
 }
 
-void validar_modulo(int *socket, modulo modulo_solicitante) {
-    if(modulo_solicitante == CPU) {
-        void *buffer = malloc(sizeof(int)*4);
-        codigo_operacion handshake = HANDSHAKE;
-        int modulo_actual = MEMORIA;
-        int desplazamiento = 0;
-        memcpy(buffer, &handshake, sizeof(int));
-        desplazamiento += sizeof(int);
-        memcpy(buffer + desplazamiento, &modulo_actual, sizeof(int));
-        desplazamiento += sizeof(int);
-        memcpy(buffer + desplazamiento, &(config_memoria.entradas_por_tabla), sizeof(int));
-        desplazamiento += sizeof(int);
-        memcpy(buffer + desplazamiento, &(config_memoria.tamanio_pagina), sizeof(int));
-
-        send(*socket, buffer, sizeof(int)*4, 0);
-        log_info(logger_memoria,"CPU Conectada");
-        free(buffer);
-        return;
-    }
-    log_error(logger_memoria,"Error de handshake con CPU");
-}
-
 void iniciar_particionamiento_en_frames() {
     int i, desplazamiento = 0;
     memoria_principal->frames = list_create();
@@ -134,7 +113,6 @@ void setear_algoritmo_reemplazo() {
         log_error(logger_memoria,"No se pudo setear el algoritmo de reemplazo. Error en el archivo config.");
     } 
 }
-
 
 void finalizar_memoria() {
     // list_destroy_and_destroy_elements(tablas_paginas, eliminar_paginas);

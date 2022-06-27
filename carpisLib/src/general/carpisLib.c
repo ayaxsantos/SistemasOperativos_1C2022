@@ -225,13 +225,28 @@ t_solicitud *recibir_solicitud(int socket) {
     return solicitud;
 }
 
-t_tercera_solictud *recibir_tercera_solicitud(int socket) {
+t_tercera_solicitud *recibir_tercera_solicitud(int socket) {
     int size;
     void *buffer = recibir_buffer(&size, socket);
-    t_tercera_solictud *solicitud = malloc(sizeof(t_tercera_solictud));
+    t_tercera_solicitud *solicitud = malloc(sizeof(t_tercera_solicitud));
     memcpy(solicitud, buffer, size);
     free(buffer);
     return solicitud;
+}
+
+/*** KERNEL + MEMORIA ***/
+/*
+ * @DESC: Recibe un entero en el buffer y lo retorna
+ * Se puede usar para recibir un tamanio_proceso como el id_tabla_1n u otras cosas que
+ * se te imaginen
+ */
+int32_t recibir_entero(int socket) {
+    int size;
+    void *buffer = recibir_buffer(&size, socket);
+    uint32_t tamanio;
+    memcpy(&tamanio, buffer, size);
+    free(buffer);
+    return tamanio;
 }
 
 /*
@@ -261,6 +276,6 @@ void *serializar_tabla1n(t_dictionary *tabla1n, int *size) {
         free(index);
         i++;
     }
-    //*size = desplazamiento;
+    /size = desplazamiento;
     return stream;
 }*/

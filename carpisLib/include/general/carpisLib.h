@@ -41,6 +41,8 @@ typedef enum
     PRIMERA_SOLICITUD,
     SEGUNDA_SOLICITUD,
     TERCERA_SOLICITUD,
+    INICIO_PROCESO,
+    SUSPENSION_PROCESO,
 	MSJ
     /*A definir*/
 } codigo_operacion;
@@ -127,7 +129,7 @@ typedef struct t_solicitud
     unsigned int nro_frame;
 } __attribute__((packed)) t_solicitud;
 
-typedef struct t_tercera_solictud
+typedef struct t_tercera_solicitud
 {
     unsigned int desplazamiento;
     unsigned int nro_frame;
@@ -177,7 +179,10 @@ t_proceso_pcb *deserializar_proceso_pcb(int socket);
 /*** CPU + MEMORIA ***/
 
 t_solicitud *recibir_solicitud(int socket);
-t_tercera_solictud  *recibir_tercera_solicitud(int socket);
+t_tercera_solicitud  *recibir_tercera_solicitud(int socket);
+
+int32_t recibir_entero(int socket);
+
 
 #include "../utils/utilslib.h"
 

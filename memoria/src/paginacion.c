@@ -4,7 +4,7 @@
 
 t_tabla_pagina *crear_tabla_principal(int tamanio){
 	t_tabla_pagina *tabla_principal = inicializar_tabla(tamanio);
-	tabla_principal = cantidad_tablas_1n;
+	tabla_principal->id_tabla = cantidad_tablas_1n;
 	cantidad_tablas_1n++;
 
 	crear_tablas_segundo_nivel(tabla_principal);
@@ -36,7 +36,7 @@ t_tabla_pagina *inicializar_tabla(int tamanio){
 
 int agregar_pag_a_tabla_1n(t_tabla_pagina *tabla_proceso, char *nro_pag){
 	t_tabla_pagina *tabla_2n_aux = inicializar_tabla(tabla_proceso->tamanio_proceso);
-	tabla_2n_aux->id_tabla = nro_pag;
+	tabla_2n_aux->id_tabla = atoi(nro_pag);
 	int i, resultado;
 
     for (i=0; i < config_memoria.entradas_por_tabla; i++){
@@ -72,16 +72,64 @@ int iniciar_proceso_en_memoria(int tamanio){
 	return tabla_proceso->id_tabla;
 }
 
-int obtener_tabla_2n(int entrada_tabla_1n){
-
+void primera_solicitud_mmu(t_solicitud* solicitud){
+	t_tabla_pagina *tabla_1n = obtener_tabla_1n_por_id(solicitud->id_tabla_1n);
+	t_tabla_pagina *tabla_2n = dictionary_get(tabla_1n->tabla, string_itoa(solicitud->entrada_tabla));
+	solicitud->id_tabla_1n = tabla_2n->id_tabla;
 }
 
+void segunda_solicitud_mmu(t_solicitud* solicitud){
+	t_tabla_pagina *tabla_1n = obtener_tabla_1n_por_id(solicitud->id_tabla_1n);
+	t_tabla_pagina *tabla_2n = dictionary_get(tabla_1n->tabla, string_itoa(solicitud->id_tabla_2n));
+	t_col_pagina *pagina = dictionary_get(tabla_2n->tabla, string_itoa(solicitud->entrada_tabla));
+	if (pagina->presencia){
+		int nro_frame = pagina->nro_frame;
+	} else {
+		// TODO: Traer de swap y responder
+	}
+}
+
+void tercera_solicitud_mmu(t_tercera_solicitud *solicitud){
+	t_frame *frame = list_get(memoria_principal->frames, solicitud->nro_frame);
+	int dir_fisica = atoi(frame->base) + solicitud->desplazamiento;
+	char *dir_fisica_exacta = string_itoa(dir_fisica);
+	int respuesta;
+
+	if (solicitud->accion_solicitada == READ_ACCION){
+		respuesta = leer_dato_de_memoria(dir_fisica_exacta);
+	} else if (solicitud->accion_solicitada == WRITE_ACCION){
+		respuesta = escribir_dato_en_memoria(dir_fisica_exacta, solicitud->dato);
+	} else {
+		respuesta = ERROR;
+	}
+
+	// Enviar paquete de respuesta
+}
+
+int leer_dato_de_memoria(char *dir_fisica){
+    char* dato = NULL;
+
+    memcpy(dato, dir_fisica, sizeof(int));
+
+    return atoi(dato);
+}
+
+int escribir_dato_en_memoria(char *dir_fisica, int dato){
+	int status = -1;
+
+	memcpy(dir_fisica, string_itoa(dato), sizeof(int));
+	status = 200; // ver el tema status
+
+	return status;
+}
+
+/* ---------- Auxiliares ---------- */
 bool buscar_por_id(void *una_tabla, unsigned int id) {
     t_tabla_pagina *tabla_proceso = (t_tabla_pagina *) una_tabla;
     return tabla_proceso->id_tabla == id;
 }
 
-t_tabla_pagina* obtener_tabla_por_id(unsigned int id_buscado){
+t_tabla_pagina* obtener_tabla_1n_por_id(unsigned int id_buscado){
     //pthread_mutex_lock(&mutex_lista_tablas_paginas);
     bool _buscar_por_id(void *una_tabla) {
         return buscar_por_id(buscar_por_id, id_buscado);
