@@ -22,6 +22,7 @@ int escribir_dato_en_memoria(char *dir_fisica, int dato);
 
 /* ---------- Auxiliares ---------- */
 bool buscar_por_id(void *una_tabla, unsigned int id);
+bool _buscar_por_id(void *una_tabla);
 t_tabla_pagina* obtener_tabla_1n_por_id(unsigned int id_buscado);
 void modificar_bit_de_presencia_pagina(t_frame *frame, int valor);
 

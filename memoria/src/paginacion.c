@@ -130,20 +130,21 @@ void segunda_solicitud_mmu(t_solicitud* solicitud){
 }
 
 void tercera_solicitud_mmu(t_tercera_solicitud *solicitud){
-	//t_frame *frame = list_get(memoria_principal->frames, solicitud->nro_frame);
-//	int dir_fisica = atoi(frame->base) + solicitud->desplazamiento;
-//	char *dir_fisica_exacta = string_itoa(dir_fisica);
-//	int respuesta;
-//
-//	if (solicitud->accion_solicitada == READ_ACCION){
-//		respuesta = leer_dato_de_memoria(dir_fisica_exacta);
-//	} else if (solicitud->accion_solicitada == WRITE_ACCION){
-//		respuesta = escribir_dato_en_memoria(dir_fisica_exacta, solicitud->dato);
-//	} else {
-//		respuesta = ERROR;
-//	}
+	int respuesta;
 
-	// Enviar paquete de respuesta
+	if (solicitud->accion_solicitada == READ_ACCION){
+		respuesta = leer_dato_de_memoria(solicitud->direccion_fisica);
+		solicitud->dato = string_itoa(respuesta);
+	} else if (solicitud->accion_solicitada == WRITE_ACCION){
+		respuesta = escribir_dato_en_memoria(solicitud->direccion_fisica, atoi(solicitud->dato));
+		if (respuesta) {
+			solicitud->estado_memo = WRITE_OK;
+		} else {
+			solicitud->estado_memo = WRITE_FAULT;
+		}
+	} else {
+		log_info(logger_memoria,"Accion no valida.");
+	}
 }
 
 int leer_dato_de_memoria(char *dir_fisica){
@@ -155,10 +156,11 @@ int leer_dato_de_memoria(char *dir_fisica){
 }
 
 int escribir_dato_en_memoria(char *dir_fisica, int dato){
-	int status = -1;
+	int status = 0;
 
+	// Chequear que se pueda escribir ahi TODO
 	memcpy(dir_fisica, string_itoa(dato), sizeof(int));
-	status = 200; // ver el tema status
+	status = 1;
 
 	return status;
 }
