@@ -4,13 +4,13 @@
 
 void conexion(void)
 {
-    int socket_kernel_serv = iniciar_servidor("127.0.0.1", "25655");
+    int socket_kernel_serv = iniciar_servidor("127.0.0.1",una_config_kernel.puerto_escucha);
     log_info(un_logger, "Kernel a la espera de conexiones ... \n");
 
     int socket_proceso = 0;
 
-    //conectar_con_cpu(socket_kernel_serv);
-    //conectar_con_memoria(socket_kernel_serv);
+    conectar_con_cpu(socket_kernel_serv);
+    conectar_con_memoria(socket_kernel_serv);
 
     // Aca tendriamos que conectarnos con MEMORIA y CPU
     // En caso de no poder realizar la conexion, error!! Kernel Panic (?

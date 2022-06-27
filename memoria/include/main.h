@@ -105,6 +105,7 @@ void liberar_memoria();
 void liberar_configuracion_y_log();
 
 void esperar_handshake_cpu(int server);
+void esperar_handshake_kernel(int server);
 void validar_modulo(int *socket, modulo modulo);
 
 #include "memoria.h"

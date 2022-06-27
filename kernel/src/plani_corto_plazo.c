@@ -58,11 +58,11 @@ void *algoritmo_fifo(void * args)
         un_proceso_pcb->tiempo_bloqueo = proceso_en_exec->tiempo_bloqueo;
 
         pthread_mutex_lock(&mutex_socket_dispatch);
-        //enviar_proceso_pcb(socket_dispatch, un_proceso_pcb,PCB);
+        enviar_proceso_pcb(socket_dispatch, un_proceso_pcb,PCB);
         pthread_mutex_unlock(&mutex_socket_dispatch);
 
-        gestionar_pcb_para_probar_sin_cpu();
-        //gestionar_pcb();
+        //gestionar_pcb_para_probar_sin_cpu();
+        gestionar_pcb();
 
         free(un_proceso_pcb);
     }

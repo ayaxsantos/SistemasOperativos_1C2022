@@ -65,10 +65,22 @@ void esperar_handshake_cpu(int server) {
     socket_cpu = esperar_cliente(server);
     int resultado = esperar_handshake(&socket_cpu, validar_modulo);
     if(resultado == -1) {
-        log_error(logger_memoria,"No se pudo conectar con el modulo MEMORIA");
+        log_error(logger_memoria,"No se pudo conectar con el modulo CPU");
         exit(EXIT_FAILURE);
     }
-    log_info(logger_memoria,"MEMORIA Conectada");
+    log_info(logger_memoria,"CPU Conectada");
+}
+
+void esperar_handshake_kernel(int server)
+{
+    log_info(logger_memoria,"Iniciando handshake con modulo KERNEL ...");
+    socket_kernel = esperar_cliente(server);
+    int resultado = esperar_handshake(&socket_kernel, validar_modulo);
+    if(resultado == -1) {
+        log_error(logger_memoria,"No se pudo conectar con el modulo KERNEL");
+        exit(EXIT_FAILURE);
+    }
+    log_info(logger_memoria,"KERNEL Conectada");
 }
 
 void validar_modulo(int *socket, modulo modulo_solicitante) {

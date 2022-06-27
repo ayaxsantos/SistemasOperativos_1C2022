@@ -16,7 +16,6 @@ typedef int32_t dir_logica;
  */
 typedef enum
 {
-    CLOCK,
     LRU,
     FIFO
 }t_algoritmo;
@@ -65,6 +64,7 @@ sem_t sem_interrupt;
 sem_t sem_ciclo_de_instruccion;
 sem_t sem_busqueda_proceso_nuevo;
 
+pthread_mutex_t mutex_logger;
 ////////////////////////////////////////////////////////////
 
 void leer_configuracion();

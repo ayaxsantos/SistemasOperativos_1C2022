@@ -3,8 +3,9 @@
 
 void iniciar() {
 
-    //conectar_a_memoria_y_recibir_config();
+    conectar_a_memoria_y_recibir_config();
     esperar_a_kernel();
+    iniciar_tlb();
 }
 
 void esperar_a_kernel() {
@@ -26,7 +27,9 @@ void esperar_a_kernel() {
 void enviar_confirmacion(int *socket, modulo modulo_solicitante) {
 
     if(modulo_solicitante == KERNEL) {
+        pthread_mutex_lock(&mutex_logger);
         log_info(logger_cpu,"HANDSHAKE con Kernel realizado");
+        pthread_mutex_unlock(&mutex_logger);
         void *buffer = malloc(sizeof(int)*2);
         modulo modulo_actual = CPU;
         codigo_operacion handshake = HANDSHAKE;
@@ -34,7 +37,9 @@ void enviar_confirmacion(int *socket, modulo modulo_solicitante) {
         memcpy(buffer + sizeof(int), &modulo_actual, sizeof(int));
         send(*socket, buffer, sizeof(int)*2, 0);
     } else {
+        pthread_mutex_lock(&mutex_logger);
         log_error(logger_cpu, "Error al realizar el HANDSHAKE con Kernel");
+        pthread_mutex_unlock(&mutex_logger);
     }
 }
 
@@ -56,7 +61,15 @@ void *ejecutar_pcb(void *arg) {
 
                 sem_post(&sem_ciclo_de_instruccion);
 				break;
+            case -1:
+                pthread_mutex_lock(&mutex_logger);
+                log_error(logger_cpu, "El puerto dispatch se desconecto. Terminando Hilo.");
+                pthread_mutex_unlock(&mutex_logger);
+                return EXIT_FAILURE;
 			default:
+                pthread_mutex_lock(&mutex_logger);
+                log_warning(logger_cpu, "Operacion desconocida.");
+                pthread_mutex_unlock(&mutex_logger);
 				break;
 		}
 	}
@@ -66,6 +79,10 @@ void *ejecutar_pcb(void *arg) {
 void *ciclo_de_instruccion(void *arg) {
     while (true) {
         sem_wait(&sem_ciclo_de_instruccion);
+
+        pthread_mutex_lock(&mutex_logger);
+        log_info(logger_cpu,"Iniciando ciclo de instruccion");
+        pthread_mutex_unlock(&mutex_logger);
 
         t_instruccion *instruccion = (t_instruccion *) queue_pop(pcb->consola->instrucciones); // FETCH
 
@@ -92,17 +109,22 @@ void *ciclo_de_instruccion(void *arg) {
 }
 
 void *ejecutar_interrupcion(void *arg) {
-    //int *cpu_interrupt = (int *)arg;
     int cpu_interrupt = iniciar_servidor(config_cpu.ip_cpu, config_cpu.puerto_escucha_interrupt);
     socket_kernel_interrupt = esperar_cliente(cpu_interrupt);
+    pthread_mutex_lock(&mutex_logger);
+    log_info(logger_cpu,"Puerto de interrupcion conectado");
+    pthread_mutex_unlock(&mutex_logger);
 	while(true) {
 
 		int operacion = recibir_operacion(socket_kernel_interrupt);
 
 		if(operacion == INTERRUPCION) {
+            pthread_mutex_lock(&mutex_logger);
+            log_info(logger_cpu,"Hubo una interrupcion");
+            pthread_mutex_unlock(&mutex_logger);
 			hay_interrupcion =  recibir_interrupcion(socket_kernel_interrupt);
             sem_wait(&sem_interrupt);
-
+            log_info(logger_cpu,"Atendiendo Interrupcion");
 			proceso_a_enviar->tiempo_bloqueo = UNDEFINED;
 			operacion_a_enviar = INTERRUPCION;
 
@@ -119,6 +141,7 @@ void ejecutar_instruccion(t_instruccion *instruccion, uint32_t valor_a_copiar) {
 
     switch (instruccion->instruc) {
         case NO_OP:
+            log_info(logger_cpu,"CPU ejecutando NO_OP");
             resultado = usleep(config_cpu.retardo_noop * 1000);
             if(resultado == -1 )
                 log_error(logger_cpu, "Error al realizar usleep");
@@ -126,27 +149,32 @@ void ejecutar_instruccion(t_instruccion *instruccion, uint32_t valor_a_copiar) {
            break;
 
         case IO:
+            log_info(logger_cpu,"CPU ejecutando IO");
         	proceso_a_enviar->tiempo_bloqueo = instruccion->parametro1;
         	operacion_a_enviar = BLOQUEO;
            break;
 
         case READ:
+            log_info(logger_cpu,"CPU ejecutando READ");
         	log_info(logger_cpu, "Valor leido de memoria: %i ", obtener_dato_memoria(instruccion->parametro1));
         	//printf("Valor leido de memoria: %i \n", obtener_dato_memoria(instruccion->parametro1));
         	chequear_si_hay_interrupcion();
            break;
 
         case WRITE:
+            log_info(logger_cpu,"CPU ejecutando WRITE");
         	escribir_dato_memoria(instruccion->parametro1, instruccion->parametro2);
         	chequear_si_hay_interrupcion();
            break;
 
         case COPY:
+            log_info(logger_cpu,"CPU ejecutando COPY");
         	escribir_dato_memoria(instruccion->parametro1, valor_a_copiar);
         	chequear_si_hay_interrupcion();
            break;
 
         case I_EXIT:
+            log_info(logger_cpu,"CPU ejecutando EXIT");
 			proceso_a_enviar->tiempo_bloqueo = UNDEFINED;
 			operacion_a_enviar = FIN_PROCESO;
            break;

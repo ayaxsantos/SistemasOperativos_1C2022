@@ -84,16 +84,12 @@ bool buscar_por_id(void *una_tabla, unsigned int id) {
 t_tabla_pagina* obtener_tabla_por_id(unsigned int id_buscado){
     //pthread_mutex_lock(&mutex_lista_tablas_paginas);
     bool _buscar_por_id(void *una_tabla) {
-        return buscar_por_id(buscar_por_id, id);
+        return buscar_por_id(buscar_por_id, id_buscado);
     }
     t_tabla_pagina *tabla_pagina = (t_tabla_pagina *)list_find(tablas_primer_nivel, _buscar_por_id);
     //pthread_mutex_unlock(&mutex_lista_tablas_paginas);
     if(tabla_pagina == NULL) { return false; }		// ¿Se encontró una tabla asociada al ID? TODO: Debugear
     return tabla_pagina;
-}
-
-t_frame* get_frame(uint32_t dir_logica) {
-	/*  */
 }
 
 void modificar_bit_de_presencia_pagina(t_frame *frame, int valor){

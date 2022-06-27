@@ -75,7 +75,7 @@ void iniciar_semaforos() {
 	sem_init(&sem_busqueda_proceso_nuevo, 0, 1);  // Preguntar si el 2do parametro está bien
 	sem_init(&sem_ciclo_de_instruccion, 0, 0);
 	sem_init(&sem_interrupt, 0, 0);
-
+    pthread_mutex_init(&mutex_logger, NULL);
 }
 
 void setear_algoritmo_reemplazo_tlb() {
