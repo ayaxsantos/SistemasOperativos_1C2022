@@ -24,7 +24,6 @@ void responder_fin_proceso(int);
 void responder_handshake(int);
 
 void mapeador(int *,modulo);
-char* obtener_nombre_modulo(modulo);
 
 /////////////// Auxiliares ////////////////
 

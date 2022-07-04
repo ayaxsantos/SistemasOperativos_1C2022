@@ -57,38 +57,12 @@ void *gestionar_conexion_cpu(void *arg) {
     }
 }
 
-void esperar_handshake_kernel(int server) {
-    log_info(logger_memoria,"Iniciando handshake con modulo KERNEL ... ");
-    socket_kernel = esperar_cliente(server);
-    void validar_modulo_kernel(int *socket, modulo modulo_solicitante) {
-        if(modulo_solicitante == KERNEL) {
-            log_info(logger_memoria,"KERNEL Conectado");
-            return;
-        }
-    }
-    int resultado = esperar_handshake(&socket_cpu, validar_modulo_kernel);
-    if(resultado == -1) {
-        log_error(logger_memoria,"No se pudo conectar con el modulo KERNEL");
-        exit(EXIT_FAILURE);
-    }
-}
-
-void esperar_handshake_cpu(int server) {
-    log_info(logger_memoria,"Esperando handshake con modulo CPU ... ");
-    socket_cpu = esperar_cliente(server);
-    int resultado = esperar_handshake(&socket_cpu, validar_modulo);
-    if(resultado == -1) {
-        log_error(logger_memoria,"No se pudo conectar con el modulo CPU");
-        exit(EXIT_FAILURE);
-    }
-    log_info(logger_memoria,"CPU Conectada");
-}
-
 void validar_modulo(int *socket, modulo modulo_solicitante) {
+    modulo modulo_actual = MEMORIA;
+
     if(modulo_solicitante == CPU) {
         void *buffer = malloc(sizeof(int)*4);
         codigo_operacion handshake = HANDSHAKE;
-        int modulo_actual = MEMORIA;
         int desplazamiento = 0;
         memcpy(buffer, &handshake, sizeof(int));
         desplazamiento += sizeof(int);
@@ -103,7 +77,22 @@ void validar_modulo(int *socket, modulo modulo_solicitante) {
         free(buffer);
         return;
     }
-    log_error(logger_memoria,"Error de handshake con CPU");
+    else if(modulo_solicitante == KERNEL)
+    {
+        log_info(logger_memoria,"KERNEL Conectado");
+        responder_handshake(socket,modulo_actual);
+    }
+    else
+        log_error(logger_memoria,"Error de handshake con %s",obtener_nombre_modulo(modulo_solicitante));
+}
+
+void responder_handshake(int *socket,modulo modulo_actual)
+{
+    void *buffer = malloc(sizeof(int)*2);
+    codigo_operacion handshake = HANDSHAKE;
+    memcpy(buffer, &handshake, sizeof(int));
+    memcpy(buffer + sizeof(int), &modulo_actual, sizeof(int));
+    send(*socket, buffer, sizeof(int)*2, 0);
 }
 
 void gestionar_primera_solicitud() {

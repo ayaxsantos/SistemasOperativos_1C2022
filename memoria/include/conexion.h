@@ -6,10 +6,8 @@
 void *gestionar_conexion_kernel(void *arg);
 void *gestionar_conexion_cpu(void *arg);
 
-void esperar_handshake_kernel(int server);
-void esperar_handshake_cpu(int server);
 void validar_modulo(int *socket, modulo modulo_solicitante);
-void validar_modulo_kernel(int *socket, modulo modulo_solicitante);
+void responder_handshake(int *socket,modulo modulo_actual);
 
 void gestionar_primera_solicitud();
 void gestionar_segunda_solicitud();

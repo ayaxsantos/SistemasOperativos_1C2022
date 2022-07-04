@@ -22,6 +22,19 @@ int esperar_handshake(int *socket, void(*mapeador)(int*, modulo)) {
     return ERROR;
 }
 
+char* obtener_nombre_modulo(modulo un_modulo)
+{
+    switch (un_modulo)
+    {
+        case CPU:
+            return "CPU";
+        case MEMORIA:
+            return "MEMORIA";
+        default:
+            return "ERROR";
+    }
+}
+
 void enviar_datos_consola(int socket, t_consola *consola) {
     t_operacion *operacion = crear_operacion(T_CONSOLA);
     setear_operacion(operacion, consola);

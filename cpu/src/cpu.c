@@ -3,7 +3,7 @@
 
 void iniciar() {
 
-    //conectar_a_memoria_y_recibir_config();
+    conectar_a_memoria_y_recibir_config();
     esperar_a_kernel();
     iniciar_tlb();
 }

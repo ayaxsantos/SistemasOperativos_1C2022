@@ -146,6 +146,8 @@ typedef struct t_tercera_solicitud
  */
 void habilitar_log(t_log *log, int habilitacion_log);
 
+char* obtener_nombre_modulo(modulo un_modulo);
+
 void enviar_handshake(int *socket, modulo modulo_solicitante);
 
 /**

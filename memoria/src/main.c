@@ -45,6 +45,26 @@ void leer_configuracion() {
 
 }
 
+void esperar_handshake_cpu(int server) {
+    log_info(logger_memoria,"Iniciando handshake con modulo CPU ... ");
+    socket_cpu = esperar_cliente(server);
+    int resultado = esperar_handshake(&socket_cpu, validar_modulo);
+    if(resultado == -1) {
+        log_error(logger_memoria,"No se pudo conectar con el modulo CPU");
+        exit(EXIT_FAILURE);
+    }
+}
+
+void esperar_handshake_kernel(int server) {
+    log_info(logger_memoria,"Iniciando handshake con modulo KERNEL ... ");
+    socket_kernel = esperar_cliente(server);
+    int resultado = esperar_handshake(&socket_kernel, validar_modulo);
+    if(resultado == -1) {
+        log_error(logger_memoria,"No se pudo conectar con el modulo KERNEL");
+        exit(EXIT_FAILURE);
+    }
+}
+
 void setear_estructuras_de_memoria() {
     memoria_principal = malloc(sizeof(t_memoria));
 
@@ -59,29 +79,6 @@ void setear_estructuras_de_memoria() {
     	log_error(logger_memoria,"No se pudo setear las estructuras de memoria."
     			"Error en el archivo config: Es necesario que el tamanio_pagina sea multiplo de tamanio_memoria.");
     };
-}
-
-void esperar_handshake_cpu(int server) {
-    log_info(logger_memoria,"Iniciando handshake con modulo CPU ... ");
-    socket_cpu = esperar_cliente(server);
-    int resultado = esperar_handshake(&socket_cpu, validar_modulo);
-    if(resultado == -1) {
-        log_error(logger_memoria,"No se pudo conectar con el modulo CPU");
-        exit(EXIT_FAILURE);
-    }
-    log_info(logger_memoria,"CPU Conectada");
-}
-
-void esperar_handshake_kernel(int server)
-{
-    log_info(logger_memoria,"Iniciando handshake con modulo KERNEL ...");
-    socket_kernel = esperar_cliente(server);
-    int resultado = esperar_handshake(&socket_kernel, validar_modulo);
-    if(resultado == -1) {
-        log_error(logger_memoria,"No se pudo conectar con el modulo KERNEL");
-        exit(EXIT_FAILURE);
-    }
-    log_info(logger_memoria,"KERNEL Conectada");
 }
 
 void iniciar_particionamiento_en_frames() {

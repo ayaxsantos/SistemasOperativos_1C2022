@@ -57,10 +57,11 @@ void conectar_a_memoria_y_recibir_config() {
     log_info(logger_cpu,"MEMORIA Conectada");
     /*
      * PARA TEST
-     */
+
     pcb = malloc(sizeof(t_pcb));
     pcb->id_tabla_1n = 1;
     resultado = escribir_dato_memoria(0, 25);
+     */
 }
 
 void obtener_configuracion(int *socket, modulo modulo) {

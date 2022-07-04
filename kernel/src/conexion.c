@@ -5,15 +5,16 @@
 void conexion(void)
 {
     int socket_kernel_serv = iniciar_servidor("127.0.0.1",una_config_kernel.puerto_escucha);
-    log_info(un_logger, "Kernel a la espera de conexiones ... \n");
+    log_warning(un_logger, "Inicializando modulo KERNEL ... ");
 
     int socket_proceso = 0;
 
     conectar_con_cpu(socket_kernel_serv);
-    //conectar_con_memoria(socket_kernel_serv);
+    conectar_con_memoria(socket_kernel_serv);
 
     // Aca tendriamos que conectarnos con MEMORIA y CPU
     // En caso de no poder realizar la conexion, error!! Kernel Panic (?
+    log_warning(un_logger, "KERNEL a la espera de procesos ... ");
 
     while(true)
     {
@@ -39,7 +40,10 @@ int conectar_con_cpu(int socket_kernel_serv)
     socket_interrupt = crear_conexion(una_config_kernel.ip_cpu, una_config_kernel.puerto_cpu_interrupt);
     socket_dispatch = crear_conexion(una_config_kernel.ip_cpu, una_config_kernel.puerto_cpu_dispatch);
     log_info(un_logger, "Enviando HANDSHAKE a CPU \n");
-    enviar_interrupcion(socket_interrupt);
+
+    //Para probar nada mas (?
+    //enviar_interrupcion(socket_interrupt);
+
     enviar_handshake(&socket_dispatch, KERNEL);
     return esperar_handshake(&socket_dispatch, confirmar_modulo);
 }
@@ -63,19 +67,6 @@ void confirmar_modulo(int *socket, modulo un_modulo) {
         log_error(un_logger,"KERNEL PANIC -> Error al realizar el HANDSHAKE %s",
                   obtener_nombre_modulo(un_modulo));
         exit(EXIT_FAILURE);
-    }
-}
-
-char* obtener_nombre_modulo(modulo un_modulo)
-{
-    switch (un_modulo)
-    {
-        case CPU:
-            return "CPU";
-        case MEMORIA:
-            return "MEMORIA";
-        default:
-            return "ERROR";
     }
 }
 
