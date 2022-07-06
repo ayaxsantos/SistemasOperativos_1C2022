@@ -53,16 +53,12 @@ void setear_operacion(t_operacion *operacion, void *valor) {
 			break;
         case PRIMERA_SOLICITUD:
         case SEGUNDA_SOLICITUD:
-            size = sizeof(int32_t) * 3 + sizeof(unsigned int);
-            stream = malloc(size);
-            memcpy(stream, valor, size);
+            stream = serializar_solicitud((t_solicitud *)valor, &size);
             operacion->buffer->size = size;
             operacion->buffer->stream = stream;
             break;
         case TERCERA_SOLICITUD:
-            size = sizeof(uint32_t) + sizeof(unsigned int)*2 + sizeof(int)*2;
-            stream = malloc(size);
-            memcpy(stream, valor, size);
+            stream = serializar_tercera_solicitud((t_tercera_solicitud *)valor, &size);
             operacion->buffer->size = size;
             operacion->buffer->stream = stream;
             break;
@@ -86,17 +82,6 @@ void crear_buffer_operacion(t_operacion *operacion) {
     operacion->buffer = malloc(sizeof(t_buffer));
     operacion->buffer->size = 0;
     operacion->buffer->stream = NULL;
-}
-
-int32_t recibir_direccion_memoria(int socket_cliente) {
-	int32_t cod_op;
-	if(recv(socket_cliente, &cod_op, sizeof(int32_t), MSG_WAITALL) != 0)
-		return cod_op;
-	else
-	{
-		close(socket_cliente);
-		return -1;
-	}
 }
 
 /*********************************************/

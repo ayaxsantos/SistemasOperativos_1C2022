@@ -34,7 +34,7 @@ int nro_pagina_en_swap(t_particion *particion, int nro_pag_memoria){
     return -1;
 }
 
-void liberar_pagina(int pid, int nro_pag_swap, t_particion* particion){
+void liberar_pagina(int nro_pag_swap, t_particion* particion){
     t_pagina_swap* pagina_swap = list_get(particion->fcb->pags_en_archivo, nro_pag_swap);
     pagina_swap->id_memoria = -1;
     pagina_swap->is_free = 1;

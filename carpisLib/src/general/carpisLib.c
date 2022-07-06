@@ -229,11 +229,24 @@ t_queue *deserializar_instrucciones(void *buffer, int size_cola) {
 }
 
 /*** CPU + MEMORIA ***/
+
 t_solicitud *recibir_solicitud(int socket) {
     int size;
     void *buffer = recibir_buffer(&size, socket);
     t_solicitud *solicitud = malloc(sizeof(t_solicitud));
-    memcpy(solicitud, buffer, size);
+    int desplazamiento = 0;
+    memcpy(&(solicitud->id_tabla_1n), buffer, sizeof(int32_t));
+    desplazamiento += sizeof(int32_t);
+    memcpy(&(solicitud->entrada_tabla), buffer + desplazamiento, sizeof(int32_t));
+    desplazamiento += sizeof(int);
+    memcpy(&(solicitud->id_tabla_2n), buffer + desplazamiento, sizeof(int32_t));
+    desplazamiento += sizeof(int32_t);
+    memcpy(&(solicitud->nro_frame), buffer + desplazamiento, sizeof(int));
+    desplazamiento += sizeof(int);
+    memcpy(&(solicitud->tamanio_direccion_base), buffer + desplazamiento, sizeof(int));
+    desplazamiento += sizeof(int);
+    solicitud->direccion_base = malloc(solicitud->tamanio_direccion_base);
+    memcpy(solicitud->direccion_base, buffer + desplazamiento, solicitud->tamanio_direccion_base);
     free(buffer);
     return solicitud;
 }
@@ -242,10 +255,73 @@ t_tercera_solicitud *recibir_tercera_solicitud(int socket) {
     int size;
     void *buffer = recibir_buffer(&size, socket);
     t_tercera_solicitud *solicitud = malloc(sizeof(t_tercera_solicitud));
-    memcpy(solicitud, buffer, size);
+    int desplazamiento = 0;
+    memcpy(&(solicitud->nro_frame), buffer, sizeof(unsigned int));
+    desplazamiento += sizeof(unsigned int);
+    memcpy(&(solicitud->accion_solicitada), buffer + desplazamiento, sizeof(int));
+    desplazamiento += sizeof(int);
+    memcpy(&(solicitud->estado_memo), buffer + desplazamiento, sizeof(int));
+    desplazamiento += sizeof(int);
+    memcpy(&(solicitud->tamanio), buffer + desplazamiento, sizeof(int32_t));
+    desplazamiento += sizeof(int32_t);
+    if(solicitud->tamanio != UNDEFINED) {
+        solicitud->dato = malloc(solicitud->tamanio);
+        memcpy(solicitud->dato, buffer + desplazamiento, solicitud->tamanio);
+        desplazamiento += solicitud->tamanio;
+    }
+    memcpy(&(solicitud->tamanio_direccion_fisica), buffer + desplazamiento, sizeof(int32_t));
+    desplazamiento += sizeof(int32_t);
+    solicitud->direccion_fisica = malloc(solicitud->tamanio_direccion_fisica);
+    memcpy(solicitud->direccion_fisica, buffer + desplazamiento, solicitud->tamanio_direccion_fisica);
     free(buffer);
     return solicitud;
 }
+
+void *serializar_solicitud(t_solicitud *solicitud, int *tamanio) {
+    *tamanio = sizeof(int32_t)*3 + sizeof(int)*2 + solicitud->tamanio_direccion_base;
+    void *buffer = malloc(*tamanio);
+    int desplazamiento = 0;
+    memcpy(buffer, &(solicitud->id_tabla_1n), sizeof(int32_t));
+    desplazamiento += sizeof(int32_t);
+    memcpy(buffer + desplazamiento, &(solicitud->entrada_tabla), sizeof(int32_t));
+    desplazamiento += sizeof(int32_t);
+    memcpy(buffer + desplazamiento, &(solicitud->id_tabla_2n), sizeof(int32_t));
+    desplazamiento += sizeof(int32_t);
+    memcpy(buffer + desplazamiento, &(solicitud->nro_frame), sizeof(int));
+    desplazamiento += sizeof(int);
+    memcpy(buffer + desplazamiento, &(solicitud->tamanio_direccion_base), sizeof(int));
+    desplazamiento += sizeof(int);
+    memcpy(buffer + desplazamiento, solicitud->direccion_base, solicitud->tamanio_direccion_base);
+    return buffer;
+}
+
+void *serializar_tercera_solicitud(t_tercera_solicitud *solicitud, int *tamanio) {
+    if(solicitud->tamanio != UNDEFINED) {
+        *tamanio = sizeof(int)*3 + sizeof(int32_t)*2 + solicitud->tamanio_direccion_fisica + solicitud->tamanio;
+    }
+    else {
+        *tamanio = sizeof(int)*3 + sizeof(int32_t)*2 + solicitud->tamanio_direccion_fisica;
+    }
+    void *buffer = malloc(*tamanio);
+    int desplazamiento = 0;
+    memcpy(buffer, &(solicitud->nro_frame), sizeof(unsigned int));
+    desplazamiento += sizeof(unsigned int);
+    memcpy(buffer + desplazamiento, &(solicitud->accion_solicitada), sizeof(int));
+    desplazamiento += sizeof(int);
+    memcpy(buffer + desplazamiento, &(solicitud->estado_memo), sizeof(int));
+    desplazamiento += sizeof(int);
+    memcpy(buffer + desplazamiento, &(solicitud->tamanio), sizeof(int32_t));
+    desplazamiento += sizeof(int32_t);
+    if(solicitud->tamanio != UNDEFINED) {
+        memcpy(buffer + desplazamiento, solicitud->dato, solicitud->tamanio);
+        desplazamiento += solicitud->tamanio;
+    }
+    memcpy(buffer + desplazamiento, &(solicitud->tamanio_direccion_fisica), sizeof(int32_t));
+    desplazamiento += sizeof(int32_t);
+    memcpy(buffer + desplazamiento, solicitud->direccion_fisica, solicitud->tamanio_direccion_fisica);
+    return buffer;
+}
+
 
 /*** KERNEL + MEMORIA ***/
 /*
@@ -261,34 +337,3 @@ int32_t recibir_entero(int socket) {
     free(buffer);
     return tamanio;
 }
-
-/*
-t_dictionary *deserializar_tabla1n(void *buffer, int size_tabla) {
-    t_dictionary *tabla = dictionary_create();
-    int desplazamiento = 0;
-    int nro_tabla;
-    while(desplazamiento < size_tabla) {
-        memcpy(&nro_tabla, buffer + desplazamiento, sizeof(int));
-        desplazamiento+=sizeof(int);
-    }
-    return tabla;
-}*/
-/*
-void *serializar_tabla1n(t_dictionary *tabla1n, int *size) {
-    *size = dictionary_size(tabla1n) * sizeof(int); //Ej: 2 registros * Tamanio int
-    int desplazamiento = 0;
-    void *stream = malloc(*size);
-    int nro_tabla = 0;
-    int i = 0;
-    char *index;
-    while (!dictionary_is_empty(tabla1n)) {
-        index = string_itoa(i);
-        nro_tabla = *((int *) dictionary_get(tabla1n,index));
-        memcpy(stream + desplazamiento, &nro_tabla, sizeof(int));
-        desplazamiento+= sizeof(int);
-        free(index);
-        i++;
-    }
-    /size = desplazamiento;
-    return stream;
-}*/

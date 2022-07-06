@@ -5,9 +5,10 @@
 
 void iniciar_mmu();
 
-uint32_t obtener_dato_memoria(dir_logica);
+uint32_t *obtener_dato_memoria(dir_logica);
 int escribir_dato_memoria(dir_logica dir, uint32_t dato);
-int procesar_solicitud(dir_logica dir, accion accion_pedida, uint32_t dato);
+char *dir_logica_a_fisica(dir_logica dir, accion accion_pedida, int32_t size);
+bool data_esta_en_una_pagina(dir_logica dir_logica, t_pag_incompleta *pag_incomplenta);
 
 t_dictionary *solicitar_tabla_2nivel(int);
 

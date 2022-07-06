@@ -127,16 +127,20 @@ typedef struct t_solicitud
     int32_t entrada_tabla;
     int32_t id_tabla_2n;
     unsigned int nro_frame;
-} __attribute__((packed)) t_solicitud;
+    int tamanio_direccion_base;
+    char *direccion_base;
+} t_solicitud;
 
 typedef struct t_tercera_solicitud
 {
-    unsigned int desplazamiento;
     unsigned int nro_frame;
     accion accion_solicitada;
-    uint32_t dato; //Suponemos un entero no signado de 4bytes
     estado_memoria estado_memo;
-} __attribute__((packed)) t_tercera_solicitud;
+    int32_t tamanio;
+    void *dato;
+    int32_t tamanio_direccion_fisica;
+    char *direccion_fisica;
+} t_tercera_solicitud;
 
 /**
  * @name habilitar_log
@@ -182,6 +186,9 @@ t_proceso_pcb *deserializar_proceso_pcb(int socket);
 
 t_solicitud *recibir_solicitud(int socket);
 t_tercera_solicitud  *recibir_tercera_solicitud(int socket);
+
+void *serializar_solicitud(t_solicitud *solicitud, int *tamanio);
+void *serializar_tercera_solicitud(t_tercera_solicitud *, int *);
 
 int32_t recibir_entero(int socket);
 

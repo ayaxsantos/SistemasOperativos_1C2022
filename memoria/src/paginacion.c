@@ -16,53 +16,89 @@ void crear_tablas_segundo_nivel(t_tabla_pagina *tabla_principal){
 	char *nro_pag;
 	int i;
 
-	for (i=0; i < config_memoria.entradas_por_tabla; i++){
-		nro_pag = string_itoa(i);
-		agregar_pag_a_tabla_1n(tabla_principal, nro_pag);
+	div_t tablas_2n_necesarias = div(tabla_principal->pags_necesarias, config_memoria.entradas_por_tabla);
+	int direccionamiento_max = config_memoria.entradas_por_tabla * config_memoria.entradas_por_tabla;
+
+	if (tabla_principal->pags_necesarias <= direccionamiento_max){
+		for (i=0; i < tablas_2n_necesarias.quot; i++){
+			nro_pag = string_itoa(i);
+			agregar_pag_a_tabla_1n(tabla_principal, nro_pag);
+		}
+
+		if (tablas_2n_necesarias.rem > 0){
+			agregar_ultima_pag_a_tabla_1n(tabla_principal, atoi(nro_pag) + 1);
+		}
+	}
+	else
+	{
+		pthread_mutex_lock(&mutex_logger);
+		log_error(logger_memoria, "El proceso que se intenta cargar en memoria es demasiado grande para la configuracion ingresada");
+		pthread_mutex_unlock(&mutex_logger);
 	}
 };
+
+int agregar_pag_a_tabla_1n(t_tabla_pagina *tabla_proceso, char *nro_pag){
+	t_tabla_pagina *tabla_2n_aux = inicializar_tabla(tabla_proceso->tamanio_proceso);
+	tabla_2n_aux->id_tabla = atoi(nro_pag);
+	int i;
+	char *nro_pag_2n;
+
+    for (i=0; i < config_memoria.entradas_por_tabla; i++){
+		nro_pag_2n = string_itoa(i);
+        agregar_pag_a_tabla_2n(tabla_2n_aux, nro_pag_2n, tabla_proceso->frames_asignados);
+    }
+
+    dictionary_put(tabla_proceso->tabla, nro_pag, tabla_2n_aux);
+    return 0;
+}
+
+int agregar_ultima_pag_a_tabla_1n(t_tabla_pagina *tabla_proceso, int nro_ultima_pag){
+	t_tabla_pagina *tabla_2n_aux = inicializar_tabla(tabla_proceso->tamanio_proceso);
+	tabla_2n_aux->id_tabla = nro_ultima_pag;
+	int i;
+	char *nro_pag_2n;
+
+	int pags_necesarias_ultima_tabla = tabla_proceso->pags_necesarias - config_memoria.entradas_por_tabla * (nro_ultima_pag-1);
+
+	for (i=0; i < pags_necesarias_ultima_tabla; i++){
+		nro_pag_2n = string_itoa(i);
+		agregar_pag_a_tabla_2n(tabla_2n_aux, nro_pag_2n, tabla_proceso->frames_asignados);
+	}
+
+	dictionary_put(tabla_proceso->tabla, string_itoa(nro_ultima_pag), tabla_2n_aux);
+	return 0;
+}
+
+int agregar_pag_a_tabla_2n(t_tabla_pagina *tabla_2n, char *nro_pag, int frames_asignados) {
+    t_col_pagina *col = malloc(sizeof(t_col_pagina));
+    t_frame *frame;
+    if(frames_asignados < config_memoria.marcos_por_proceso) {
+        frame = recorrer_frames(tabla_2n);
+    }
+    else {
+        frame = realizar_algoritmo(tabla_2n,col,READ_ACCION, atoi(nro_pag));
+    }
+    col->presencia = true;
+    col->nro_frame = frame->nro_frame;
+
+    dictionary_put(tabla_2n->tabla, nro_pag, col);
+
+    frame->usado = 1;
+    frame->modificado = READ_ACCION;
+    frame->nro_pagina_asignada = atoi(nro_pag);
+    frame->is_free = false;
+    return 0;
+}
 
 t_tabla_pagina *inicializar_tabla(int tamanio){
 	t_tabla_pagina* nueva_tabla = malloc(sizeof(t_tabla_pagina));
 	nueva_tabla->id_tabla = 0;
 	nueva_tabla->tabla = dictionary_create();
 	nueva_tabla->tamanio_proceso = tamanio;
+	nueva_tabla->pags_necesarias = tamanio / config_memoria.tamanio_pagina;
 	nueva_tabla->puntero = 0;
-	nueva_tabla->cantidad_hit = 0;
-	nueva_tabla->cantidad_miss = 0;
 
 	return nueva_tabla;
-}
-
-int agregar_pag_a_tabla_1n(t_tabla_pagina *tabla_proceso, char *nro_pag){
-	t_tabla_pagina *tabla_2n_aux = inicializar_tabla(tabla_proceso->tamanio_proceso);
-	tabla_2n_aux->id_tabla = atoi(nro_pag);
-	int i, resultado;
-
-    for (i=0; i < config_memoria.entradas_por_tabla; i++){
-    		nro_pag = string_itoa(i);
-    		resultado = agregar_pag_a_tabla_2n(tabla_proceso, nro_pag);
-
-    		if(resultado == -1) {
-    			// pthread_mutex_lock(&mutex_logger);
-    			log_error(logger_memoria, "El espacio de memoria del proceso está lleno.");
-    			// pthread_mutex_unlock(&mutex_logger);
-    			liberar_todas_las_paginas_del_proceso(tabla_proceso);
-    			return -1;
-    		}
-    	}
-
-    dictionary_put(tabla_proceso->tabla, nro_pag, tabla_2n_aux);
-    return 0;
-}
-
-int agregar_pag_a_tabla_2n(t_tabla_pagina *tabla_2n, char *nro_pag){
-    t_col_pagina *col = malloc(sizeof(t_col_pagina));
-    t_frame *frame = obtener_frame_libre(tabla_2n, col, atoi(nro_pag));
-    dictionary_put(tabla_2n->tabla, nro_pag, col);
-    frame->nro_pagina_asignada = atoi(nro_pag);
-    frame->is_free = false;
-    return 0;
 }
 
 /* ---------- Utilización ---------- */
@@ -75,35 +111,40 @@ int iniciar_proceso_en_memoria(int tamanio){
 void primera_solicitud_mmu(t_solicitud* solicitud){
 	t_tabla_pagina *tabla_1n = obtener_tabla_1n_por_id(solicitud->id_tabla_1n);
 	t_tabla_pagina *tabla_2n = dictionary_get(tabla_1n->tabla, string_itoa(solicitud->entrada_tabla));
-	solicitud->id_tabla_1n = tabla_2n->id_tabla;
+
+	solicitud->id_tabla_2n = tabla_2n->id_tabla;
 }
 
 void segunda_solicitud_mmu(t_solicitud* solicitud){
 	t_tabla_pagina *tabla_1n = obtener_tabla_1n_por_id(solicitud->id_tabla_1n);
 	t_tabla_pagina *tabla_2n = dictionary_get(tabla_1n->tabla, string_itoa(solicitud->id_tabla_2n));
 	t_col_pagina *pagina = dictionary_get(tabla_2n->tabla, string_itoa(solicitud->entrada_tabla));
+
 	if (pagina->presencia){
-		int nro_frame = pagina->nro_frame;
-	} else {
-		// TODO: Traer de swap y responder
+		solicitud->nro_frame = pagina->nro_frame;
+	}
+	else{
+		t_frame *frame = realizar_algoritmo(tabla_2n, pagina, READ_ACCION, solicitud->entrada_tabla);
+		solicitud->nro_frame = frame->nro_frame;
 	}
 }
 
 void tercera_solicitud_mmu(t_tercera_solicitud *solicitud){
-	t_frame *frame = list_get(memoria_principal->frames, solicitud->nro_frame);
-	int dir_fisica = atoi(frame->base) + solicitud->desplazamiento;
-	char *dir_fisica_exacta = string_itoa(dir_fisica);
 	int respuesta;
 
 	if (solicitud->accion_solicitada == READ_ACCION){
-		respuesta = leer_dato_de_memoria(dir_fisica_exacta);
+		respuesta = leer_dato_de_memoria(solicitud->direccion_fisica);
+		solicitud->dato = string_itoa(respuesta);
 	} else if (solicitud->accion_solicitada == WRITE_ACCION){
-		respuesta = escribir_dato_en_memoria(dir_fisica_exacta, solicitud->dato);
+		respuesta = escribir_dato_en_memoria(solicitud->direccion_fisica, atoi(solicitud->dato));
+		if (respuesta) {
+			solicitud->estado_memo = WRITE_OK;
+		} else {
+			solicitud->estado_memo = WRITE_FAULT;
+		}
 	} else {
-		respuesta = ERROR;
+		log_info(logger_memoria,"Accion no valida.");
 	}
-
-	// Enviar paquete de respuesta
 }
 
 int leer_dato_de_memoria(char *dir_fisica){
@@ -115,10 +156,11 @@ int leer_dato_de_memoria(char *dir_fisica){
 }
 
 int escribir_dato_en_memoria(char *dir_fisica, int dato){
-	int status = -1;
+	int status = 0;
 
+	// Chequear que se pueda escribir ahi TODO
 	memcpy(dir_fisica, string_itoa(dato), sizeof(int));
-	status = 200; // ver el tema status
+	status = 1;
 
 	return status;
 }
@@ -130,12 +172,12 @@ bool buscar_por_id(void *una_tabla, unsigned int id) {
 }
 
 t_tabla_pagina* obtener_tabla_1n_por_id(unsigned int id_buscado){
-    //pthread_mutex_lock(&mutex_lista_tablas_paginas);
+    pthread_mutex_lock(&mutex_lista_tablas_paginas);
     bool _buscar_por_id(void *una_tabla) {
         return buscar_por_id(buscar_por_id, id_buscado);
     }
     t_tabla_pagina *tabla_pagina = (t_tabla_pagina *)list_find(tablas_primer_nivel, _buscar_por_id);
-    //pthread_mutex_unlock(&mutex_lista_tablas_paginas);
+    pthread_mutex_unlock(&mutex_lista_tablas_paginas);
     if(tabla_pagina == NULL) { return false; }		// ¿Se encontró una tabla asociada al ID? TODO: Debugear
     return tabla_pagina;
 }
@@ -161,7 +203,6 @@ void liberar_todas_las_paginas_del_proceso(t_tabla_pagina* tabla_proceso){
         free(pagina);
     }
     dictionary_clean_and_destroy_elements(tabla_proceso->tabla, eliminar_columna_tabla);
-    //TODO: Liberar en swap
 }
 
 void eliminar_columna_tabla(void *arg) {

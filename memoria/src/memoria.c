@@ -26,32 +26,46 @@ void iniciar_memoria() {
 void iniciar_proceso(int socket_cliente) {
     uint32_t tamanio_proceso = recibir_entero(socket_cliente);
 	t_tabla_pagina* tabla_principal_del_proceso = crear_tabla_principal((int )tamanio_proceso);
-    //Mutex
+
+	pthread_mutex_lock(&mutex_lista_tablas_paginas);
     list_add(tablas_primer_nivel, tabla_principal_del_proceso);
     int index_tabla = list_size(tablas_primer_nivel)-1;
-    //UnMutex
+    pthread_mutex_unlock(&mutex_lista_tablas_paginas);
 
-     t_operacion *operacion = crear_operacion(INICIO_PROCESO);
-	 setear_operacion(operacion,&index_tabla);
-	 enviar_operacion(operacion,socket_cliente);
-	 eliminar_operacion(operacion);
+    t_operacion *operacion = crear_operacion(INICIO_PROCESO);
+	setear_operacion(operacion,&index_tabla);
+	enviar_operacion(operacion,socket_cliente);
+	eliminar_operacion(operacion);
 
-     //TODO: Ver despues SWAP
-     //crear_archivo(index_tabla, tabla_principal_del_proceso->tamanio_proceso);
+	crear_archivo(tabla_principal_del_proceso->id_tabla, tamanio_proceso);
 }
 
 void terminar_proceso(int socket_cliente) {
-	int nada;
-	void *buffer = recibir_buffer(&nada,socket_cliente);
-	int index_tabla = socket_cliente;		// TODO Obtener id de tabla
-	t_tabla_pagina* tabla_1n = list_get(tablas_primer_nivel, index_tabla);
-	// liberar_todas_las_paginas(tabla_1n);
-	free(buffer);
+	uint32_t id_tabla = recibir_entero(socket_cliente);
+	t_tabla_pagina* tabla_1n = list_get(tablas_primer_nivel, id_tabla);
+
+	liberar_todas_las_paginas_del_proceso(tabla_1n);
+
+	t_operacion *operacion = crear_operacion(FIN_PROCESO);
+	setear_operacion(operacion,&id_tabla);
+	enviar_operacion(operacion,socket_cliente);
+	eliminar_operacion(operacion);
+
+	destruir_archivo(id_tabla);
 }
 
-void gestionar_suspension(int socket_cliente) {
-	// TODO Completar
+void suspender_proceso(int socket_cliente) {
+	uint32_t id = recibir_entero(socket_cliente);
+	// t_tabla_pagina* tabla_1n = list_get(tablas_primer_nivel, id);
+
+	// swapear_tabla_completa(tabla_1n); TODO
+
+	t_operacion *operacion = crear_operacion(SUSPENSION_PROCESO);
+	setear_operacion(operacion,&id);
+	enviar_operacion(operacion,socket_cliente);
+	eliminar_operacion(operacion);
 }
+
 
 void gestionar_acceso(int socket_cliente) {
 	// TODO Completar

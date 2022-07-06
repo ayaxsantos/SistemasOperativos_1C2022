@@ -9,6 +9,8 @@
 #include <semaphore.h>
 #include <errno.h>
 
+#define size_dato sizeof(uint32_t)
+
 typedef int32_t dir_logica;
 /**
  * @DESC Quizas este en carpisLib
@@ -34,6 +36,13 @@ typedef struct
     char* ip_cpu;
     int log_habilitado;
 } t_config_cpu;
+
+typedef struct t_pag_incompleta
+{
+    int size_restante;
+    dir_logica fin_pagina;
+    int nro_pagina;
+} t_pag_incompleta;
 
 typedef struct t_columna_tlb {
     int entrada;

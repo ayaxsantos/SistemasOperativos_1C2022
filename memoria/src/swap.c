@@ -25,15 +25,15 @@ void formatear_swap(){
     swap.particiones = list_create();
 }
 
-void crear_archivo(int nro_proceso, int tamanio_proceso){
+void crear_archivo(int id, int tamanio_proceso){
 	int truncado = 0, cerrado = 0;
 	char *nombre_archivo = string_new();
 		string_append(&nombre_archivo,"proceso_");
-		string_append(&nombre_archivo, string_itoa(nro_proceso));
+		string_append(&nombre_archivo, string_itoa(id));
 		string_append(&nombre_archivo,".swap");
 
 	t_fcb *fcb_aux = malloc(sizeof(t_fcb));
-	fcb_aux->id_archivo = nro_proceso;
+	fcb_aux->id_archivo = id;
 	fcb_aux->path_archivo = nombre_archivo;
 	fcb_aux->pags_en_archivo = formatear_pags_en_archivo(tamanio_proceso);
 
@@ -67,4 +67,18 @@ t_list* formatear_pags_en_archivo(int tamanio_proceso){
     }
 
     return pags_en_archivo;
-};
+}
+
+void destruir_archivo(int id){
+	t_particion* particion = encontrar_particion_de(id);
+
+	if(particion != NULL){
+		for (int i = 0; i < list_size(particion->fcb->pags_en_archivo); i++){
+			liberar_pagina(i, particion);
+			list_remove(particion->fcb->pags_en_archivo, i);
+		}
+	}
+	else{
+		log_info(logger_swap,"ERROR: El proceso que se intenta cerrar no existe en swap.");
+	}
+}
