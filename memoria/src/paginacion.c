@@ -135,10 +135,17 @@ void tercera_solicitud_mmu(t_tercera_solicitud *solicitud){
 	if (solicitud->accion_solicitada == READ_ACCION){
 		respuesta = leer_dato_de_memoria(solicitud->direccion_fisica);
 		solicitud->dato = string_itoa(respuesta);
+		pthread_mutex_lock(&mutex_mp);
+		actualizar_tiempo_usado(list_get(memoria_principal->frames,solicitud->nro_frame));
+		pthread_mutex_unlock(&mutex_mp);
 	} else if (solicitud->accion_solicitada == WRITE_ACCION){
 		respuesta = escribir_dato_en_memoria(solicitud->direccion_fisica, atoi(solicitud->dato));
 		if (respuesta) {
 			solicitud->estado_memo = WRITE_OK;
+			marcar_frame_ocupado(solicitud->nro_frame);
+			pthread_mutex_lock(&mutex_mp);
+			actualizar_modificado(list_get(memoria_principal->frames,solicitud->nro_frame));
+			pthread_mutex_unlock(&mutex_mp);
 		} else {
 			solicitud->estado_memo = WRITE_FAULT;
 		}
@@ -186,6 +193,10 @@ void modificar_bit_de_presencia_pagina(t_frame *frame, int valor){
     t_tabla_pagina *tabla_paginas = list_get(tablas_primer_nivel,frame->tabla_1n_asignada);
     t_col_pagina *registro = (t_col_pagina *) dictionary_get(tabla_paginas->tabla, string_itoa(frame->nro_pagina_asignada));
     registro->presencia = valor;
+}
+
+void marcar_frame_ocupado(unsigned int nro_frame){
+// TODO
 }
 
 /* ---------- Cierre ----------*/
