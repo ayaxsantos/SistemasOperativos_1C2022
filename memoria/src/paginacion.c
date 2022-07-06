@@ -133,10 +133,11 @@ void tercera_solicitud_mmu(t_tercera_solicitud *solicitud){
 	int respuesta;
 
 	if (solicitud->accion_solicitada == READ_ACCION){
-		respuesta = leer_dato_de_memoria(solicitud->direccion_fisica);
+        //TODO: Calcular la dir fisica a partir del nro de frame y desplazamiento
+		//respuesta = leer_dato_de_memoria(solicitud->direccion_fisica);
 		solicitud->dato = string_itoa(respuesta);
 	} else if (solicitud->accion_solicitada == WRITE_ACCION){
-		respuesta = escribir_dato_en_memoria(solicitud->direccion_fisica, atoi(solicitud->dato));
+		//respuesta = escribir_dato_en_memoria(solicitud->direccion_fisica, solicitud->dato);
 		if (respuesta) {
 			solicitud->estado_memo = WRITE_OK;
 		} else {

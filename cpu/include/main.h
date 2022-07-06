@@ -37,13 +37,6 @@ typedef struct
     int log_habilitado;
 } t_config_cpu;
 
-typedef struct t_pag_incompleta
-{
-    int size_restante;
-    dir_logica fin_pagina;
-    int nro_pagina;
-} t_pag_incompleta;
-
 typedef struct t_columna_tlb {
     int entrada;
     bool is_free;
