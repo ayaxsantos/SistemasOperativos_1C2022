@@ -67,10 +67,8 @@ void setear_operacion(t_operacion *operacion, void *valor) {
             operacion->buffer->stream = stream;
             break;
         case INICIO_PROCESO:
-            stream = malloc(sizeof(uint32_t));
-            memcpy(stream, valor, sizeof(uint32_t));
-            operacion->buffer->size = sizeof(uint32_t);
-            operacion->buffer->stream = stream;
+            operacion->buffer->size = sizeof(uint32_t)*2;
+            operacion->buffer->stream = valor;
     }
     return;
 }

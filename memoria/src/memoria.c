@@ -24,17 +24,25 @@ void iniciar_memoria() {
 }
 
 void iniciar_proceso(int socket_cliente) {
-    uint32_t tamanio_proceso = recibir_entero(socket_cliente);
+    int size;
+    uint32_t tamanio_proceso, pid;
+    void *dato = recibir_buffer(&size, socket_cliente);
+    memcpy(&pid, dato, sizeof(uint32_t));
+    memcpy(&tamanio_proceso, dato + sizeof(uint32_t), sizeof(uint32_t));
 	t_tabla_pagina* tabla_principal_del_proceso = crear_tabla_principal((int )tamanio_proceso);
     //Mutex
     list_add(tablas_primer_nivel, tabla_principal_del_proceso);
     int index_tabla = list_size(tablas_primer_nivel)-1;
     //UnMutex
 
-     t_operacion *operacion = crear_operacion(INICIO_PROCESO);
-	 setear_operacion(operacion,&index_tabla);
-	 enviar_operacion(operacion,socket_cliente);
-	 eliminar_operacion(operacion);
+    void *dato_a_enviar = malloc(sizeof(uint32_t)*2);
+    memcpy(dato_a_enviar, &pid, sizeof(uint32_t));
+    memcpy(dato_a_enviar + sizeof(uint32_t), &index_tabla, sizeof(uint32_t));
+
+    t_operacion *operacion = crear_operacion(INICIO_PROCESO);
+	setear_operacion(operacion,dato_a_enviar);
+	enviar_operacion(operacion,socket_cliente);
+	eliminar_operacion(operacion);
 
      //TODO: Ver despues SWAP
      //crear_archivo(index_tabla, tabla_principal_del_proceso->tamanio_proceso);
