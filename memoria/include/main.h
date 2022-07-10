@@ -42,8 +42,6 @@ typedef struct t_frame
     bool usado;
     int modificado;
     bool is_free;
-    int nro_pagina_asignada;
-    int tabla_1n_asignada;
     long tiempo_usado;
 } t_frame;
 
@@ -65,9 +63,8 @@ typedef struct t_tabla_pagina
 	int id_tabla;
     int tamanio_proceso;
     t_dictionary *tabla;
+    t_list *frames_asignados;
     int puntero;
-    int cantidad_hit;
-    int cantidad_miss;
 } t_tabla_pagina;
 
 typedef enum
@@ -115,5 +112,6 @@ void esperar_handshake_kernel(int server);
 #include "swap.h"
 #include "conexion.h"
 #include "paginacion.h"
+#include "clock.h"
 
 #endif /* MAIN_H_INCLUDED */
