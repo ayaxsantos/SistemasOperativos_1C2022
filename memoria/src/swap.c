@@ -68,3 +68,21 @@ t_list* formatear_pags_en_archivo(int tamanio_proceso){
 
     return pags_en_archivo;
 };
+
+void swapear_tabla_completa(t_tabla_pagina *tabla_1n){
+	//TODO
+}
+
+void destruir_archivo(int id){
+	t_particion* particion = encontrar_particion_de(id);
+
+	if(particion != NULL){
+		for (int i = 0; i < list_size(particion->fcb->pags_en_archivo); i++){
+			liberar_pagina(i, particion);
+			list_remove(particion->fcb->pags_en_archivo, i);
+		}
+	}
+	else{
+		log_info(logger_swap,"ERROR: El proceso que se intenta cerrar no existe en swap.");
+	}
+}

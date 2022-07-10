@@ -90,8 +90,13 @@ int socket_cpu, socket_kernel;
 
 t_memoria *memoria_principal;
 t_list *tablas_primer_nivel;
+
 /************SEMAFOROS*******************/
+
+pthread_mutex_t mutex_mp;
 pthread_mutex_t mutex_logger;
+pthread_mutex_t mutex_lista_tablas_paginas;
+sem_t sem_algoritmo;
 
 ////////////////////////////////////////////////
 
