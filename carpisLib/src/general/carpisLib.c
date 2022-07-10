@@ -262,6 +262,16 @@ int32_t recibir_entero(int socket) {
     return tamanio;
 }
 
+t_dato_inicio *recibir_dato_inicio(int socket) {
+    int size;
+    void *buffer = recibir_buffer(&size, socket);
+    t_dato_inicio *inicio_proceso = malloc(sizeof(t_dato_inicio));
+    memcpy(inicio_proceso, buffer, size);
+    free(buffer);
+    return inicio_proceso;
+}
+
+
 /*
 t_dictionary *deserializar_tabla1n(void *buffer, int size_tabla) {
     t_dictionary *tabla = dictionary_create();

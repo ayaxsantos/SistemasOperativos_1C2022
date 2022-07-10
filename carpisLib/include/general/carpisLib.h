@@ -108,9 +108,8 @@ typedef struct
     double una_estimacion;
     estado un_estado;
     t_consola *consola;
-
-    //Tabla de paginas -> Proximas iteraciones
     int32_t id_tabla_1n;
+    int mi_socket_memoria;
 } t_pcb;
 
 typedef struct proceso_pcb
@@ -137,6 +136,14 @@ typedef struct t_tercera_solicitud
     uint32_t dato; //Suponemos un entero no signado de 4bytes
     estado_memoria estado_memo;
 } __attribute__((packed)) t_tercera_solicitud;
+
+/*** KERNEL + MEMORIA ***/
+typedef struct t_dato_inicio
+{
+    unsigned int pid;
+    int tamanio_proceso;
+    int32_t id_tabla_1n;
+} __attribute__((packed)) t_dato_inicio;
 
 /**
  * @name habilitar_log
@@ -183,7 +190,9 @@ t_proceso_pcb *deserializar_proceso_pcb(int socket);
 t_solicitud *recibir_solicitud(int socket);
 t_tercera_solicitud  *recibir_tercera_solicitud(int socket);
 
+/*** KERNEL + MEMORIA ***/
 int32_t recibir_entero(int socket);
+t_dato_inicio *recibir_dato_inicio(int socket);
 
 
 #include "../utils/utilslib.h"

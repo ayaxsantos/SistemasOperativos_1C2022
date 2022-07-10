@@ -21,6 +21,11 @@ int iniciar_servidor(char *ip, char *puerto)
                              servinfo->ai_protocol);
 
     // Asociamos el socket a un puerto
+    const int enable = 1;
+    if (setsockopt(socket_servidor, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)) < 0)
+        printf("setsockopt(SO_REUSEADDR) failed");
+    if (setsockopt(socket_servidor, SOL_SOCKET, SO_REUSEPORT, &enable, sizeof(int)) < 0)
+        printf("setsockopt(SO_REUSEPORT) failed");
 
     bind(socket_servidor, servinfo->ai_addr, servinfo->ai_addrlen);
 

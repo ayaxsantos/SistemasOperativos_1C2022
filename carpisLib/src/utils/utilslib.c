@@ -39,6 +39,13 @@ void setear_operacion(t_operacion *operacion, void *valor) {
             operacion->buffer->size = size;
             operacion->buffer->stream = stream;
             break;
+		case INICIO_PROCESO:
+            size = sizeof(int32_t) + sizeof(unsigned int) + sizeof(int);
+            stream = malloc(size);
+            memcpy(stream, valor, size);
+            operacion->buffer->size = size;
+            operacion->buffer->stream = stream;
+			break;
         case PCB:
 		case BLOQUEO:
 		case FIN_PROCESO:
@@ -66,9 +73,6 @@ void setear_operacion(t_operacion *operacion, void *valor) {
             operacion->buffer->size = size;
             operacion->buffer->stream = stream;
             break;
-        case INICIO_PROCESO:
-            operacion->buffer->size = sizeof(uint32_t)*2;
-            operacion->buffer->stream = valor;
     }
     return;
 }

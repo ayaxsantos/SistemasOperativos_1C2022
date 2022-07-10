@@ -7,11 +7,11 @@ void iniciar_memoria() {
     setear_estructuras_de_memoria();
 	esperar_handshake_cpu(server);
     esperar_handshake_kernel(server);
-	log_info(logger_memoria,"Memoria a la espera de conexiones ...");
     pthread_t *hilo_cpu = malloc(sizeof(pthread_t));
     pthread_create(hilo_cpu, NULL, &gestionar_conexion_cpu, NULL);
     pthread_detach(*hilo_cpu);
     int *socket_cliente;
+    log_info(logger_memoria,"Memoria a la espera de conexiones con Kernel ...");
 	while(true) {
         socket_cliente = malloc(sizeof(int));
         *socket_cliente = esperar_cliente(server);
@@ -24,23 +24,16 @@ void iniciar_memoria() {
 }
 
 void iniciar_proceso(int socket_cliente) {
-    int size;
-    uint32_t tamanio_proceso, pid;
-    void *dato = recibir_buffer(&size, socket_cliente);
-    memcpy(&pid, dato, sizeof(uint32_t));
-    memcpy(&tamanio_proceso, dato + sizeof(uint32_t), sizeof(uint32_t));
-	t_tabla_pagina* tabla_principal_del_proceso = crear_tabla_principal((int )tamanio_proceso);
+    t_dato_inicio *inicio_proceso = recibir_dato_inicio(socket_cliente);
+	t_tabla_pagina* tabla_principal_del_proceso = crear_tabla_principal((int )inicio_proceso->tamanio_proceso);
     //Mutex
     list_add(tablas_primer_nivel, tabla_principal_del_proceso);
     int index_tabla = list_size(tablas_primer_nivel)-1;
     //UnMutex
-
-    void *dato_a_enviar = malloc(sizeof(uint32_t)*2);
-    memcpy(dato_a_enviar, &pid, sizeof(uint32_t));
-    memcpy(dato_a_enviar + sizeof(uint32_t), &index_tabla, sizeof(uint32_t));
+    inicio_proceso->id_tabla_1n = index_tabla;
 
     t_operacion *operacion = crear_operacion(INICIO_PROCESO);
-	setear_operacion(operacion,dato_a_enviar);
+	setear_operacion(operacion,inicio_proceso);
 	enviar_operacion(operacion,socket_cliente);
 	eliminar_operacion(operacion);
 

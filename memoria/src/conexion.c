@@ -31,6 +31,7 @@ void *gestionar_conexion_kernel(void *arg) {
 }
 
 void *gestionar_conexion_cpu(void *arg) {
+    log_info(logger_memoria,"Memoria a la espera de operaciones con CPU ...");
     while (true) {
         codigo_operacion cod_op = recibir_operacion(socket_cpu);
         switch (cod_op) {
