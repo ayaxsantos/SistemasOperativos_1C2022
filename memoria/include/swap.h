@@ -73,6 +73,7 @@ void formatear_swap();
 void crear_archivo(int nro_proceso, int tamanio_proceso);
 t_list* formatear_pags_en_archivo(int tamanio_proceso);
 
+void marcar_pag_ocupada(int pid, int nro_pagina_en_memoria);
 void swapear_tabla_completa(t_tabla_pagina *tabla_1n);
 
 void destruir_archivo(int id_tabla);

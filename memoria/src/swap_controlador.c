@@ -1,5 +1,101 @@
 #include "../include/swap_controlador.h"
 
+void realizar_page_fault(void *data, int nro_pagina, unsigned int pid) {
+    // TODO
+}
+
+void gestionar_page_request(unsigned int pid, int pagina){
+	void * pag_leida;
+    t_particion* particion = encontrar_particion_de(pid);
+
+    if (!particion){
+    	log_info(logger_swap,"El proceso no tiene páginas en swap que pueda pedir.");
+    }
+    else{
+        int nro_pag_en_swap = nro_pagina_en_swap(particion, pagina);
+        if(nro_pag_en_swap > -1) {
+        	int inicio_pag = nro_pag_en_swap * config_memoria.tamanio_pagina;
+
+			int file = open(particion->fcb->path_archivo, O_RDWR);
+			char* ptro_archivo = (char*)mmap(0, config_memoria.tamanio_pagina, PROT_READ | PROT_WRITE, MAP_SHARED, file, 0);
+
+			void* buffer = malloc(config_memoria.tamanio_pagina);
+			char c;
+			int i, desplazamiento = 0;
+
+			if (ptro_archivo != 0){
+				for (i = inicio_pag; i < config_memoria.tamanio_pagina + inicio_pag; i++){
+					c = ptro_archivo[i];
+					memcpy(buffer + desplazamiento, &c, sizeof(char));
+					desplazamiento+= sizeof(char);
+				}
+				pag_leida = buffer;
+
+				int cod = munmap(ptro_archivo, config_memoria.tamanio_pagina);
+
+				int cerrado = close (particion->archivo);
+				if (cerrado != 0){ log_info(logger_swap,"No se pudo cerrar el archivo."); }
+
+				/*if (cod == 0){
+					marcar_pag_ocupada(pid, pagina);
+
+					t_paquete_memoria *paquete = crear_paquete_memoria(WRITE_PAGE);
+					setear_paquete_memoria(paquete, solicitud);
+					enviar_paquete_memoria(paquete, socket_memoria);
+					eliminar_paquete_memoria(paquete);
+				}*/
+			}
+			free(buffer);
+			return;
+        }
+    	log_info(logger_swap,"PF: El proceso no tiene la pagina pedida en swap.");
+    }
+}
+
+void gestionar_page_write(unsigned int pid, int pagina, void* a_escribir){
+    t_particion* particion = encontrar_particion_de(pid);
+
+    if (!particion){
+    	log_info(logger_swap,"Error en la recuperación del archivo en swap para este proceso.");
+    }
+
+    int nro_pag_en_swap = nro_pagina_en_swap(particion, pagina);
+    if (nro_pag_en_swap == -1){                                            // Página nueva
+		int nro_pagina_libre = obtener_nro_pagina_libre(particion);
+		if (nro_pagina_libre > -1){
+			asignar_pagina_a(particion, nro_pagina_libre);
+		}
+		nro_pag_en_swap = nro_pagina_libre;
+    }
+	else{
+		log_info(logger_swap,"El proceso alcanzó el máximo número de páginas que puede pedir.");
+	}
+
+    int inicio_pag = nro_pag_en_swap * config_memoria.tamanio_pagina;
+
+    int file = open(particion->fcb->path_archivo, O_RDWR);
+    char* ptro_archivo = (char*) mmap(0, config_memoria.tamanio_pagina, PROT_READ | PROT_WRITE, MAP_SHARED, file, 0);
+
+    if (ptro_archivo != 0){
+        ptro_archivo[inicio_pag] = a_escribir;
+        int desplazamiento = inicio_pag;
+        int desplazamiento_data = 0;
+        for(int i=inicio_pag;i<config_memoria.tamanio_pagina + inicio_pag; i++){
+            memcpy(ptro_archivo + desplazamiento, a_escribir + desplazamiento_data, sizeof(char));
+            desplazamiento += sizeof(char);
+            desplazamiento_data += sizeof(char);
+        }
+
+        int cod = munmap(ptro_archivo, config_memoria.tamanio_pagina);
+        if (cod != 0){ log_info(logger_swap,"No se pudo 'desmapear' el archivo."); }
+
+        int cerrado = close (particion->archivo);
+        if (cerrado != 0){ log_info(logger_swap,"No se pudo cerrar el archivo."); }
+
+        log_info(logger_swap,"La escritura en swap se realizó con éxito.");
+    }
+}
+
 t_particion* encontrar_particion_de(int tabla_1n){
 	t_list *particiones = swap.particiones;
     for (int i = 0; i < list_size(particiones); i++){
@@ -34,7 +130,20 @@ int nro_pagina_en_swap(t_particion *particion, int nro_pag_memoria){
     return -1;
 }
 
-void liberar_pagina(int pid, int nro_pag_swap, t_particion* particion){
+void asignar_pagina_a(t_particion *particion, int nro_pagina){
+    t_list* paginas = particion->fcb->pags_en_archivo;
+    int i;
+    for (i = 0; i < list_size(paginas); i++){
+        t_pagina_swap* pag_aux = list_get(paginas,i);
+        if (pag_aux->is_free){
+            pag_aux->id_memoria = nro_pagina;
+            pag_aux->is_free = 0;
+            return;
+        }
+    }
+}
+
+void liberar_pagina(int nro_pag_swap, t_particion* particion){
     t_pagina_swap* pagina_swap = list_get(particion->fcb->pags_en_archivo, nro_pag_swap);
     pagina_swap->id_memoria = -1;
     pagina_swap->is_free = 1;

@@ -21,7 +21,7 @@ void arrancar_logger_swap(){
 }
 
 void formatear_swap(){
-    swap.raiz = malloc(sizeof(t_swap)); //TODO: Liberar memoria
+    swap.raiz = malloc(sizeof(t_swap));
     swap.particiones = list_create();
 }
 
@@ -68,6 +68,15 @@ t_list* formatear_pags_en_archivo(int tamanio_proceso){
 
     return pags_en_archivo;
 };
+
+void marcar_pag_ocupada(int pid, int nro_pagina_en_memoria){
+	t_particion* particion = encontrar_particion_de(pid);
+    int nro_pag_en_swap = nro_pagina_en_swap(particion->fcb->pags_en_archivo, nro_pagina_en_memoria);
+
+    t_pagina_swap* pagina_swap = list_get(particion->fcb->pags_en_archivo, nro_pag_en_swap);
+    pagina_swap->id_memoria = nro_pagina_en_memoria;
+    pagina_swap->is_free = 0;
+}
 
 void swapear_tabla_completa(t_tabla_pagina *tabla_1n){
 	//TODO
