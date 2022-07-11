@@ -21,6 +21,12 @@
 
 ////////////////////////////////////////////////
 
+typedef enum
+{
+    CLOCK,
+    CLOCKM
+} algoritmo;
+
 typedef struct config_memoria
 {
     char* puerto_escucha;
@@ -67,11 +73,12 @@ typedef struct t_tabla_pagina
     int puntero;
 } t_tabla_pagina;
 
-typedef enum
-{   
-    CLOCK,
-    CLOCKM
-} algoritmo;
+typedef struct t_frame_asignado
+{
+    int id_tabla_2n;
+    int entrada_tabla_2b;
+    int nro_frame;
+} t_frame_asignado;
 
 ////////////////////////////////////////////////
 
