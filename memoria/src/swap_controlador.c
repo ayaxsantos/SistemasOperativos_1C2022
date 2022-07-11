@@ -96,6 +96,21 @@ void gestionar_page_write(unsigned int pid, int pagina, void* a_escribir){
     }
 }
 
+
+void marcar_pag_ocupada(int pid, int nro_pagina_en_memoria){
+	t_particion* particion = encontrar_particion_de(pid);
+    int nro_pag_en_swap = nro_pagina_en_swap(particion->fcb->pags_en_archivo, nro_pagina_en_memoria);
+
+    t_pagina_swap* pagina_swap = list_get(particion->fcb->pags_en_archivo, nro_pag_en_swap);
+    pagina_swap->id_memoria = nro_pagina_en_memoria;
+    pagina_swap->is_free = 0;
+}
+
+void swapear_tabla_completa(t_tabla_pagina *tabla_1n){
+	//TODO
+}
+
+/* ------ Auxiliares ------ */
 t_particion* encontrar_particion_de(int tabla_1n){
 	t_list *particiones = swap.particiones;
     for (int i = 0; i < list_size(particiones); i++){
@@ -141,12 +156,6 @@ void asignar_pagina_a(t_particion *particion, int nro_pagina){
             return;
         }
     }
-}
-
-void liberar_pagina(int nro_pag_swap, t_particion* particion){
-    t_pagina_swap* pagina_swap = list_get(particion->fcb->pags_en_archivo, nro_pag_swap);
-    pagina_swap->id_memoria = -1;
-    pagina_swap->is_free = 1;
 }
 
 int calcular_pags_libres(t_particion* particion){
