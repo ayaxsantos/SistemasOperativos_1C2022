@@ -121,12 +121,22 @@ void segunda_solicitud_mmu(t_solicitud* solicitud){
 	t_tabla_pagina *tabla_2n = dictionary_get(tabla_1n->tabla, string_itoa(solicitud->id_tabla_2n));
 	t_col_pagina *pagina = dictionary_get(tabla_2n->tabla, string_itoa(solicitud->entrada_tabla));
 
-	if (pagina->presencia){
-		solicitud->nro_frame = pagina->nro_frame;
+	if (!pagina->presencia){
+        if(pagina->nro_frame != UNDEFINED) {
+            t_frame *frame = realizar_algoritmo(tabla_2n, pagina, solicitud->accion_solicitada, solicitud->entrada_tabla);
+            solicitud->nro_frame = frame->nro_frame;
+        }
+        /*
+         * Aca debo asignar el marco a la pagina
+         * presencia: False && nro_frame: UNDEFINED
+         */
+        else{
+            //asignar_primer_marco_a_pagina(tabla_1n, pagina);
+
+        }
 	}
 	else{
-		t_frame *frame = realizar_algoritmo(tabla_2n, pagina, READ_ACCION, solicitud->entrada_tabla);
-		solicitud->nro_frame = frame->nro_frame;
+        solicitud->nro_frame = pagina->nro_frame;
 	}
 }
 
@@ -165,6 +175,24 @@ int escribir_dato_en_memoria(char *dir_fisica, int dato){
 	status = 1;
 
 	return status;
+}
+
+void asignar_primer_marco_a_pagina(t_tabla_pagina *tabla_2n, t_solicitud *solicitud, t_col_pagina *pagina, int frames_asignados) {
+    t_frame *frame;
+    if(frames_asignados < config_memoria.marcos_por_proceso) {
+        frame = recorrer_frames(tabla_2n);
+        pagina->presencia = true;
+        pagina->nro_frame = frame->nro_frame;
+
+        frame->usado = 1;
+        frame->modificado = solicitud->accion_solicitada;
+        frame->is_free = false;
+        solicitud->nro_frame = frame->nro_frame;
+    }
+    else {
+        frame = realizar_algoritmo(tabla_2n, pagina, solicitud->accion_solicitada, solicitud->entrada_tabla);
+        solicitud->nro_frame = frame->nro_frame;
+    }
 }
 
 /* ---------- Auxiliares ---------- */
