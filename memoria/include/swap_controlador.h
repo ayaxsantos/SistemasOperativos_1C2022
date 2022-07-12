@@ -8,7 +8,7 @@ t_particion* encontrar_particion_de(int pid);
 
 int obtener_nro_pagina_libre(t_particion* particion);
 int nro_pagina_en_swap(t_particion *particion, int nro_pag_memoria);
-void liberar_pagina(int pid, int nro_pag_swap, t_particion* particion);
+void liberar_pagina(int nro_pag_swap, t_particion* particion);
 int calcular_pags_libres(t_particion* particion);
 
 #endif /* INCLUDE_SWAP_CONTROLADOR_H_ */

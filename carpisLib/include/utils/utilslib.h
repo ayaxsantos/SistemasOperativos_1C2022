@@ -10,8 +10,6 @@ void *serializar_operacion(t_operacion *operacion, int bytes);
 void enviar_operacion(t_operacion *operacion, int socket_cliente);
 void eliminar_operacion(t_operacion *operacion) ;
 
-int32_t recibir_direccion_memoria(int socket_cliente);
-
 void mostrar_error(char *exmsj, t_log *logger);
 
 #endif

@@ -90,17 +90,6 @@ void crear_buffer_operacion(t_operacion *operacion) {
     operacion->buffer->stream = NULL;
 }
 
-int32_t recibir_direccion_memoria(int socket_cliente) {
-	int32_t cod_op;
-	if(recv(socket_cliente, &cod_op, sizeof(int32_t), MSG_WAITALL) != 0)
-		return cod_op;
-	else
-	{
-		close(socket_cliente);
-		return -1;
-	}
-}
-
 /*********************************************/
 //-----------------Liberaciones de memoria---------------------/
 

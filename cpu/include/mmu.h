@@ -5,7 +5,7 @@
 
 void iniciar_mmu();
 
-uint32_t obtener_dato_memoria(dir_logica);
+uint32_t obtener_dato_memoria(dir_logica dir);
 int escribir_dato_memoria(dir_logica dir, uint32_t dato);
 int procesar_solicitud(dir_logica dir, accion accion_pedida, uint32_t dato);
 

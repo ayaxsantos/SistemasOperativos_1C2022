@@ -64,10 +64,10 @@ typedef struct t_tabla_pagina
 {
 	int id_tabla;
     int tamanio_proceso;
+    int pags_necesarias;
     t_dictionary *tabla;
     int puntero;
-    int cantidad_hit;
-    int cantidad_miss;
+    int frames_asignados;
 } t_tabla_pagina;
 
 typedef enum
@@ -90,8 +90,13 @@ int socket_cpu, socket_kernel;
 
 t_memoria *memoria_principal;
 t_list *tablas_primer_nivel;
+
 /************SEMAFOROS*******************/
+
+pthread_mutex_t mutex_mp;
 pthread_mutex_t mutex_logger;
+pthread_mutex_t mutex_lista_tablas_paginas;
+sem_t sem_algoritmo;
 
 ////////////////////////////////////////////////
 
@@ -115,5 +120,6 @@ void esperar_handshake_kernel(int server);
 #include "swap.h"
 #include "conexion.h"
 #include "paginacion.h"
+#include "memoria_controlador.h"
 
 #endif /* MAIN_H_INCLUDED */

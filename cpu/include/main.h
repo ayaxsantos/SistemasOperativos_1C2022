@@ -9,6 +9,8 @@
 #include <semaphore.h>
 #include <errno.h>
 
+#define size_dato sizeof(uint32_t)
+
 typedef int32_t dir_logica;
 /**
  * @DESC Quizas este en carpisLib

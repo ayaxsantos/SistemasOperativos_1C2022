@@ -9,7 +9,7 @@ uint32_t obtener_dato_memoria(dir_logica dir) {
 }
 
 int escribir_dato_memoria(dir_logica dir, uint32_t dato) {
-    return procesar_solicitud(dir, WRITE_ACCION, dato);
+    return dir_logica_a_fisica(dir, WRITE_ACCION, dato);
 }
 
 int procesar_solicitud(dir_logica dir, accion accion_pedida, uint32_t dato) {

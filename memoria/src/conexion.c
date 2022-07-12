@@ -15,7 +15,14 @@ void *gestionar_conexion_kernel(void *arg) {
                 pthread_mutex_lock(&mutex_logger);
                 log_info(logger_memoria,"Llego un FIN_PROCESO");
                 pthread_mutex_unlock(&mutex_logger);
+                terminar_proceso(socket_cliente);
                 break;
+            case SUSPENSION_PROCESO:
+				pthread_mutex_lock(&mutex_logger);
+				log_info(logger_memoria,"Llego un SUSPENSION_PROCESO");
+				pthread_mutex_unlock(&mutex_logger);
+				suspender_proceso(socket_cliente);
+				break;
             case -1:
                 pthread_mutex_lock(&mutex_logger);
                 log_error(logger_memoria, "El cliente se desconecto. Terminando Hilo.");
@@ -98,8 +105,8 @@ void responder_handshake(int *socket,modulo modulo_actual)
 
 void gestionar_primera_solicitud() {
     t_solicitud *request = recibir_solicitud(socket_cpu);
-    //primera_solicitud_mmu(request);
-    request->id_tabla_2n = 3;
+
+    primera_solicitud_mmu(request);
 
     t_operacion *operacion = crear_operacion(PRIMERA_SOLICITUD);
     setear_operacion(operacion, request);
@@ -110,8 +117,8 @@ void gestionar_primera_solicitud() {
 
 void gestionar_segunda_solicitud() {
     t_solicitud *request = recibir_solicitud(socket_cpu);
-    //segunda_solicitud_mmu(request);
-    request->nro_frame = 3;
+
+    segunda_solicitud_mmu(request);
 
     t_operacion *operacion = crear_operacion(SEGUNDA_SOLICITUD);
     setear_operacion(operacion, request);
@@ -122,5 +129,12 @@ void gestionar_segunda_solicitud() {
 
 void gestionar_tercera_solicitud() {
     t_tercera_solicitud *request = recibir_tercera_solicitud(socket_cpu);
+
     tercera_solicitud_mmu(request);
+
+    t_operacion *operacion = crear_operacion(TERCERA_SOLICITUD);
+	setear_operacion(operacion, request);
+	enviar_operacion(operacion, socket_cpu);
+	eliminar_operacion(operacion);
+	free(request);
 }
