@@ -7,8 +7,8 @@ t_frame *recorrer_frames(t_tabla_pagina *tabla_pagina) {
     for(i=0;i<memoria_principal->cantidad_frames;i++) {
 		frame = (t_frame*)list_get(memoria_principal->frames, i);
 		if(frame->is_free) {
-            return frame;
             pthread_mutex_unlock(&mutex_mp);
+            return frame;
 		}
 	}
     pthread_mutex_unlock(&mutex_mp);

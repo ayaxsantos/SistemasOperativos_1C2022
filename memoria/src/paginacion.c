@@ -35,7 +35,7 @@ void crear_tablas_segundo_nivel(t_tabla_pagina *tabla_principal){
 		log_error(logger_memoria, "El proceso que se intenta cargar en memoria es demasiado grande para la configuracion ingresada");
 		pthread_mutex_unlock(&mutex_logger);
 	}
-};
+}
 
 int agregar_pag_a_tabla_1n(t_tabla_pagina *tabla_proceso, char *nro_pag){
 	t_tabla_pagina *tabla_2n_aux = inicializar_tabla(tabla_proceso->tamanio_proceso);
@@ -46,6 +46,7 @@ int agregar_pag_a_tabla_1n(t_tabla_pagina *tabla_proceso, char *nro_pag){
     for (i=0; i < config_memoria.entradas_por_tabla; i++){
 		nro_pag_2n = string_itoa(i);
         agregar_pag_a_tabla_2n(tabla_2n_aux, nro_pag_2n, tabla_proceso->frames_asignados);
+        tabla_proceso->frames_asignados++;
     }
 
     dictionary_put(tabla_proceso->tabla, nro_pag, tabla_2n_aux);
@@ -71,22 +72,22 @@ int agregar_ultima_pag_a_tabla_1n(t_tabla_pagina *tabla_proceso, int nro_ultima_
 
 int agregar_pag_a_tabla_2n(t_tabla_pagina *tabla_2n, char *nro_pag, int frames_asignados) {
     t_col_pagina *col = malloc(sizeof(t_col_pagina));
-    t_frame *frame;
+    /*t_frame *frame;
     if(frames_asignados < config_memoria.marcos_por_proceso) {
         frame = recorrer_frames(tabla_2n);
     }
     else {
         frame = realizar_algoritmo(tabla_2n,col,READ_ACCION, atoi(nro_pag));
-    }
-    col->presencia = true;
-    col->nro_frame = frame->nro_frame;
+    }*/
+    col->presencia = false;
+    col->nro_frame = UNDEFINED;
 
     dictionary_put(tabla_2n->tabla, nro_pag, col);
-
+    /*
     frame->usado = 1;
     frame->modificado = READ_ACCION;
     frame->nro_pagina_asignada = atoi(nro_pag);
-    frame->is_free = false;
+    frame->is_free = false;*/
     return 0;
 }
 
@@ -183,11 +184,12 @@ t_tabla_pagina* obtener_tabla_1n_por_id(unsigned int id_buscado){
     return tabla_pagina;
 }
 
+/*
 void modificar_bit_de_presencia_pagina(t_frame *frame, int valor){
     t_tabla_pagina *tabla_paginas = list_get(tablas_primer_nivel,frame->tabla_1n_asignada);
     t_col_pagina *registro = (t_col_pagina *) dictionary_get(tabla_paginas->tabla, string_itoa(frame->nro_pagina_asignada));
     registro->presencia = valor;
-}
+}*/
 
 /* ---------- Cierre ----------*/
 

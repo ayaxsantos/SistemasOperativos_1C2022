@@ -42,8 +42,6 @@ typedef struct t_frame
     bool usado;
     int modificado;
     bool is_free;
-    int nro_pagina_asignada;
-    int tabla_1n_asignada;
     long tiempo_usado;
 } t_frame;
 
