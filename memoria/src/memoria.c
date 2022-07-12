@@ -26,11 +26,13 @@ void iniciar_memoria() {
 void iniciar_proceso(int socket_cliente) {
     t_dato_inicio *inicio_proceso = recibir_dato_inicio(socket_cliente);
 	t_tabla_pagina* tabla_principal_del_proceso = crear_tabla_principal((int )inicio_proceso->tamanio_proceso);
-    //Mutex
-    list_add(tablas_primer_nivel, tabla_principal_del_proceso);
-    int index_tabla = list_size(tablas_primer_nivel)-1;
-    //UnMutex
-    inicio_proceso->id_tabla_1n = index_tabla;
+
+	pthread_mutex_lock(&mutex_lista_tablas_paginas);
+	list_add(tablas_primer_nivel, tabla_principal_del_proceso);
+	int index_tabla = list_size(tablas_primer_nivel)-1;
+	pthread_mutex_unlock(&mutex_lista_tablas_paginas);
+
+	inicio_proceso->id_tabla_1n = index_tabla;
 
     t_operacion *operacion = crear_operacion(INICIO_PROCESO);
 	setear_operacion(operacion,inicio_proceso);
@@ -56,9 +58,11 @@ void terminar_proceso(int socket_cliente) {
 
 void suspender_proceso(int socket_cliente) {
 	uint32_t id = recibir_entero(socket_cliente);
-	// t_tabla_pagina* tabla_1n = list_get(tablas_primer_nivel, id);
 
-	// swapear_tabla_completa(tabla_1n); TODO
+	pthread_mutex_lock(&mutex_lista_tablas_paginas);
+	t_tabla_pagina* tabla_1n = list_get(tablas_primer_nivel, id);
+	swapear_tabla_completa(tabla_1n);
+	pthread_mutex_unlock(&mutex_lista_tablas_paginas);
 
 	t_operacion *operacion = crear_operacion(SUSPENSION_PROCESO);
 	setear_operacion(operacion,&id);

@@ -1,7 +1,5 @@
 #include "../include/swap.h"
 
-t_log *logger_swap = NULL;
-
 void iniciar_swap() {
 	arrancar_logger_swap();
 	habilitar_log(logger_swap, config_swap.log_habilitado);
@@ -21,7 +19,7 @@ void arrancar_logger_swap(){
 }
 
 void formatear_swap(){
-    swap.raiz = malloc(sizeof(t_swap)); //TODO: Liberar memoria
+    swap.raiz = malloc(sizeof(t_swap));
     swap.particiones = list_create();
 }
 
@@ -81,4 +79,10 @@ void destruir_archivo(int id){
 	else{
 		log_info(logger_swap,"ERROR: El proceso que se intenta cerrar no existe en swap.");
 	}
+}
+
+void liberar_pagina(int nro_pag_swap, t_particion* particion){
+    t_pagina_swap* pagina_swap = list_get(particion->fcb->pags_en_archivo, nro_pag_swap);
+    pagina_swap->id_memoria = -1;
+    pagina_swap->is_free = 1;
 }

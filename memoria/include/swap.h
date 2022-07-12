@@ -63,6 +63,7 @@ typedef struct swap{
 ////////////////////////////////////////////////
 
 t_swap swap;
+t_log *logger_swap;
 
 ////////////////////////////////////////////////
 
@@ -74,5 +75,6 @@ void crear_archivo(int id, int tamanio_proceso);
 t_list* formatear_pags_en_archivo(int tamanio_proceso);
 
 void destruir_archivo(int id_tabla);
+void liberar_pagina(int nro_pag_swap, t_particion* particion);
 
 #endif /* INCLUDE_SWAP_H_ */
