@@ -21,6 +21,12 @@
 
 ////////////////////////////////////////////////
 
+typedef enum
+{
+    CLOCK,
+    CLOCKM
+} algoritmo;
+
 typedef struct config_memoria
 {
     char* puerto_escucha;
@@ -64,15 +70,16 @@ typedef struct t_tabla_pagina
     int tamanio_proceso;
     int pags_necesarias;
     t_dictionary *tabla;
+    t_list *frames_asignados;
     int puntero;
-    int frames_asignados;
 } t_tabla_pagina;
 
-typedef enum
-{   
-    CLOCK,
-    CLOCKM
-} algoritmo;
+typedef struct t_frame_asignado
+{
+    int id_tabla_2n;
+    int entrada_tabla_2b;
+    int nro_frame;
+} t_frame_asignado;
 
 ////////////////////////////////////////////////
 
@@ -119,5 +126,6 @@ void esperar_handshake_kernel(int server);
 #include "conexion.h"
 #include "paginacion.h"
 #include "memoria_controlador.h"
+#include "clock.h"
 
 #endif /* MAIN_H_INCLUDED */
