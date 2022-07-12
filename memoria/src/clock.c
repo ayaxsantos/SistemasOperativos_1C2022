@@ -24,7 +24,7 @@ t_frame *realizar_algoritmo_clock(t_tabla_pagina *tabla_1n, t_col_pagina *regist
                     t_frame_asignado *marco = malloc(sizeof(t_frame_asignado));
                     marco->nro_frame = registro_pagina->nro_frame;
                     marco->id_tabla_2n = tabla_2n->id_tabla;
-                    marco->entrada_tabla_2b = j;
+                    marco->entrada_tabla_2n = j;
                     list_add(tabla_1n->frames_asignados, marco);
                 }
             }

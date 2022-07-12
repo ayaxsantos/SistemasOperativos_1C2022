@@ -3,7 +3,7 @@
 void *gestionar_conexion_kernel(void *arg) {
     int socket_cliente = *((int *)arg);
     while (true) {
-		codigo_operacion cod_op = recibir_operacion(socket_cliente);
+		int cod_op = recibir_operacion(socket_cliente);
 		switch (cod_op) {
             case INICIO_PROCESO:
                 pthread_mutex_lock(&mutex_logger);
@@ -27,7 +27,7 @@ void *gestionar_conexion_kernel(void *arg) {
                 pthread_mutex_lock(&mutex_logger);
                 log_error(logger_memoria, "El cliente se desconecto. Terminando Hilo.");
                 pthread_mutex_unlock(&mutex_logger);
-                return EXIT_FAILURE;
+                break;
             default:
                 pthread_mutex_lock(&mutex_logger);
                 log_warning(logger_memoria, "Operacion desconocida.");
@@ -40,7 +40,7 @@ void *gestionar_conexion_kernel(void *arg) {
 void *gestionar_conexion_cpu(void *arg) {
     log_info(logger_memoria,"Memoria a la espera de operaciones con CPU ...");
     while (true) {
-        codigo_operacion cod_op = recibir_operacion(socket_cpu);
+        int cod_op = recibir_operacion(socket_cpu);
         switch (cod_op) {
             case PRIMERA_SOLICITUD:
                 gestionar_primera_solicitud();
@@ -55,7 +55,7 @@ void *gestionar_conexion_cpu(void *arg) {
                 pthread_mutex_lock(&mutex_logger);
                 log_error(logger_memoria, "CPU se desconecto. Terminando Hilo.");
                 pthread_mutex_unlock(&mutex_logger);
-                return EXIT_FAILURE;
+                break;
             default:
                 pthread_mutex_lock(&mutex_logger);
                 log_warning(logger_memoria, "Operacion desconocida de CPU.");
@@ -128,7 +128,7 @@ void gestionar_segunda_solicitud() {
 }
 
 void gestionar_tercera_solicitud() {
-    t_tercera_solicitud *request = recibir_tercera_solicitud(socket_cpu);
+    t_solicitud *request = recibir_solicitud(socket_cpu);
 
     tercera_solicitud_mmu(request);
 

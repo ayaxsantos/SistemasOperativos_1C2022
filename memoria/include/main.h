@@ -77,7 +77,7 @@ typedef struct t_tabla_pagina
 typedef struct t_frame_asignado
 {
     int id_tabla_2n;
-    int entrada_tabla_2b;
+    int entrada_tabla_2n;
     int nro_frame;
 } t_frame_asignado;
 

@@ -1,10 +1,5 @@
 #include "../../include/utils/utilslib.h"
 
-void mostrar_error(char *exmsj, t_log *logger) {
-	log_error(logger, exmsj);
-}
-
-/*********************************************/
 void enviar_operacion(t_operacion *operacion, int socket_cliente) {
 	int bytes;
 	void* a_enviar;
@@ -29,7 +24,7 @@ void *serializar_operacion(t_operacion *operacion, int bytes) {
 
 void setear_operacion(t_operacion *operacion, void *valor) {
     codigo_operacion op_code = operacion->cod_op;
-    int desplazamiento = 0, size;
+    int size;
     t_consola *consola;
     void *stream;
 
@@ -60,14 +55,8 @@ void setear_operacion(t_operacion *operacion, void *valor) {
 			break;
         case PRIMERA_SOLICITUD:
         case SEGUNDA_SOLICITUD:
-            size = sizeof(int32_t) * 3 + sizeof(unsigned int);
-            stream = malloc(size);
-            memcpy(stream, valor, size);
-            operacion->buffer->size = size;
-            operacion->buffer->stream = stream;
-            break;
         case TERCERA_SOLICITUD:
-            size = sizeof(uint32_t) + sizeof(unsigned int)*2 + sizeof(int)*2;
+            size = sizeof(int32_t) * 3 + sizeof(unsigned int)*2 + sizeof(int)*2 + sizeof(uint32_t);
             stream = malloc(size);
             memcpy(stream, valor, size);
             operacion->buffer->size = size;
