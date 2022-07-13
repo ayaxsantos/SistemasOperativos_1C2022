@@ -216,7 +216,7 @@ bool buscar_por_id(void *una_tabla, unsigned int id) {
 t_tabla_pagina* obtener_tabla_1n_por_id(unsigned int id_buscado){
     pthread_mutex_lock(&mutex_lista_tablas_paginas);
     bool _buscar_por_id(void *una_tabla) {
-        return buscar_por_id(buscar_por_id, id_buscado);
+        return buscar_por_id(una_tabla, id_buscado);
     }
     t_tabla_pagina *tabla_pagina = (t_tabla_pagina *)list_find(tablas_primer_nivel, _buscar_por_id);
     pthread_mutex_unlock(&mutex_lista_tablas_paginas);

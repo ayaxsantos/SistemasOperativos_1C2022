@@ -42,8 +42,8 @@ int procesar_solicitud(dir_logica dir, accion accion_pedida, uint32_t dato) {
     else {
         int entrada_tabla_1n = entrada_tabla_1er_nivel(num_pagina);
         int32_t id_tabla_2n = solicitar_registro_1nivel(pcb->id_tabla_1n, entrada_tabla_1n);
-        unsigned int nro_frame = solicitar_registro_2nivel(id_tabla_2n, entrada_tabla_2do_nivel(num_pagina));
-        actualizar_tlb(nro_frame, num_pagina, pcb->id_tabla_1n);
+        unsigned int nro_frame = solicitar_registro_2nivel(id_tabla_2n, entrada_tabla_2do_nivel(num_pagina),accion_pedida);
+        //actualizar_tlb(nro_frame, num_pagina, pcb->id_tabla_1n);
         if(accion_pedida == WRITE_ACCION) {
             estado_memoria res = enviar_dato_memoria(calcular_desplazamiento(dir, num_pagina), nro_frame, dato);
             return res;
