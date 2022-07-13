@@ -58,27 +58,15 @@ void terminar_proceso(int socket_cliente) {
 
 void suspender_proceso(int socket_cliente) {
 	uint32_t id = recibir_entero(socket_cliente);
+	unsigned int pid;		// Conseguir pid
 
 	pthread_mutex_lock(&mutex_lista_tablas_paginas);
 	t_tabla_pagina* tabla_1n = list_get(tablas_primer_nivel, id);
-	swapear_tabla_completa(tabla_1n);
+	swapear_tabla_completa(pid, tabla_1n);
 	pthread_mutex_unlock(&mutex_lista_tablas_paginas);
 
 	t_operacion *operacion = crear_operacion(SUSPENSION_PROCESO);
 	setear_operacion(operacion,&id);
 	enviar_operacion(operacion,socket_cliente);
 	eliminar_operacion(operacion);
-}
-
-
-void gestionar_acceso(int socket_cliente) {
-	// TODO Completar
-}
-
-void gestionar_lectura(int socket_cliente){
-	// TODO Completar
-}
-
-void gestionar_escritura(int socket_cliente){
-	// TODO Completar
 }

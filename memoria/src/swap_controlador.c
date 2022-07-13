@@ -96,19 +96,43 @@ void gestionar_page_write(unsigned int pid, int pagina, void* a_escribir){
     }
 }
 
+/*
+ * Analizar distintos casos:
+ * 1. Primera vez que se envía toda la data a swap (hay basura en el archivo)
+ * 2. No es necesario enviar toda la data, sino sólo las páginas modificadas
+ *
+ * Para pensar: ¿Vale la pena un page_write por cada página en el caso 1?
+ * 				¿No se puede hacer más eficiente abriendo el archivo y escribiendo todo de una?
+ * */
+void swapear_tabla_completa(unsigned int pid, t_tabla_pagina *tabla_1n){
+	int i, j;
+	t_tabla_pagina *tabla_2n_aux;
+	t_col_pagina *col_aux;
+	t_frame *frame_aux;
+
+	for (i = 0; i < dictionary_size(tabla_1n->tabla); i++){
+		tabla_2n_aux = dictionary_get(tabla_1n->tabla, string_itoa(i));
+		for (j = 0; i < dictionary_size(tabla_2n_aux->tabla); j++){
+			col_aux = dictionary_get(tabla_2n_aux->tabla, string_itoa(j));
+			col_aux->presencia = false;
+			pthread_mutex_lock(&mutex_mp);
+			frame_aux = list_get(memoria_principal->frames, col_aux->nro_frame);
+			pthread_mutex_unlock(&mutex_mp);
+			gestionar_page_write(pid, j, frame_aux->base);
+		}
+	}
+}
+
 
 void marcar_pag_ocupada(int pid, int nro_pagina_en_memoria){
 	t_particion* particion = encontrar_particion_de(pid);
-    int nro_pag_en_swap = nro_pagina_en_swap(particion->fcb->pags_en_archivo, nro_pagina_en_memoria);
+    int nro_pag_en_swap = nro_pagina_en_swap(particion, nro_pagina_en_memoria);
 
     t_pagina_swap* pagina_swap = list_get(particion->fcb->pags_en_archivo, nro_pag_en_swap);
     pagina_swap->id_memoria = nro_pagina_en_memoria;
     pagina_swap->is_free = 0;
 }
 
-void swapear_tabla_completa(t_tabla_pagina *tabla_1n){
-	//TODO
-}
 
 /* ------ Auxiliares ------ */
 t_particion* encontrar_particion_de(int tabla_1n){

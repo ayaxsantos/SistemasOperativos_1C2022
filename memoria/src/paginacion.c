@@ -114,6 +114,10 @@ void primera_solicitud_mmu(t_solicitud* solicitud){
 	t_tabla_pagina *tabla_2n = dictionary_get(tabla_1n->tabla, string_itoa(solicitud->entrada_tabla));
 
 	solicitud->id_tabla_2n = tabla_2n->id_tabla;
+
+	pthread_mutex_lock(&mutex_logger);
+	log_info(logger_memoria, "Primera solicitud MMU recibida con exito.");
+	pthread_mutex_unlock(&mutex_logger);
 }
 
 void segunda_solicitud_mmu(t_solicitud* solicitud){
@@ -137,6 +141,10 @@ void segunda_solicitud_mmu(t_solicitud* solicitud){
 	else{
         solicitud->nro_frame = pagina->nro_frame;
 	}
+
+	pthread_mutex_lock(&mutex_logger);
+	log_info(logger_memoria, "Segunda solicitud MMU recibida con exito.");
+	pthread_mutex_unlock(&mutex_logger);
 }
 
 void tercera_solicitud_mmu(t_solicitud *solicitud){
@@ -158,6 +166,10 @@ void tercera_solicitud_mmu(t_solicitud *solicitud){
 	} else {
 		log_info(logger_memoria,"Accion no valida.");
 	}
+
+	pthread_mutex_lock(&mutex_logger);
+	log_info(logger_memoria, "Tercera solicitud MMU recibida con exito.");
+	pthread_mutex_unlock(&mutex_logger);
 }
 
 int leer_dato_de_memoria(char *dir_fisica){

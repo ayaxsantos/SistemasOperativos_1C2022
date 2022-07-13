@@ -68,7 +68,7 @@ t_list* formatear_pags_en_archivo(int tamanio_proceso){
 }
 
 void destruir_archivo(int id){
-	t_particion* particion = encontrar_particion_de(id);
+	t_particion *particion = encontrar_particion_de(id);
 
 	if(particion != NULL){
 		for (int i = 0; i < list_size(particion->fcb->pags_en_archivo); i++){
