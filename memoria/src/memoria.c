@@ -57,16 +57,15 @@ void terminar_proceso(int socket_cliente) {
 }
 
 void suspender_proceso(int socket_cliente) {
-	uint32_t id = recibir_entero(socket_cliente);
-	unsigned int pid;		// Conseguir pid
+	int32_t id_tabla_1n = (int32_t)recibir_entero(socket_cliente);
 
 	pthread_mutex_lock(&mutex_lista_tablas_paginas);
-	t_tabla_pagina* tabla_1n = list_get(tablas_primer_nivel, id);
-	swapear_tabla_completa(pid, tabla_1n);
+	t_tabla_pagina* tabla_1n = list_get(tablas_primer_nivel, id_tabla_1n);
+	swapear_tabla_completa(tabla_1n);
 	pthread_mutex_unlock(&mutex_lista_tablas_paginas);
 
 	t_operacion *operacion = crear_operacion(SUSPENSION_PROCESO);
-	setear_operacion(operacion,&id);
+	setear_operacion(operacion,&id_tabla_1n);
 	enviar_operacion(operacion,socket_cliente);
 	eliminar_operacion(operacion);
 }

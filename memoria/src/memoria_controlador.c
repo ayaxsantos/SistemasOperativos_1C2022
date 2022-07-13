@@ -1,6 +1,6 @@
 #include "../include/memoria_controlador.h"
 
-t_frame *recorrer_frames(t_tabla_pagina *tabla_pagina) {
+t_frame *recorrer_frames() {
     int i;
     t_frame *frame = NULL;
     pthread_mutex_lock(&mutex_mp);
@@ -32,4 +32,8 @@ t_frame *realizar_algoritmo(t_tabla_pagina *tabla_pagina, t_col_pagina *pagina,
         break;
     }
     return frame;
+}
+
+void liberar_frame_asignado(void *frame_asignado) {
+    free(frame_asignado);
 }

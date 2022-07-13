@@ -1,6 +1,6 @@
 #include "../include/swap_controlador.h"
 
-void realizar_page_fault(void *data, int nro_pagina, unsigned int pid) {
+void realizar_page_fault(void *data, int32_t id_tabla_1n, int32_t entrada_tabla_1n, int32_t entrada_tabla_2n) {
     // TODO
 }
 
@@ -104,7 +104,8 @@ void gestionar_page_write(unsigned int pid, int pagina, void* a_escribir){
  * Para pensar: ¿Vale la pena un page_write por cada página en el caso 1?
  * 				¿No se puede hacer más eficiente abriendo el archivo y escribiendo todo de una?
  * */
-void swapear_tabla_completa(unsigned int pid, t_tabla_pagina *tabla_1n){
+void swapear_tabla_completa(t_tabla_pagina *tabla_1n){
+    /*
 	int i, j;
 	t_tabla_pagina *tabla_2n_aux;
 	t_col_pagina *col_aux;
@@ -120,9 +121,30 @@ void swapear_tabla_completa(unsigned int pid, t_tabla_pagina *tabla_1n){
 			pthread_mutex_unlock(&mutex_mp);
 			gestionar_page_write(pid, j, frame_aux->base);
 		}
-	}
+	}*/
+    char *entrada_tabla_1n;
+    char *nro_pag;
+    for (int i = 0; i < dictionary_size(tabla_1n->tabla); ++i) {
+        entrada_tabla_1n = string_itoa(i);
+        t_tabla_pagina *tabla_2n = dictionary_get(tabla_1n->tabla, entrada_tabla_1n);
+        for (int j = 0; j < dictionary_size(tabla_2n->tabla); ++j) {
+            nro_pag = string_itoa(j);
+            t_col_pagina *registro_pagina = dictionary_get(tabla_2n->tabla, nro_pag);
+            if(registro_pagina->presencia){
+                registro_pagina->presencia = false;
+                t_frame *frame = list_get(memoria_principal->frames,registro_pagina->nro_frame);
+                //El numero de pagina esta formado por: entrada_tabla_1n:entrada_tabla_2n
+                //gestionar_page_write(tabla_1n->id_tabla, i, j, frame->base);
+                frame->is_free = true;
+            }
+            registro_pagina->nro_frame = UNDEFINED;
+            free(nro_pag);
+        }
+        free(entrada_tabla_1n);
+    }
+    tabla_1n->suspendido = true;
+    list_clean_and_destroy_elements(tabla_1n->frames_asignados, liberar_frame_asignado);
 }
-
 
 void marcar_pag_ocupada(int pid, int nro_pagina_en_memoria){
 	t_particion* particion = encontrar_particion_de(pid);

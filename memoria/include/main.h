@@ -72,11 +72,12 @@ typedef struct t_tabla_pagina
     t_dictionary *tabla;
     t_list *frames_asignados;
     int puntero;
+    bool suspendido;
 } t_tabla_pagina;
 
 typedef struct t_frame_asignado
 {
-    int id_tabla_2n;
+    int entrada_tabla_1n;
     int entrada_tabla_2n;
     int nro_frame;
 } t_frame_asignado;
@@ -88,6 +89,7 @@ t_log *logger_memoria;
 algoritmo tipo_algoritmo;
 int cantidad_maxima_frames;
 int cantidad_tablas_1n;
+int32_t entrada_tabla_1n_temporal;
 
 int socket_cpu, socket_kernel;
 
@@ -127,5 +129,6 @@ void esperar_handshake_kernel(int server);
 #include "paginacion.h"
 #include "memoria_controlador.h"
 #include "clock.h"
+#include "swap_controlador.h"
 
 #endif /* MAIN_H_INCLUDED */

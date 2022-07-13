@@ -6,6 +6,7 @@ t_tabla_pagina *crear_tabla_principal(int tamanio){
 	t_tabla_pagina *tabla_principal = inicializar_tabla(tamanio);
 	tabla_principal->id_tabla = cantidad_tablas_1n;
     tabla_principal->frames_asignados = list_create();
+    tabla_principal->suspendido = false;
 	cantidad_tablas_1n++;
 
 	crear_tablas_segundo_nivel(tabla_principal);
@@ -112,6 +113,7 @@ int iniciar_proceso_en_memoria(int tamanio){
 void primera_solicitud_mmu(t_solicitud* solicitud){
 	t_tabla_pagina *tabla_1n = obtener_tabla_1n_por_id(solicitud->id_tabla_1n);
 	t_tabla_pagina *tabla_2n = dictionary_get(tabla_1n->tabla, string_itoa(solicitud->entrada_tabla));
+    entrada_tabla_1n_temporal = solicitud->entrada_tabla;
 
 	solicitud->id_tabla_2n = tabla_2n->id_tabla;
 
@@ -122,12 +124,12 @@ void primera_solicitud_mmu(t_solicitud* solicitud){
 
 void segunda_solicitud_mmu(t_solicitud* solicitud){
 	t_tabla_pagina *tabla_1n = obtener_tabla_1n_por_id(solicitud->id_tabla_1n);
-	t_tabla_pagina *tabla_2n = dictionary_get(tabla_1n->tabla, string_itoa(solicitud->id_tabla_2n));
+	t_tabla_pagina *tabla_2n = dictionary_get(tabla_1n->tabla, string_itoa(entrada_tabla_1n_temporal));
 	t_col_pagina *pagina = dictionary_get(tabla_2n->tabla, string_itoa(solicitud->entrada_tabla));
 
 	if (!pagina->presencia){
         if(pagina->nro_frame != UNDEFINED) {
-            t_frame *frame = realizar_algoritmo(tabla_2n, pagina, solicitud->accion_solicitada, solicitud->id_tabla_2n,solicitud->entrada_tabla);
+            t_frame *frame = realizar_algoritmo(tabla_2n, pagina, solicitud->accion_solicitada, entrada_tabla_1n_temporal,solicitud->entrada_tabla);
             solicitud->nro_frame = frame->nro_frame;
         }
         /*
@@ -166,7 +168,7 @@ void tercera_solicitud_mmu(t_solicitud *solicitud){
 	} else {
 		log_info(logger_memoria,"Accion no valida.");
 	}
-
+    entrada_tabla_1n_temporal = UNDEFINED;
 	pthread_mutex_lock(&mutex_logger);
 	log_info(logger_memoria, "Tercera solicitud MMU recibida con exito.");
 	pthread_mutex_unlock(&mutex_logger);
@@ -197,10 +199,15 @@ void asignar_primer_marco_a_pagina(t_tabla_pagina *tabla_1n, t_tabla_pagina *tab
     t_frame *frame;
     int cantidad_frames_asignados = list_size(tabla_1n->frames_asignados);
     if(cantidad_frames_asignados < config_memoria.marcos_por_proceso) {
-        frame = recorrer_frames(tabla_2n);
+        frame = recorrer_frames();
         pagina->presencia = true;
         pagina->nro_frame = frame->nro_frame;
-
+        if(tabla_1n->suspendido) {
+            /*
+             * TODO: gestionar un page fault
+             * realizar_page_fault(frame->base,tabla_1n->id_tabla_1n, entrada_tabla_1n_temporal, solicitud->entrada_tabla);
+             */
+        }
         frame->usado = 1;
         frame->modificado = solicitud->accion_solicitada;
         frame->is_free = false;
@@ -210,11 +217,11 @@ void asignar_primer_marco_a_pagina(t_tabla_pagina *tabla_1n, t_tabla_pagina *tab
         t_frame_asignado *frame_asignado = malloc(sizeof(t_frame_asignado));
         frame_asignado->nro_frame = frame->nro_frame;
         frame_asignado->entrada_tabla_2n = solicitud->entrada_tabla;
-        frame_asignado->id_tabla_2n = tabla_2n->id_tabla;
+        frame_asignado->entrada_tabla_1n = entrada_tabla_1n_temporal;
         list_add(tabla_1n->frames_asignados, frame_asignado);
     }
     else {
-        frame = realizar_algoritmo(tabla_2n, pagina, solicitud->accion_solicitada, solicitud->id_tabla_2n,solicitud->entrada_tabla);
+        frame = realizar_algoritmo(tabla_2n, pagina, solicitud->accion_solicitada, entrada_tabla_1n_temporal,solicitud->entrada_tabla);
         solicitud->nro_frame = frame->nro_frame;
     }
 }

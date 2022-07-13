@@ -1,18 +1,5 @@
 #include "../include/conector_memoria.h"
 
-/*
- * typedef struct t_solicitud
-{
-    int32_t id_tabla_1n;
-    int32_t entrada_tabla;
-    int32_t id_tabla_2n;
-    unsigned int nro_frame;
-    unsigned int desplazamiento;
-    accion accion_solicitada;
-    uint32_t dato; //Suponemos un entero no signado de 4bytes
-    estado_memoria estado_memo;
-} __attribute__((packed)) t_solicitud;
- */
 int32_t solicitar_registro_1nivel(int id_tabla_1n, int entrada_tabla_1n) {
     t_solicitud *request = malloc(sizeof(t_solicitud));
     request->id_tabla_1n = id_tabla_1n;
