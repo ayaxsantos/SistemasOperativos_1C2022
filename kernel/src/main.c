@@ -76,6 +76,8 @@ void iniciar_semaforos()
     sem_init(&hay_procesos_en_ready,0,0);
     sem_init(&hay_procesos_en_blocked,0,0);
     sem_init(&hay_que_ordenar_cola_ready,0,0);
+    sem_init(&hay_proceso_ejecutando,0,1);
+
 }
 
 void iniciar_mutex()
@@ -134,6 +136,7 @@ void liberar_semaforos()
     sem_destroy(&hay_procesos_en_ready);
     sem_destroy(&hay_procesos_en_blocked);
     sem_destroy(&hay_que_ordenar_cola_ready);
+    sem_destroy(&hay_proceso_ejecutando);
 }
 
 void liberar_hilos()

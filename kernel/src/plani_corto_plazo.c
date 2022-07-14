@@ -71,6 +71,7 @@ void *algoritmo_fifo(void * args)
 void *algoritmo_sjf_con_desalojo(void *args)
 {
     pthread_t *hilo_monitoreo_tiempos = malloc(sizeof(pthread_t));
+    sem_wait(&hay_que_ordenar_cola_ready);
 
     while(true)
     {
@@ -78,7 +79,7 @@ void *algoritmo_sjf_con_desalojo(void *args)
 
         //Por que este semaforo aca??
         //Para el primer orden, asi sabemos cual tenemos que mandar a ejecutar!!
-        sem_wait(&hay_que_ordenar_cola_ready);
+        sem_wait(&hay_proceso_ejecutando); //monitoreo
 
         //Ordenar lista
         organizacionPlani();
@@ -124,7 +125,8 @@ void *rutina_monitoreo_desalojo(void *args)
         organizacionPlani();
         proceso_candidato = list_get(procesos_en_ready,0);
 
-        if(list_size(procesos_en_ready) != 0 && hay_que_desalojar(proceso_candidato))
+        //El problema es que hay que desalojar verifica con proceso en exec
+        if(hay_que_desalojar(proceso_candidato))
         {
             pthread_mutex_lock(&mutex_log);
             log_info(un_logger, "Se debe desalojar al proceso con PID = %u",proceso_en_exec->un_pcb->pid);
@@ -136,6 +138,8 @@ void *rutina_monitoreo_desalojo(void *args)
             solicitar_desalojo_a_cpu();
             break;
         }
+
+        sem_post(&hay_proceso_ejecutando); //monitoreo
 
         //Volvemos a tomar el tiempo inicial, lo medido anteriormente se guardo (OJO ESTO)
         //time(&tiempoI);
@@ -165,6 +169,7 @@ bool hay_que_desalojar(t_proceso *proceso_candidato)
 
 double calcular_tiempo_ejecutando()
 {
+    //time(tiempoF);
     double tiempo_transcurrido_exec = difftime(tiempoF,tiempoI);
     double resultado = proceso_en_exec->tiempo_ejecutando_estimacion - tiempo_transcurrido_exec;
     return round(resultado);
