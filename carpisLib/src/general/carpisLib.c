@@ -109,6 +109,7 @@ void serializar_proceso_pcb(t_proceso_pcb *proceso_bloqueo, t_operacion *operaci
     operacion->buffer->stream = malloc(operacion->buffer->size);
     memcpy(operacion->buffer->stream, pcb_serializado, size_pcb);
     memcpy(operacion->buffer->stream + size_pcb,&(proceso_bloqueo->tiempo_bloqueo),sizeof(int));
+
     free(pcb_serializado);
 }
 
@@ -172,8 +173,8 @@ t_proceso_pcb *deserializar_proceso_pcb(int socket)
 
     t_proceso_pcb *un_proceso_pcb = malloc(sizeof(un_proceso_pcb));
     un_proceso_pcb->pcb = deserializar_pcb(buffer);
-
-    memcpy(&(un_proceso_pcb->tiempo_bloqueo), buffer, sizeof(int));
+    size-=sizeof(int);
+    memcpy(&(un_proceso_pcb->tiempo_bloqueo), buffer+size, sizeof(int));
     free(buffer);
     return un_proceso_pcb;
 }
