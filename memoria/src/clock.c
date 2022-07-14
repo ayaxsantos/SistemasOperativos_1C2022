@@ -7,32 +7,49 @@
  */
 t_frame *realizar_algoritmo_clock(t_tabla_pagina *tabla_1n, t_col_pagina *registro,
                                   accion accion_memoria, int32_t id_tabla_2n, int32_t entrada_tabla_2n) {
-    char *entrada_tabla_1n;
-    char *entrada_tabla_2n_aux;
-    if(tabla_1n->puntero == UNDEFINED) {
-        for (int i = 0; i < dictionary_size(tabla_1n->tabla); ++i) {
-            entrada_tabla_1n = string_itoa(i);
-            t_tabla_pagina *tabla_2n = dictionary_get(tabla_1n->tabla, entrada_tabla_1n);
-            //Deberia llenar la lista de frames con los asignados al proceso en el orden FIFO
-            for (int j = 0; j < dictionary_size(tabla_2n->tabla); ++j) {
-                entrada_tabla_2n_aux = string_itoa(j);
-                t_col_pagina *registro_pagina = dictionary_get(tabla_2n->tabla, entrada_tabla_2n_aux);
-                if(registro_pagina->presencia){
-                    if(tabla_1n->puntero == UNDEFINED) {
-                        tabla_1n->puntero = registro_pagina->nro_frame;
-                    }
-                    t_frame_asignado *marco = malloc(sizeof(t_frame_asignado));
-                    marco->nro_frame = registro_pagina->nro_frame;
-                    marco->id_tabla_2n = tabla_2n->id_tabla;
-                    marco->entrada_tabla_2b = j;
-                    list_add(tabla_1n->frames_asignados, marco);
-                }
-            }
-        }
-    }
-    //Comienza el verdadero algoritmo clock
-    for (int i = 0; i < config_memoria.marcos_por_proceso; ++i) {
-        t_frame_asignado *frame_asignado = list_get(tabla_1n->frames_asignados, tabla_1n->puntero);
 
-    }
+	t_frame *frame_a_asignar = NULL;
+	t_frame_asignado *posible_frame_a_reemplazar;
+
+	int posicion_actual_puntero;
+
+	while(frame_a_asignar == NULL) {
+		posicion_actual_puntero = tabla_1n->puntero;
+		posible_frame_a_reemplazar = list_get(tabla_1n->frames_asignados, posicion_actual_puntero);
+		frame_a_asignar = (t_frame*)list_get(memoria_principal->frames, posible_frame_a_reemplazar->nro_frame);
+
+		if(frame_a_asignar->usado) { // BIT DE USO == 1
+			frame_a_asignar->usado = false;
+			frame_a_asignar = NULL;
+			incrementar_puntero(tabla_1n);
+		} else { 					// BIT DE USO == 0
+			t_tabla_pagina *tabla_2n_pagina_victima = (t_tabla_pagina*)dictionary_get(tabla_1n->tabla, string_atoi(posible_frame_a_reemplazar->id_tabla_2n));
+			t_col_pagina *registro_pagina_victima = (t_col_pagina*)dictionary_get(tabla_2n_pagina_victima->tabla, string_atoi(posible_frame_a_reemplazar->entrada_tabla_2n));
+
+			if(frame_a_asignar->modificado) {
+
+				// Realizar la escritura en SWAP, pagina victima
+
+			}
+			// Realizar PAGE FAULT
+
+			registro_pagina_victima->presencia = false;
+			registro->nro_frame = posible_frame_a_reemplazar->nro_frame;
+			registro->presencia = true;
+
+			posible_frame_a_reemplazar->id_tabla_2n = id_tabla_2n;
+			posible_frame_a_reemplazar->entrada_tabla_2n = entrada_tabla_2n;
+
+			frame_a_asignar->modificado = accion_memoria;
+			frame_a_asignar->usado = true;
+
+			incrementar_puntero(tabla_1n);
+
+			return frame_a_asignar;
+		}
+	}
+}
+
+void incrementar_puntero(t_tabla_pagina *tabla_1n) {
+	tabla_1n->puntero == (cantidad_maxima_frames - 1)? tabla_1n->puntero = 0 : tabla_1n->puntero++;
 }
