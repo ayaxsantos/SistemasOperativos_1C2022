@@ -201,8 +201,6 @@ void responder_fin_proceso(int socket_proceso)
     pthread_mutex_lock(&mutex_log);
     log_info(un_logger,"Se envio mensaje de finalizacion!!");
     pthread_mutex_unlock(&mutex_log);
-
-    sem_post(&grado_multiprog_lo_permite);
 }
 
 //////////////////////////////////////////////////

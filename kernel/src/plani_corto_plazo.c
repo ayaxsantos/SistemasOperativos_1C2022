@@ -117,6 +117,9 @@ void *rutina_monitoreo_desalojo(void *args)
     time(&tiempoI);
     while(true)
     {
+        if(proceso_en_exec == NULL)
+            break;
+
         sem_wait(&hay_que_ordenar_cola_ready);
 
         //Tomamos le tiempo final, este se ira actualizando
@@ -138,7 +141,6 @@ void *rutina_monitoreo_desalojo(void *args)
             solicitar_desalojo_a_cpu();
             break;
         }
-
         sem_post(&hay_proceso_ejecutando); //monitoreo
 
         //Volvemos a tomar el tiempo inicial, lo medido anteriormente se guardo (OJO ESTO)
