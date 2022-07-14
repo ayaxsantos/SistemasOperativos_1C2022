@@ -3,13 +3,11 @@
 
 #include "swap.h"
 
-void realizar_page_fault(void *data, int32_t id_tabla_1n, int32_t entrada_tabla_1n, int32_t entrada_tabla_2n);
-
-void gestionar_page_request(unsigned int pid, int pagina);
-void gestionar_page_write(unsigned int pid, int pagina, void* a_escribir);
+void realizar_page_fault(int32_t id_tabla_1n, int nro_pagina, void *a_leer);
+void escribir_pagina_en_swap(int32_t id_tabla_1n, int nro_pagina, void *a_escribir);
 
 void marcar_pag_ocupada(int pid, int nro_pagina_en_memoria);
-void swapear_tabla_completa(t_tabla_pagina *tabla_1n);
+void swapear_proceso(t_tabla_pagina *tabla_1n);
 
 /* ------ Auxiliares ------ */
 t_particion* encontrar_particion_de(int tabla_1n);

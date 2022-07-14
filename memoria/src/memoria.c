@@ -39,7 +39,7 @@ void iniciar_proceso(int socket_cliente) {
 	enviar_operacion(operacion,socket_cliente);
 	eliminar_operacion(operacion);
 
-	//crear_archivo(tabla_principal_del_proceso->id_tabla, inicio_proceso->tamanio_proceso);
+	crear_archivo(inicio_proceso->pid, inicio_proceso->tamanio_proceso);
 }
 
 void terminar_proceso(int socket_cliente) {
@@ -61,7 +61,7 @@ void suspender_proceso(int socket_cliente) {
 
 	pthread_mutex_lock(&mutex_lista_tablas_paginas);
 	t_tabla_pagina* tabla_1n = list_get(tablas_primer_nivel, id_tabla_1n);
-	swapear_tabla_completa(tabla_1n);
+    swapear_proceso(tabla_1n);
 	pthread_mutex_unlock(&mutex_lista_tablas_paginas);
 
 	t_operacion *operacion = crear_operacion(SUSPENSION_PROCESO);

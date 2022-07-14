@@ -1,65 +1,58 @@
 #include "../include/swap_controlador.h"
 
-void realizar_page_fault(void *data, int32_t id_tabla_1n, int32_t entrada_tabla_1n, int32_t entrada_tabla_2n) {
-    // TODO
-}
-
-void gestionar_page_request(unsigned int pid, int pagina){
-	void * pag_leida;
-    t_particion* particion = encontrar_particion_de(pid);
+void realizar_page_fault(int32_t id_tabla_1n, int nro_pagina, void *a_leer) {
+    t_particion* particion = encontrar_particion_de(id_tabla_1n);
 
     if (!particion){
-    	log_info(logger_swap,"El proceso no tiene páginas en swap que pueda pedir.");
+        log_info(logger_memoria,"El proceso no tiene páginas en swap que pueda pedir.");
     }
     else{
-        int nro_pag_en_swap = nro_pagina_en_swap(particion, pagina);
+        int nro_pag_en_swap = nro_pagina_en_swap(particion, nro_pagina);
         if(nro_pag_en_swap > -1) {
-        	int inicio_pag = nro_pag_en_swap * config_memoria.tamanio_pagina;
+            int inicio_pag = nro_pag_en_swap * config_memoria.tamanio_pagina;
 
-			int file = open(particion->fcb->path_archivo, O_RDWR);
-			char* ptro_archivo = (char*)mmap(0, config_memoria.tamanio_pagina, PROT_READ | PROT_WRITE, MAP_SHARED, file, 0);
+            int file = open(particion->fcb->path_archivo, O_RDWR);
+            char* ptro_archivo = (char*)mmap(0, config_memoria.tamanio_pagina, PROT_READ | PROT_WRITE, MAP_SHARED, file, 0);
 
-			void* buffer = malloc(config_memoria.tamanio_pagina);
-			char c;
-			int i, desplazamiento = 0;
+            a_leer = malloc(config_memoria.tamanio_pagina);
+            char c;
+            int i, desplazamiento = 0;
 
-			if (ptro_archivo != 0){
-				for (i = inicio_pag; i < config_memoria.tamanio_pagina + inicio_pag; i++){
-					c = ptro_archivo[i];
-					memcpy(buffer + desplazamiento, &c, sizeof(char));
-					desplazamiento+= sizeof(char);
-				}
-				pag_leida = buffer;
+            if (ptro_archivo != 0){
+                for (i = inicio_pag; i < config_memoria.tamanio_pagina + inicio_pag; i++){
+                    c = ptro_archivo[i];
+                    memcpy(a_leer + desplazamiento, &c, sizeof(char));
+                    desplazamiento+= sizeof(char);
+                }
 
-				int cod = munmap(ptro_archivo, config_memoria.tamanio_pagina);
+                int cod = munmap(ptro_archivo, config_memoria.tamanio_pagina);
 
-				int cerrado = close (particion->archivo);
-				if (cerrado != 0){ log_info(logger_swap,"No se pudo cerrar el archivo."); }
+                int cerrado = close (particion->archivo);
+                if (cerrado != 0){ log_info(logger_memoria,"No se pudo cerrar el archivo."); }
 
-				/*if (cod == 0){
-					marcar_pag_ocupada(pid, pagina);
+                /*if (cod == 0){
+                    marcar_pag_ocupada(pid, pagina);
 
-					t_paquete_memoria *paquete = crear_paquete_memoria(WRITE_PAGE);
-					setear_paquete_memoria(paquete, solicitud);
-					enviar_paquete_memoria(paquete, socket_memoria);
-					eliminar_paquete_memoria(paquete);
-				}*/
-			}
-			free(buffer);
-			return;
+                    t_paquete_memoria *paquete = crear_paquete_memoria(WRITE_PAGE);
+                    setear_paquete_memoria(paquete, solicitud);
+                    enviar_paquete_memoria(paquete, socket_memoria);
+                    eliminar_paquete_memoria(paquete);
+                }*/
+            }
+            return;
         }
-    	log_info(logger_swap,"PF: El proceso no tiene la pagina pedida en swap.");
+        log_info(logger_memoria,"PF: El proceso no tiene la pagina pedida en swap.");
     }
 }
 
-void gestionar_page_write(unsigned int pid, int pagina, void* a_escribir){
-    t_particion* particion = encontrar_particion_de(pid);
+void escribir_pagina_en_swap(int32_t id_tabla_1n, int nro_pagina, void *a_escribir){
+    t_particion* particion = encontrar_particion_de(id_tabla_1n);
 
     if (!particion){
-    	log_info(logger_swap,"Error en la recuperación del archivo en swap para este proceso.");
+    	log_info(logger_memoria,"Error en la recuperación del archivo en swap para este proceso.");
     }
 
-    int nro_pag_en_swap = nro_pagina_en_swap(particion, pagina);
+    int nro_pag_en_swap = nro_pagina_en_swap(particion, nro_pagina);
     if (nro_pag_en_swap == -1){                                            // Página nueva
 		int nro_pagina_libre = obtener_nro_pagina_libre(particion);
 		if (nro_pagina_libre > -1){
@@ -68,7 +61,7 @@ void gestionar_page_write(unsigned int pid, int pagina, void* a_escribir){
 		nro_pag_en_swap = nro_pagina_libre;
     }
 	else{
-		log_info(logger_swap,"El proceso alcanzó el máximo número de páginas que puede pedir.");
+		log_info(logger_memoria,"El proceso alcanzó el máximo número de páginas que puede pedir.");
 	}
 
     int inicio_pag = nro_pag_en_swap * config_memoria.tamanio_pagina;
@@ -87,12 +80,12 @@ void gestionar_page_write(unsigned int pid, int pagina, void* a_escribir){
         }
 
         int cod = munmap(ptro_archivo, config_memoria.tamanio_pagina);
-        if (cod != 0){ log_info(logger_swap,"No se pudo 'desmapear' el archivo."); }
+        if (cod != 0){ log_info(logger_memoria,"No se pudo 'desmapear' el archivo."); }
 
         int cerrado = close (particion->archivo);
-        if (cerrado != 0){ log_info(logger_swap,"No se pudo cerrar el archivo."); }
+        if (cerrado != 0){ log_info(logger_memoria,"No se pudo cerrar el archivo."); }
 
-        log_info(logger_swap,"La escritura en swap se realizó con éxito.");
+        log_info(logger_memoria,"La escritura en swap se realizó con éxito.");
     }
 }
 
@@ -104,45 +97,30 @@ void gestionar_page_write(unsigned int pid, int pagina, void* a_escribir){
  * Para pensar: ¿Vale la pena un page_write por cada página en el caso 1?
  * 				¿No se puede hacer más eficiente abriendo el archivo y escribiendo todo de una?
  * */
-void swapear_tabla_completa(t_tabla_pagina *tabla_1n){
-    /*
-	int i, j;
-	t_tabla_pagina *tabla_2n_aux;
-	t_col_pagina *col_aux;
-	t_frame *frame_aux;
-
-	for (i = 0; i < dictionary_size(tabla_1n->tabla); i++){
-		tabla_2n_aux = dictionary_get(tabla_1n->tabla, string_itoa(i));
-		for (j = 0; i < dictionary_size(tabla_2n_aux->tabla); j++){
-			col_aux = dictionary_get(tabla_2n_aux->tabla, string_itoa(j));
-			col_aux->presencia = false;
-			pthread_mutex_lock(&mutex_mp);
-			frame_aux = list_get(memoria_principal->frames, col_aux->nro_frame);
-			pthread_mutex_unlock(&mutex_mp);
-			gestionar_page_write(pid, j, frame_aux->base);
-		}
-	}*/
+void swapear_proceso(t_tabla_pagina *tabla_1n){
     char *entrada_tabla_1n;
-    char *nro_pag;
+    char *entrada_tabla_2n;
+    int nro_pagina;
     for (int i = 0; i < dictionary_size(tabla_1n->tabla); ++i) {
         entrada_tabla_1n = string_itoa(i);
         t_tabla_pagina *tabla_2n = dictionary_get(tabla_1n->tabla, entrada_tabla_1n);
         for (int j = 0; j < dictionary_size(tabla_2n->tabla); ++j) {
-            nro_pag = string_itoa(j);
-            t_col_pagina *registro_pagina = dictionary_get(tabla_2n->tabla, nro_pag);
+            entrada_tabla_2n = string_itoa(j);
+            t_col_pagina *registro_pagina = dictionary_get(tabla_2n->tabla, entrada_tabla_2n);
             if(registro_pagina->presencia){
                 registro_pagina->presencia = false;
                 t_frame *frame = list_get(memoria_principal->frames,registro_pagina->nro_frame);
                 //El numero de pagina esta formado por: entrada_tabla_1n:entrada_tabla_2n
-                //gestionar_page_write(tabla_1n->id_tabla, i, j, frame->base);
+                nro_pagina = calcular_nro_pagina(i,j);
+                escribir_pagina_en_swap(tabla_1n->id_tabla, nro_pagina, frame->base);
                 frame->is_free = true;
             }
             registro_pagina->nro_frame = UNDEFINED;
-            free(nro_pag);
+            free(entrada_tabla_2n);
         }
         free(entrada_tabla_1n);
     }
-    tabla_1n->suspendido = true;
+    tabla_1n->fue_suspendido = true;
     list_clean_and_destroy_elements(tabla_1n->frames_asignados, liberar_frame_asignado);
 }
 

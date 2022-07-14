@@ -27,7 +27,7 @@ void asignar_primer_marco_a_pagina(t_tabla_pagina *,t_tabla_pagina *tabla_2n, t_
 bool buscar_por_id(void *una_tabla, unsigned int id);
 bool _buscar_por_id(void *una_tabla);
 t_tabla_pagina* obtener_tabla_1n_por_id(unsigned int id_buscado);
-void modificar_bit_de_presencia_pagina(t_frame *frame, int valor);
+int calcular_nro_pagina(int32_t entrada_tabla_1n, int32_t entrada_tabla_2n);
 
 /* ---------- Cierre ---------- */
 void liberar_todas_las_paginas_del_proceso(t_tabla_pagina* tabla_proceso);

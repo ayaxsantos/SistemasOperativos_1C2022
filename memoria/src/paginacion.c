@@ -6,7 +6,7 @@ t_tabla_pagina *crear_tabla_principal(int tamanio){
 	t_tabla_pagina *tabla_principal = inicializar_tabla(tamanio);
 	tabla_principal->id_tabla = cantidad_tablas_1n;
     tabla_principal->frames_asignados = list_create();
-    tabla_principal->suspendido = false;
+    tabla_principal->fue_suspendido = false;
 	cantidad_tablas_1n++;
 
 	crear_tablas_segundo_nivel(tabla_principal);
@@ -202,7 +202,7 @@ void asignar_primer_marco_a_pagina(t_tabla_pagina *tabla_1n, t_tabla_pagina *tab
         frame = recorrer_frames();
         pagina->presencia = true;
         pagina->nro_frame = frame->nro_frame;
-        if(tabla_1n->suspendido) {
+        if(tabla_1n->fue_suspendido) {
             /*
              * TODO: gestionar un page fault
              * realizar_page_fault(frame->base,tabla_1n->id_tabla_1n, entrada_tabla_1n_temporal, solicitud->entrada_tabla);
@@ -243,12 +243,9 @@ t_tabla_pagina* obtener_tabla_1n_por_id(unsigned int id_buscado){
     return tabla_pagina;
 }
 
-/*
-void modificar_bit_de_presencia_pagina(t_frame *frame, int valor){
-    t_tabla_pagina *tabla_paginas = list_get(tablas_primer_nivel,frame->tabla_1n_asignada);
-    t_col_pagina *registro = (t_col_pagina *) dictionary_get(tabla_paginas->tabla, string_itoa(frame->nro_pagina_asignada));
-    registro->presencia = valor;
-}*/
+int calcular_nro_pagina(int32_t entrada_tabla_1n, int32_t entrada_tabla_2n) {
+    return entrada_tabla_1n * config_memoria.entradas_por_tabla + entrada_tabla_2n;
+}
 
 /* ---------- Cierre ----------*/
 

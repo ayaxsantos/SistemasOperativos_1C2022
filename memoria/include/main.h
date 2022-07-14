@@ -72,7 +72,7 @@ typedef struct t_tabla_pagina
     t_dictionary *tabla;
     t_list *frames_asignados;
     int puntero;
-    bool suspendido;
+    bool fue_suspendido;
 } t_tabla_pagina;
 
 typedef struct t_frame_asignado
@@ -129,6 +129,5 @@ void esperar_handshake_kernel(int server);
 #include "paginacion.h"
 #include "memoria_controlador.h"
 #include "clock.h"
-#include "swap_controlador.h"
 
 #endif /* MAIN_H_INCLUDED */

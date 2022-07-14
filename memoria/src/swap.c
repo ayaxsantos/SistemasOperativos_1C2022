@@ -1,21 +1,7 @@
 #include "../include/swap.h"
 
 void iniciar_swap() {
-	arrancar_logger_swap();
-	habilitar_log(logger_swap, config_swap.log_habilitado);
     formatear_swap();
-}
-
-void arrancar_logger_swap(){
-	t_log_level nivel_log = LOG_LEVEL_INFO;
-	logger_swap = log_create("swap.log","swap",true,nivel_log);
-
-	if(logger_swap ==  NULL){
-		write(0,"ERROR -> No se pudo crear el log \n",30);
-		exit(EXIT_FAILURE);
-	}
-
-	log_info(logger_swap,"--------- Log modulo SWAP ---------");
 }
 
 void formatear_swap(){
@@ -41,15 +27,15 @@ void crear_archivo(int id, int tamanio_proceso){
 
 	if (particion->archivo != -1) {
 		truncado = ftruncate(particion->archivo, tamanio_proceso);
-		if (truncado != 0){ log_info(logger_swap,"No se pudo establecer el tamanio del archivo."); }
+		if (truncado != 0){ log_info(logger_memoria,"No se pudo establecer el tamanio del archivo."); }
 
 		cerrado = close (particion->archivo);
-		if (cerrado != 0){ log_info(logger_swap,"No se pudo cerrar el archivo."); }
+		if (cerrado != 0){ log_info(logger_memoria,"No se pudo cerrar el archivo."); }
 
 		list_add(swap.particiones, particion);
 	}
 	else {
-		log_info(logger_swap,"No se pudo crear el archivo.");
+		log_info(logger_memoria,"No se pudo crear el archivo.");
 	}
 }
 
@@ -77,7 +63,7 @@ void destruir_archivo(int id){
 		}
 	}
 	else{
-		log_info(logger_swap,"ERROR: El proceso que se intenta cerrar no existe en swap.");
+		log_info(logger_memoria,"ERROR: El proceso que se intenta cerrar no existe en swap.");
 	}
 }
 
