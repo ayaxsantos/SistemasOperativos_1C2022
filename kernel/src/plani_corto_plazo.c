@@ -71,15 +71,15 @@ void *algoritmo_fifo(void * args)
 void *algoritmo_sjf_con_desalojo(void *args)
 {
     pthread_t *hilo_monitoreo_tiempos = malloc(sizeof(pthread_t));
+
+    //Para el primer orden, asi sabemos cual tenemos que mandar a ejecutar!!
     sem_wait(&hay_que_ordenar_cola_ready);
 
     while(true)
     {
         sem_wait(&hay_procesos_en_ready);
 
-        //Por que este semaforo aca??
-        //Para el primer orden, asi sabemos cual tenemos que mandar a ejecutar!!
-        sem_wait(&hay_proceso_ejecutando); //monitoreo
+        //sem_wait(&hay_proceso_ejecutando); //monitoreo
 
         //Ordenar lista
         organizacionPlani();
@@ -93,7 +93,7 @@ void *algoritmo_sjf_con_desalojo(void *args)
         log_info(un_logger,"Se pasa a EXEC el proceso PID = %u",proceso_en_exec->un_pcb->pid);
         pthread_mutex_unlock(&mutex_log);
 
-        pthread_create(hilo_monitoreo_tiempos, NULL, rutina_monitoreo_desalojo, NULL);
+        pthread_create(hilo_monitoreo_tiempos, NULL, rutina_monitoreo_desalojo, (void*)proceso_en_exec);
         pthread_detach(*hilo_monitoreo_tiempos);
 
         t_proceso_pcb *un_proceso_pcb = malloc(sizeof(t_proceso_pcb));
@@ -109,17 +109,20 @@ void *algoritmo_sjf_con_desalojo(void *args)
     }
 }
 
-void *rutina_monitoreo_desalojo(void *args)
+void *rutina_monitoreo_desalojo(void *param_proceso_vinculado)
 {
+    t_proceso *un_proceso_vinculado = (t_proceso*)param_proceso_vinculado;
+
     t_proceso *proceso_candidato;
+
+    pthread_mutex_lock(&mutex_log);
+    log_info(un_logger,"Se inicio una rutina desalojo!!");
+    pthread_mutex_unlock(&mutex_log);
 
     //Tomamos tiempo inicial APENAS lo pasamos a EXEC
     time(&tiempoI);
     while(true)
     {
-        if(proceso_en_exec == NULL)
-            break;
-
         sem_wait(&hay_que_ordenar_cola_ready);
 
         //Tomamos le tiempo final, este se ira actualizando
@@ -129,7 +132,10 @@ void *rutina_monitoreo_desalojo(void *args)
         proceso_candidato = list_get(procesos_en_ready,0);
 
         //El problema es que hay que desalojar verifica con proceso en exec
-        if(hay_que_desalojar(proceso_candidato))
+
+        if(un_proceso_vinculado != proceso_en_exec)
+            break;
+        else if(hay_que_desalojar(proceso_candidato))
         {
             pthread_mutex_lock(&mutex_log);
             log_info(un_logger, "Se debe desalojar al proceso con PID = %u",proceso_en_exec->un_pcb->pid);
@@ -141,11 +147,19 @@ void *rutina_monitoreo_desalojo(void *args)
             solicitar_desalojo_a_cpu();
             break;
         }
-        sem_post(&hay_proceso_ejecutando); //monitoreo
+        //sem_post(&hay_proceso_ejecutando); //monitoreo
 
         //Volvemos a tomar el tiempo inicial, lo medido anteriormente se guardo (OJO ESTO)
         //time(&tiempoI);
     }
+
+    sem_post(&puedo_liberar_proceso);
+    //sem_post(&hay_proceso_ejecutando);
+
+    pthread_mutex_lock(&mutex_log);
+    log_info(un_logger,"Se finalizo una rutina desalojo!!");
+    pthread_mutex_unlock(&mutex_log);
+
     return NULL;
 }
 

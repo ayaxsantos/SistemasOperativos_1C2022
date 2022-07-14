@@ -86,6 +86,11 @@ void finalizar_proceso_ejecutando()
     pthread_mutex_unlock(&mutex_log);
 
     responder_fin_proceso(proceso_en_exec->comunicacion_proceso->socket_proceso);
+
+    //OJO FIFO
+    if(strcmp("SJF",una_config_kernel.algoritmo_planificacion) == 0)
+        sem_wait(&puedo_liberar_proceso);
+
     transicionar_proceso_a_exit();
     proceso_en_exec = NULL;
 
