@@ -1,7 +1,8 @@
 #include "../include/mmu.h"
 
 void iniciar_mmu() {
-    
+    setear_algoritmo_reemplazo_tlb();
+    iniciar_tlb();
 }
 
 uint32_t obtener_dato_memoria(dir_logica dir) {
@@ -27,22 +28,22 @@ int procesar_solicitud(dir_logica dir, accion accion_pedida, uint32_t dato) {
     if(num_pagina > config_cpu.tamanio_pagina) {
         return ERROR;
     }
-    //int resultado = obtener_nro_frame_de_tlb(num_pagina,pcb->id_tabla_1n);
-    int resultado = ERROR;
+    unsigned int nro_frame;
+    int resultado = obtener_nro_frame_de_tlb(num_pagina, &nro_frame);
     if(resultado != ERROR) {
         if(accion_pedida == WRITE_ACCION) {
-            estado_memoria res = enviar_dato_memoria(calcular_desplazamiento(dir, num_pagina), resultado, dato);
+            estado_memoria res = enviar_dato_memoria(calcular_desplazamiento(dir, num_pagina), nro_frame, dato);
             return res;
         }
         else {
-            uint32_t dato = solicitar_dato(calcular_desplazamiento(dir, num_pagina), resultado);
+            uint32_t dato = solicitar_dato(calcular_desplazamiento(dir, num_pagina), nro_frame);
             return dato;
         }
     }
     else {
         int entrada_tabla_1n = entrada_tabla_1er_nivel(num_pagina);
         int32_t id_tabla_2n = solicitar_registro_1nivel(pcb->id_tabla_1n, entrada_tabla_1n);
-        unsigned int nro_frame = solicitar_registro_2nivel(id_tabla_2n, entrada_tabla_2do_nivel(num_pagina),accion_pedida);
+        nro_frame = solicitar_registro_2nivel(id_tabla_2n, entrada_tabla_2do_nivel(num_pagina),accion_pedida);
         //actualizar_tlb(nro_frame, num_pagina, pcb->id_tabla_1n);
         if(accion_pedida == WRITE_ACCION) {
             estado_memoria res = enviar_dato_memoria(calcular_desplazamiento(dir, num_pagina), nro_frame, dato);

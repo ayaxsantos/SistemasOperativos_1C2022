@@ -2,10 +2,9 @@
 
 
 void iniciar() {
-
     conectar_a_memoria_y_recibir_config();
     esperar_a_kernel();
-    iniciar_tlb();
+    iniciar_mmu();
 }
 
 void esperar_a_kernel() {
@@ -65,7 +64,7 @@ void *ejecutar_pcb(void *arg) {
                 pthread_mutex_lock(&mutex_logger);
                 log_error(logger_cpu, "El puerto dispatch se desconecto. Terminando Hilo.");
                 pthread_mutex_unlock(&mutex_logger);
-                return EXIT_FAILURE;
+                break;
 			default:
                 pthread_mutex_lock(&mutex_logger);
                 log_warning(logger_cpu, "Operacion desconocida.");

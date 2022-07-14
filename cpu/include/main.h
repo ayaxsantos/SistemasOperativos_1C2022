@@ -40,9 +40,8 @@ typedef struct
 typedef struct t_columna_tlb {
     int entrada;
     bool is_free;
-    int id_tabla_1n;
     int pagina;
-    int nro_marco;
+    unsigned int nro_marco;
     long tiempo_usado;
 }t_columna_tlb;
 
@@ -74,8 +73,6 @@ void arrancar_logger();
 void conectar_a_memoria_y_recibir_config();
 void obtener_configuracion(int *socket, modulo modulo);
 void iniciar_semaforos();
-
-void setear_algoritmo_reemplazo_tlb();
 
 void liberar_semaforos();
 void liberar_configuracion_y_log();

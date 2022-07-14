@@ -23,9 +23,8 @@ void *serializar_operacion(t_operacion *operacion, int bytes) {
 }
 
 void setear_operacion(t_operacion *operacion, void *valor) {
-    codigo_operacion op_code = operacion->cod_op;
+    int op_code = operacion->cod_op;
     int size;
-    t_consola *consola;
     void *stream;
 
     switch (op_code) {

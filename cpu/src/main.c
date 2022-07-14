@@ -78,18 +78,6 @@ void iniciar_semaforos() {
     pthread_mutex_init(&mutex_logger, NULL);
 }
 
-void setear_algoritmo_reemplazo_tlb() {
-    if(!strcmp("FIFO",config_cpu.algoritmo_reemplazo_tlb)) {
-        tipo_algoritmo_tlb = FIFO;
-    }
-    else if(!strcmp("LRU",config_cpu.algoritmo_reemplazo_tlb)) {
-        tipo_algoritmo_tlb = LRU;
-    }
-    else {
-        log_error(logger_cpu,"No se pudieron setear las estructuras de CPU. Error en el archivo config.");
-    } 
-}
-
 void liberar_semaforos()
 {
     sem_destroy(&sem_busqueda_proceso_nuevo);
