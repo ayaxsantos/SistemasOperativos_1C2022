@@ -269,7 +269,6 @@ void liberar_todas_las_paginas_del_proceso(t_tabla_pagina* tabla_proceso){
         free(entrada_tabla_1n);
     }
     list_clean_and_destroy_elements(tabla_proceso->frames_asignados, liberar_frame_asignado);
-    destruir_archivo(tabla_proceso->id_tabla);
     //dictionary_clean_and_destroy_elements(tabla_proceso->tabla, eliminar_columna_tabla);
 }
 

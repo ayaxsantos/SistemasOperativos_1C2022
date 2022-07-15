@@ -52,7 +52,7 @@ void terminar_proceso(int socket_cliente) {
 	enviar_operacion(operacion,socket_cliente);
 	eliminar_operacion(operacion);
 
-	destruir_archivo(id_tabla);
+	//destruir_archivo(id_tabla);
 }
 
 void suspender_proceso(int socket_cliente) {
