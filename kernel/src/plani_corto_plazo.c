@@ -108,10 +108,16 @@ void *algoritmo_sjf_con_desalojo(void *args)
 
 void *rutina_monitoreo_desalojo(void *args)
 {
+    int i = 0;
     t_proceso *proceso_candidato;
     while(true)
     {
         sem_wait(&hay_que_ordenar_cola_ready);
+
+        pthread_mutex_lock(&mutex_log);
+        log_warning(un_logger,"he pasado por aqui  = %d",i);
+        pthread_mutex_unlock(&mutex_log);
+        i++;
 
         //Tomamos le tiempo final, este se ira actualizando
         organizacionPlani();
@@ -155,11 +161,11 @@ bool hay_que_desalojar(t_proceso *proceso_candidato)
     log_error(un_logger,"El tiempo que lleva es: %f",tiempo_que_lleva);
     pthread_mutex_unlock(&mutex_log);
 
-    //proceso_en_exec->tiempo_ejecutando_estimacion += tiempo_que_lleva;
+    double tiempo_total = proceso_en_exec->un_pcb->una_estimacion - tiempo_que_lleva;
 
     if(tiempo_que_lleva <= 0)
         return false;
-    else if (proceso_candidato->un_pcb->una_estimacion < tiempo_que_lleva)
+    else if (proceso_candidato->un_pcb->una_estimacion < tiempo_total)
         return true;
     else
         return false;
