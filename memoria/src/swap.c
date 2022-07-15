@@ -25,7 +25,8 @@ void crear_archivo(int id, int id_tabla_1n, int tamanio_proceso){
 
 	t_particion *particion = malloc(sizeof(t_particion));
 	particion->fcb = fcb_aux;
-	particion->archivo = creat(fcb_aux->path_archivo, S_IRWXG);
+	particion->archivo = creat(fcb_aux->path_archivo, S_IRWXG | S_IRWXO | S_IRWXU);
+    particion->tamanio = tamanio_proceso;
 
 	if (particion->archivo != -1) {
 		truncado = ftruncate(particion->archivo, tamanio_proceso);

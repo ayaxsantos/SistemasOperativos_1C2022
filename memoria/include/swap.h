@@ -1,9 +1,11 @@
 #ifndef INCLUDE_SWAP_H_
 #define INCLUDE_SWAP_H_
 
-#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <sys/mman.h> /* mmap() is defined in this header */
 #include <fcntl.h>
-#include <sys/mman.h>
+#include <errno.h>
 #include "main.h"
 
 #define ERROR_SWAP_WRITE -2

@@ -13,22 +13,36 @@ void realizar_page_fault(int32_t id_tabla_1n, int nro_pagina, void *a_leer) {
         if(nro_pag_en_swap > -1) {
             int inicio_pag = nro_pag_en_swap * config_memoria.tamanio_pagina;
 
-            int file = open(particion->fcb->path_archivo, O_RDWR);
+            int file;
+            int errnum;
+            int mode = 0x0777;
+            if ((file = open (particion->fcb->path_archivo, O_RDWR,mode)) < 0)//edited here
+            {
+                errnum = errno;
+                fprintf(stderr, "Value of errno: %d\n", errno);
+                perror("Error printed by perror");
+                fprintf(stderr, "Error opening file: %s\n", strerror( errnum ));
+                log_error(logger_memoria,"No se pudo abrir el archivo %s para leer.", particion->fcb->path_archivo);
+                return;
+            }
+
             char* ptro_archivo = (char*)mmap(0, config_memoria.tamanio_pagina, PROT_READ | PROT_WRITE, MAP_SHARED, file, 0);
 
             a_leer = malloc(config_memoria.tamanio_pagina);
-            char c;
-            int i, desplazamiento = 0;
 
             if (ptro_archivo != 0){
+                /*
+                char c;
+                int i, desplazamiento = 0;
                 for (i = inicio_pag; i < config_memoria.tamanio_pagina + inicio_pag; i++){
                     c = ptro_archivo[i];
                     memcpy(a_leer + desplazamiento, &c, sizeof(char));
                     desplazamiento+= sizeof(char);
-                }
+                }*/
+                memcpy(a_leer,ptro_archivo + inicio_pag, config_memoria.tamanio_pagina);
 
                 int cod = munmap(ptro_archivo, config_memoria.tamanio_pagina);
-                if (cod != 0){ log_info(logger_memoria,"No se pudo mapear el archivo."); }
+                if (cod != 0){ log_info(logger_memoria,"No se pudo 'desmapear' el archivo."); }
 
                 int cerrado = close (particion->archivo);
                 if (cerrado != 0){ log_info(logger_memoria,"No se pudo cerrar el archivo."); }
@@ -61,24 +75,35 @@ void escribir_pagina_en_swap(int32_t id_tabla_1n, int nro_pagina, void *a_escrib
 	}
 
     int inicio_pag = nro_pag_en_swap * config_memoria.tamanio_pagina;
-
-    int file = open(particion->fcb->path_archivo, O_RDWR);
-    char* ptro_archivo = (char*) mmap(0, config_memoria.tamanio_pagina, PROT_READ | PROT_WRITE, MAP_SHARED, file, 0);
+    int file;
+    int errnum;
+    int mode = 0x0777;
+    if ((file = open (particion->fcb->path_archivo, O_RDWR,mode)) < 0)//edited here
+    {
+        errnum = errno;
+        fprintf(stderr, "Value of errno: %d\n", errno);
+        perror("Error printed by perror");
+        fprintf(stderr, "Error opening file: %s\n", strerror( errnum ));
+        log_error(logger_memoria,"No se pudo abrir el archivo %s para escribir.", particion->fcb->path_archivo);
+        return;
+    }
+    char* ptro_archivo = mmap(0, config_memoria.tamanio_pagina, PROT_READ | PROT_WRITE, MAP_SHARED, file, 0);
 
     if (ptro_archivo != 0){
-        ptro_archivo[inicio_pag] = a_escribir;
-        int desplazamiento = inicio_pag;
+
+        memcpy(ptro_archivo + inicio_pag, a_escribir, config_memoria.tamanio_pagina);
+       /* int desplazamiento = inicio_pag;
         int desplazamiento_data = 0;
-        for(int i=inicio_pag;i<config_memoria.tamanio_pagina + inicio_pag; i++){
+        * for(int i=inicio_pag;i<config_memoria.tamanio_pagina + inicio_pag; i++){
             memcpy(ptro_archivo + desplazamiento, a_escribir + desplazamiento_data, sizeof(char));
             desplazamiento += sizeof(char);
             desplazamiento_data += sizeof(char);
-        }
+        }*/
 
         int cod = munmap(ptro_archivo, config_memoria.tamanio_pagina);
         if (cod != 0){ log_error(logger_memoria,"No se pudo 'desmapear' el archivo."); }
 
-        int cerrado = close (particion->archivo);
+        int cerrado = close (file);
         if (cerrado != 0){ log_error(logger_memoria,"No se pudo cerrar el archivo."); }
 
         log_info(logger_memoria,"La escritura en swap se realizó con éxito.");
@@ -96,8 +121,7 @@ void swapear_proceso(t_tabla_pagina *tabla_1n){
                 t_frame *frame = list_get(memoria_principal->frames,registro_pagina->nro_frame);
                 //El numero de pagina esta formado por: entrada_tabla_1n:entrada_tabla_2n
                 nro_pagina = calcular_nro_pagina(i,j);
-                //TODO: @jume
-                //escribir_pagina_en_swap(tabla_1n->id_tabla, nro_pagina, frame->base);
+                escribir_pagina_en_swap(tabla_1n->id_tabla, nro_pagina, frame->base);
                 frame->is_free = true;
             }
             registro_pagina->nro_frame = UNDEFINED;

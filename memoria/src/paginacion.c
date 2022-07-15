@@ -130,7 +130,7 @@ void segunda_solicitud_mmu(t_solicitud* solicitud){
 
 	if (!pagina->presencia){
         if(pagina->nro_frame != UNDEFINED) {
-            t_frame *frame = realizar_algoritmo_reemplazo(tabla_2n, pagina, solicitud->accion_solicitada,
+            t_frame *frame = realizar_algoritmo_reemplazo(tabla_1n, pagina, solicitud->accion_solicitada,
                                                           entrada_tabla_1n_temporal, solicitud->entrada_tabla);
             solicitud->nro_frame = frame->nro_frame;
         }
