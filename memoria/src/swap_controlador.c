@@ -66,8 +66,7 @@ void escribir_pagina_en_swap(int32_t id_tabla_1n, int nro_pagina, void *a_escrib
         int desplazamiento = inicio_pag;
         int desplazamiento_data = 0;
         for(int i=inicio_pag;i<config_memoria.tamanio_pagina + inicio_pag; i++){
-            memcpy(ptro_archivo + desplazamiento, a_escribir + desplazamiento_data, sizeof(int));
-            memcpy(ptro_archivo + desplazamiento, a_escribir, sizeof(int));
+            memcpy(ptro_archivo + desplazamiento, a_escribir + desplazamiento_data, sizeof(char));
             desplazamiento += sizeof(char);
             desplazamiento_data += sizeof(char);
         }

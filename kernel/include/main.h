@@ -42,6 +42,7 @@ typedef struct proceso
     time_t tiempoI;
     time_t tiempoF;
     pthread_mutex_t mutex_proceso;
+    int mi_socket_memoria;
 } t_proceso;
 
 //////////////////////////////////////////

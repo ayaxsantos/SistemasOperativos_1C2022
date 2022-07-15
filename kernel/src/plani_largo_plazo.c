@@ -83,17 +83,17 @@ void finalizar_proceso_ejecutando()
 {
     t_operacion *operacion = crear_operacion(FIN_PROCESO_MEMORIA);
     setear_operacion(operacion,&(proceso_en_exec->un_pcb->id_tabla_1n));
-    enviar_operacion(operacion,proceso_en_exec->un_pcb->mi_socket_memoria);
+    enviar_operacion(operacion,proceso_en_exec->mi_socket_memoria);
     eliminar_operacion(operacion);
 
-    codigo_operacion cod_op = recibir_operacion(proceso_en_exec->un_pcb->mi_socket_memoria);
+    codigo_operacion cod_op = recibir_operacion(proceso_en_exec->mi_socket_memoria);
     if(cod_op != FIN_PROCESO_MEMORIA) {
         pthread_mutex_lock(&mutex_log);
         log_error(un_logger,"Error al recibir el fin del proceso %d",proceso_en_exec->un_pcb->pid);
         pthread_mutex_unlock(&mutex_log);
     }
     else {
-        int id_tabla_1n = recibir_entero(proceso_en_exec->un_pcb->mi_socket_memoria);
+        int id_tabla_1n = recibir_entero(proceso_en_exec->mi_socket_memoria);
         pthread_mutex_lock(&mutex_log);
         log_info(un_logger,"Se finaliza el proceso con PID = %u con ID tabla = %d",proceso_en_exec->un_pcb->pid, id_tabla_1n);
         pthread_mutex_unlock(&mutex_log);

@@ -107,6 +107,35 @@ void inicializar_proceso(t_com_proceso *comunicacion_proceso)
     un_proceso->tiempo_bloqueo = UNDEFINED;
     pthread_mutex_init(&un_proceso->mutex_proceso,NULL);
 
+    un_proceso->mi_socket_memoria = crear_conexion(una_config_kernel.ip_memoria,una_config_kernel.puerto_memoria);
+    t_dato_inicio *inicio_proceso = malloc(sizeof(t_dato_inicio));
+    inicio_proceso->pid = un_proceso->un_pcb->pid;
+    inicio_proceso->tamanio_proceso = un_proceso->un_pcb->consola->tamanio;
+    inicio_proceso->id_tabla_1n = UNDEFINED;
+
+    t_operacion *operacion = crear_operacion(INICIO_PROCESO);
+    setear_operacion(operacion, inicio_proceso);
+    enviar_operacion(operacion, un_proceso->mi_socket_memoria);
+    eliminar_operacion(operacion);
+    free(inicio_proceso);
+
+    //Espera de retorno
+    int codigo_retorno = recibir_operacion(un_proceso->mi_socket_memoria);
+
+    if(codigo_retorno == INICIO_PROCESO) {
+        inicio_proceso = recibir_dato_inicio(un_proceso->mi_socket_memoria);
+        un_proceso->un_pcb->id_tabla_1n = inicio_proceso->id_tabla_1n;
+        pthread_mutex_lock(&mutex_log);
+        log_info(un_logger,"Obtengo el id de la tabla de primer nivel de memoria: %d", un_proceso->un_pcb->id_tabla_1n);
+        pthread_mutex_unlock(&mutex_log);
+    }
+    else {
+        pthread_mutex_lock(&mutex_log);
+        log_error(un_logger,"Operacion Desconocida al iniciar el proceso");
+        pthread_mutex_unlock(&mutex_log);
+    }
+
+
     pasar_proceso_a_new(un_proceso);
 }
 
@@ -133,33 +162,6 @@ t_pcb *inicializar_pcb(t_com_proceso *comunicacion_proceso)
     un_pcb->una_estimacion = una_config_kernel.estimacion_inicial;
     un_pcb->un_estado = NEW;
     un_pcb->consola = una_consola;
-    un_pcb->mi_socket_memoria = crear_conexion(una_config_kernel.ip_memoria,una_config_kernel.puerto_memoria);
-    t_dato_inicio *inicio_proceso = malloc(sizeof(t_dato_inicio));
-    inicio_proceso->pid = un_pcb->pid;
-    inicio_proceso->tamanio_proceso = un_pcb->consola->tamanio;
-    inicio_proceso->id_tabla_1n = UNDEFINED;
-
-    t_operacion *operacion = crear_operacion(INICIO_PROCESO);
-    setear_operacion(operacion, inicio_proceso);
-    enviar_operacion(operacion, un_pcb->mi_socket_memoria);
-    eliminar_operacion(operacion);
-    free(inicio_proceso);
-
-    //Espera de retorno
-    int codigo_retorno = recibir_operacion(un_pcb->mi_socket_memoria);
-
-    if(codigo_retorno == INICIO_PROCESO) {
-        inicio_proceso = recibir_dato_inicio(un_pcb->mi_socket_memoria);
-        un_pcb->id_tabla_1n = inicio_proceso->id_tabla_1n;
-        pthread_mutex_lock(&mutex_log);
-        log_info(un_logger,"Obtengo el id de la tabla de primer nivel de memoria: %d", un_pcb->id_tabla_1n);
-        pthread_mutex_unlock(&mutex_log);
-    }
-    else {
-        pthread_mutex_lock(&mutex_log);
-        log_error(un_logger,"Operacion Desconocida al iniciar el proceso");
-        pthread_mutex_unlock(&mutex_log);
-    }
 
     return un_pcb;
 }

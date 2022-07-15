@@ -110,7 +110,6 @@ typedef struct
     estado un_estado;
     t_consola *consola;
     int32_t id_tabla_1n;
-    int mi_socket_memoria;
 } t_pcb;
 
 typedef struct proceso_pcb
