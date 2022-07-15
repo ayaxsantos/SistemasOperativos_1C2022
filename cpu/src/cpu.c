@@ -97,8 +97,7 @@ void *ciclo_de_instruccion(void *arg) {
         uint32_t valor_a_copiar;
 
         if(necesita_fetch_operands(instruccion->instruc)) { // DECODE
-
-        	valor_a_copiar = obtener_dato_memoria(instruccion->parametro2); // VER, si está OK el parametro!!
+        	valor_a_copiar = obtener_dato_memoria(instruccion->parametro2);
         }
 
         ejecutar_instruccion(instruccion, valor_a_copiar); // EXECUTE
@@ -107,8 +106,7 @@ void *ciclo_de_instruccion(void *arg) {
         if(hay_que_desalojar_cpu()) {
             desalojar_cpu();
         } else {
-            free(proceso_a_enviar);// Preguntar si está OK el free acá
-            //sem_post(&sem_ciclo_de_instruccion);
+            free(proceso_a_enviar);
         }
     }
 }
@@ -161,8 +159,8 @@ void ejecutar_instruccion(t_instruccion *instruccion, uint32_t valor_a_copiar) {
 
         case READ:
             log_info(logger_cpu,"CPU ejecutando READ");
+            log_info(logger_cpu, "Leer valor de la direccion logica: %d",instruccion->parametro1);
         	log_info(logger_cpu, "Valor leido de memoria: %i en la direccion: %d", obtener_dato_memoria(instruccion->parametro1), instruccion->parametro1);
-        	//printf("Valor leido de memoria: %i \n", obtener_dato_memoria(instruccion->parametro1));
         	chequear_si_hay_interrupcion();
            break;
 
@@ -189,7 +187,7 @@ void ejecutar_instruccion(t_instruccion *instruccion, uint32_t valor_a_copiar) {
 void desalojar_cpu() {
 		proceso_a_enviar->pcb = pcb;
 		enviar_proceso_pcb(socket_kernel_dispatch, proceso_a_enviar, operacion_a_enviar);
-		free(proceso_a_enviar);// Preguntar si está OK el free acá
+		free(proceso_a_enviar);
         limpiar_tlb();
 		sem_post(&sem_busqueda_proceso_nuevo);
 }

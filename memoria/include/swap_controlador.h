@@ -15,5 +15,6 @@ int obtener_nro_pagina_libre(t_particion* particion);
 int nro_pagina_en_swap(t_particion *particion, int nro_pag);
 void asignar_pagina_a(t_particion* particion, int nro_pagina);
 int calcular_pags_libres(t_particion* particion);
+void imprimir_error_archivo(int error);
 
 #endif /* INCLUDE_SWAP_CONTROLADOR_H_ */
