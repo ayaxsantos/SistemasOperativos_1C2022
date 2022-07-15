@@ -55,7 +55,7 @@ void iniciar_config()
     una_config_kernel.puerto_escucha = config_get_string_value(una_config,"PUERTO_ESCUCHA");
     una_config_kernel.algoritmo_planificacion = config_get_string_value(una_config,"ALGORITMO_PLANIFICACION");
     una_config_kernel.estimacion_inicial = config_get_int_value(una_config,"ESTIMACION_INICIAL");
-    una_config_kernel.alfa_plani = config_get_int_value(una_config,"ALFA");
+    una_config_kernel.alfa_plani = config_get_double_value(una_config,"ALFA");
     una_config_kernel.grado_multiprogramacion = config_get_int_value(una_config,"GRADO_MULTIPROGRAMACION");
     una_config_kernel.tiempo_max_bloqueado = config_get_int_value(una_config,"TIEMPO_MAXIMO_BLOQUEADO") / 1000;
 }

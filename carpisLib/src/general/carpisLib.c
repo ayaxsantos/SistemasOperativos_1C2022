@@ -84,13 +84,15 @@ void *serializar_pcb(t_pcb *pcb, int *size_pcb) {
     int desplazamiento = 0;
     int size_consola = 0;
     void *consola_serializada = serializar_consola(pcb->consola, &size_consola);
-    *size_pcb =  size_consola +sizeof(int)*4 + sizeof(int32_t);
+    *size_pcb =  size_consola +sizeof(int)*4 + sizeof(int32_t) + sizeof(double);
     void *stream = malloc(*size_pcb);
 
     memcpy(stream + desplazamiento, &(pcb->pid), sizeof(int));
     desplazamiento+= sizeof(int);
     memcpy(stream + desplazamiento, &(pcb->program_counter), sizeof(int));
     desplazamiento+= sizeof(int);
+    memcpy(stream + desplazamiento, &(pcb->una_estimacion), sizeof(double));
+    desplazamiento+= sizeof(double);
     memcpy(stream + desplazamiento, &(pcb->un_estado), sizeof(int));
     desplazamiento+= sizeof(int);
     memcpy(stream + desplazamiento, &size_consola, sizeof(int));
@@ -188,6 +190,8 @@ t_pcb *deserializar_pcb(void *buffer) {
     desplazamiento+=sizeof(int);
     memcpy(&(pcb->program_counter), buffer+desplazamiento, sizeof(int));
     desplazamiento+=sizeof(int);
+    memcpy(&(pcb->una_estimacion), buffer+desplazamiento, sizeof(double));
+    desplazamiento+=sizeof(double);
     memcpy(&(pcb->un_estado), buffer+desplazamiento, sizeof(int));
     desplazamiento+=sizeof(int);
     memcpy(&size, buffer+desplazamiento, sizeof(int));

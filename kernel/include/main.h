@@ -21,7 +21,7 @@ typedef struct config_kernel
     char *puerto_escucha;
     char *algoritmo_planificacion;
     int estimacion_inicial;
-    int alfa_plani;
+    double alfa_plani;
     int grado_multiprogramacion;
     int tiempo_max_bloqueado;
 } t_config_kernel;
@@ -36,7 +36,6 @@ typedef struct com_proceso
 typedef struct proceso
 {
     t_com_proceso *comunicacion_proceso;
-    double tiempo_ejecutando_estimacion;
     t_pcb *un_pcb;
     int tiempo_bloqueo;
     time_t tiempoI;

@@ -12,7 +12,7 @@ void *algoritmo_fifo(void*);
 void *algoritmo_sjf_con_desalojo(void*);
 void pasar_proceso_a_bloqueado();
 void organizacionPlani();
-int calcular_estimacion(time_t tiempoF, time_t tiempoI, t_proceso *un_proceso);
+double calcular_estimacion(time_t tiempoF, time_t tiempoI, t_proceso *un_proceso);
 bool comparador_de_procesos_SJF(t_proceso *un_proceso_primero, t_proceso *un_proceso_segundo);
 void devolver_proceso_a_ready(t_proceso *);
 void gestionar_pcb_para_probar_sin_cpu();
@@ -28,6 +28,7 @@ bool hay_que_desalojar(t_proceso *);
 void solicitar_desalojo_a_cpu();
 double calcular_tiempo_ejecutando();
 void *rutina_monitoreo_desalojo(void *);
+void mostrar_procesos_en_ready(t_proceso *un_proceso);
 
 time_t tiempoF, tiempoI;
 

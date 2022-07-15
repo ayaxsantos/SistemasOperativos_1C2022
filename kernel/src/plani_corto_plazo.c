@@ -7,11 +7,6 @@ void inicializar_plani_corto_plazo()
 {
     pthread_mutex_init(&mutex_flag_interrupt,NULL);
 
-    //TEMPORAL, DESPUES SACAR CUANDO SE INTEGRE CON CPU
-    pthread_mutex_lock(&mutex_flag_interrupt);
-    flag_interrupt = false;
-    pthread_mutex_unlock(&mutex_flag_interrupt);
-
     if(strcmp("FIFO",una_config_kernel.algoritmo_planificacion) == 0)
     {
         lanzar_hilo_plani_corto_plazo_con(algoritmo_fifo);
@@ -46,8 +41,9 @@ void *algoritmo_fifo(void * args)
 
         pthread_mutex_lock(&mutex_procesos_en_ready);
         proceso_en_exec = list_remove(procesos_en_ready, 0);
-        proceso_en_exec->un_pcb->un_estado = EXEC;
         pthread_mutex_unlock(&mutex_procesos_en_ready);
+
+        proceso_en_exec->un_pcb->un_estado = EXEC;
 
         pthread_mutex_lock(&mutex_log);
         log_warning(un_logger,"Se pasa a EXEC el proceso PID = %u",proceso_en_exec->un_pcb->pid);
@@ -87,6 +83,8 @@ void *algoritmo_sjf_con_desalojo(void *args)
         pthread_mutex_lock(&mutex_procesos_en_ready);
         proceso_en_exec = list_remove(procesos_en_ready, 0);
         pthread_mutex_unlock( &mutex_procesos_en_ready);
+
+        proceso_en_exec->un_pcb->un_estado = EXEC;
 
         //Tomamos tiempo inicial APENAS lo pasamos a EXEC
         time(&tiempoI);
@@ -285,18 +283,19 @@ void devolver_proceso_a_ready(t_proceso *un_proceso)
 /////////////////////////////////////////////////
 // Exclusivas de SJF con desalojo
 
-int calcular_estimacion(time_t tiempoF, time_t tiempoI, t_proceso *un_proceso)
+double calcular_estimacion(time_t tiempoF, time_t tiempoI, t_proceso *un_proceso)
 {
+    time(&tiempoF);
     double real_anterior = difftime(tiempoF,tiempoI);
-    int alpha = una_config_kernel.alfa_plani;
+    double alpha = una_config_kernel.alfa_plani;
 
     pthread_mutex_lock(&mutex_log);
     log_info(un_logger,"Tiempito -> Real Anterior: %lf ms",real_anterior * 1E3);
     pthread_mutex_unlock(&mutex_log);
 
-    int estimacion_anterior = un_proceso->un_pcb->una_estimacion;
+    double estimacion_anterior = un_proceso->un_pcb->una_estimacion;
 
-    return estimacion_anterior * alpha + real_anterior * (1-alpha);
+    return (estimacion_anterior * alpha) + real_anterior * (1-alpha);
     //Cuenta...
     //Ti = Ti1 * α + Ri1 * (1 - α)
 }
@@ -309,7 +308,22 @@ void organizacionPlani()
         return comparador_de_procesos_SJF((t_proceso*)proceso_primero,(t_proceso*)proceso_segundo);
     }
     list_sort(procesos_en_ready, comparador_procesos_SJF);
+
+    void mostrar_procesos_en_ready_inner(void *un_proceso)
+    {
+        mostrar_procesos_en_ready((t_proceso*)un_proceso);
+    }
+    list_iterate(procesos_en_ready,mostrar_procesos_en_ready_inner);
     pthread_mutex_unlock(&mutex_procesos_en_ready);
+}
+
+void mostrar_procesos_en_ready(t_proceso *un_proceso)
+{
+    pthread_mutex_lock(&mutex_log);
+    log_warning(un_logger,"HEL PROZEZO EZ: pid: %d | Eztimazion: %f",
+                un_proceso->un_pcb->pid,
+                un_proceso->un_pcb->una_estimacion);
+    pthread_mutex_unlock(&mutex_log);
 }
 
 bool comparador_de_procesos_SJF(t_proceso *un_proceso_primero, t_proceso *un_proceso_segundo)
@@ -365,8 +379,6 @@ void gestionar_pcb_para_probar_sin_cpu()
             pthread_mutex_unlock(&mutex_flag_interrupt);
         }
         free(una_instruccion);
-
-
 
     }
 }
