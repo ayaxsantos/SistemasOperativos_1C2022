@@ -116,7 +116,7 @@ void setear_algoritmo_reemplazo();
 void iniciar_semaforos();
 
 void finalizar_memoria();
-void eliminar_frames(void *arg);
+void eliminar_frame(void *arg);
 void liberar_memoria();
 void liberar_configuracion_y_log();
 

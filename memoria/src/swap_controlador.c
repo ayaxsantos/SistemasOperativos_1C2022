@@ -26,18 +26,10 @@ void realizar_page_fault(int32_t id_tabla_1n, int nro_pagina, void *a_leer) {
                 }
 
                 int cod = munmap(ptro_archivo, config_memoria.tamanio_pagina);
+                if (cod != 0){ log_info(logger_memoria,"No se pudo mapear el archivo."); }
 
                 int cerrado = close (particion->archivo);
                 if (cerrado != 0){ log_info(logger_memoria,"No se pudo cerrar el archivo."); }
-
-                /*if (cod == 0){
-                    marcar_pag_ocupada(pid, pagina);
-
-                    t_paquete_memoria *paquete = crear_paquete_memoria(WRITE_PAGE);
-                    setear_paquete_memoria(paquete, solicitud);
-                    enviar_paquete_memoria(paquete, socket_memoria);
-                    eliminar_paquete_memoria(paquete);
-                }*/
             }
             return;
         }
@@ -74,7 +66,8 @@ void escribir_pagina_en_swap(int32_t id_tabla_1n, int nro_pagina, void *a_escrib
         int desplazamiento = inicio_pag;
         int desplazamiento_data = 0;
         for(int i=inicio_pag;i<config_memoria.tamanio_pagina + inicio_pag; i++){
-            memcpy(ptro_archivo + desplazamiento, a_escribir + desplazamiento_data, sizeof(char));
+            memcpy(ptro_archivo + desplazamiento, a_escribir + desplazamiento_data, sizeof(int));
+            memcpy(ptro_archivo + desplazamiento, a_escribir, sizeof(int));
             desplazamiento += sizeof(char);
             desplazamiento_data += sizeof(char);
         }
@@ -89,24 +82,12 @@ void escribir_pagina_en_swap(int32_t id_tabla_1n, int nro_pagina, void *a_escrib
     }
 }
 
-/*
- * Analizar distintos casos:
- * 1. Primera vez que se envía toda la data a swap (hay basura en el archivo)
- * 2. No es necesario enviar toda la data, sino sólo las páginas modificadas
- *
- * Para pensar: ¿Vale la pena un page_write por cada página en el caso 1?
- * 				¿No se puede hacer más eficiente abriendo el archivo y escribiendo todo de una?
- * */
 void swapear_proceso(t_tabla_pagina *tabla_1n){
-    char *entrada_tabla_1n;
-    char *entrada_tabla_2n;
     int nro_pagina;
     for (int i = 0; i < dictionary_size(tabla_1n->tabla); ++i) {
-        entrada_tabla_1n = string_itoa(i);
-        t_tabla_pagina *tabla_2n = dictionary_get(tabla_1n->tabla, entrada_tabla_1n);
+        t_tabla_pagina *tabla_2n = dictionary_get(tabla_1n->tabla, string_itoa(i));
         for (int j = 0; j < dictionary_size(tabla_2n->tabla); ++j) {
-            entrada_tabla_2n = string_itoa(j);
-            t_col_pagina *registro_pagina = dictionary_get(tabla_2n->tabla, entrada_tabla_2n);
+            t_col_pagina *registro_pagina = dictionary_get(tabla_2n->tabla, string_itoa(j));
             if(registro_pagina->presencia){
                 registro_pagina->presencia = false;
                 t_frame *frame = list_get(memoria_principal->frames,registro_pagina->nro_frame);
@@ -116,9 +97,7 @@ void swapear_proceso(t_tabla_pagina *tabla_1n){
                 frame->is_free = true;
             }
             registro_pagina->nro_frame = UNDEFINED;
-            free(entrada_tabla_2n);
         }
-        free(entrada_tabla_1n);
     }
     tabla_1n->fue_suspendido = true;
     list_clean_and_destroy_elements(tabla_1n->frames_asignados, liberar_frame_asignado);

@@ -5,7 +5,6 @@
 t_tabla_pagina *crear_tabla_principal(int tamanio){
 	t_tabla_pagina *tabla_principal = inicializar_tabla(tamanio);
     tabla_principal->frames_asignados = list_create();
-    tabla_principal->fue_suspendido = false;
 
     pthread_mutex_lock(&mutex_contador_tablas_1n);
     tabla_principal->id_tabla = cantidad_tablas_1n;
@@ -46,11 +45,9 @@ int agregar_pag_a_tabla_1n(t_tabla_pagina *tabla_proceso, char *nro_pag){
 	t_tabla_pagina *tabla_2n_aux = inicializar_tabla(tabla_proceso->tamanio_proceso);
 	tabla_2n_aux->id_tabla = atoi(nro_pag);
 	int i;
-	char *nro_pag_2n;
 
     for (i=0; i < config_memoria.entradas_por_tabla; i++){
-		nro_pag_2n = string_itoa(i);
-        agregar_pag_a_tabla_2n(tabla_2n_aux, nro_pag_2n);
+        agregar_pag_a_tabla_2n(tabla_2n_aux, string_itoa(i));
     }
 
     dictionary_put(tabla_proceso->tabla, nro_pag, tabla_2n_aux);
@@ -61,13 +58,11 @@ int agregar_ultima_pag_a_tabla_1n(t_tabla_pagina *tabla_proceso, int nro_ultima_
 	t_tabla_pagina *tabla_2n_aux = inicializar_tabla(tabla_proceso->tamanio_proceso);
 	tabla_2n_aux->id_tabla = nro_ultima_pag;
 	int i;
-	char *nro_pag_2n;
 
 	int pags_necesarias_ultima_tabla = tabla_proceso->pags_necesarias - config_memoria.entradas_por_tabla * (nro_ultima_pag-1);
 
 	for (i=0; i < pags_necesarias_ultima_tabla; i++){
-		nro_pag_2n = string_itoa(i);
-		agregar_pag_a_tabla_2n(tabla_2n_aux, nro_pag_2n);
+		agregar_pag_a_tabla_2n(tabla_2n_aux, string_itoa(i));
 	}
 
 	dictionary_put(tabla_proceso->tabla, string_itoa(nro_ultima_pag), tabla_2n_aux);
@@ -98,10 +93,11 @@ int agregar_pag_a_tabla_2n(t_tabla_pagina *tabla_2n, char *nro_pag) {
 t_tabla_pagina *inicializar_tabla(int tamanio){
 	t_tabla_pagina* nueva_tabla = malloc(sizeof(t_tabla_pagina));
 	nueva_tabla->id_tabla = 0;
-	nueva_tabla->tabla = dictionary_create();
 	nueva_tabla->tamanio_proceso = tamanio;
 	nueva_tabla->pags_necesarias = tamanio / config_memoria.tamanio_pagina;
+	nueva_tabla->tabla = dictionary_create();
 	nueva_tabla->puntero = 0;
+	nueva_tabla->fue_suspendido = false;
 
 	return nueva_tabla;
 }
