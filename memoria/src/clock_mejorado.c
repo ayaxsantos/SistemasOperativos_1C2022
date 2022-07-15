@@ -88,10 +88,4 @@ t_frame *realizar_segundo_paso(t_tabla_pagina *tabla_1n, t_col_pagina *registro,
 		}
 	}
 	return NULL;
-
-
-}
-
-void incrementar_puntero(t_tabla_pagina *tabla_1n) {
-	tabla_1n->puntero == (cantidad_maxima_frames - 1)? tabla_1n->puntero = 0 : tabla_1n->puntero++;
 }

@@ -51,7 +51,3 @@ t_frame *realizar_algoritmo_clock(t_tabla_pagina *tabla_1n, t_col_pagina *regist
 		}
 	}
 }
-
-void incrementar_puntero(t_tabla_pagina *tabla_1n) {
-	tabla_1n->puntero == (config_memoria.marcos_por_proceso - 1)? tabla_1n->puntero = 0 : tabla_1n->puntero++;
-}

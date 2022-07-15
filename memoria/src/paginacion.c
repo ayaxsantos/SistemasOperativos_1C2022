@@ -246,6 +246,10 @@ int calcular_nro_pagina(int32_t entrada_tabla_1n, int32_t entrada_tabla_2n) {
     return entrada_tabla_1n * config_memoria.entradas_por_tabla + entrada_tabla_2n;
 }
 
+void incrementar_puntero(t_tabla_pagina *tabla_1n) {
+    tabla_1n->puntero == (config_memoria.marcos_por_proceso - 1)? tabla_1n->puntero = 0 : tabla_1n->puntero++;
+}
+
 /* ---------- Cierre ----------*/
 
 void liberar_todas_las_paginas_del_proceso(t_tabla_pagina* tabla_proceso){
