@@ -42,10 +42,10 @@ void realizar_page_fault(int32_t id_tabla_1n, int nro_pagina, void *a_leer) {
                 memcpy(a_leer,ptro_archivo + inicio_pag, config_memoria.tamanio_pagina);
 
                 int cod = munmap(ptro_archivo, config_memoria.tamanio_pagina);
-                if (cod != 0){ log_info(logger_memoria,"No se pudo 'desmapear' el archivo."); }
+                if (cod != 0){ log_error(logger_memoria,"No se pudo 'desmapear' el archivo."); }
 
                 int cerrado = close (particion->archivo);
-                if (cerrado != 0){ log_info(logger_memoria,"No se pudo cerrar el archivo."); }
+                if (cerrado != 0){ log_error(logger_memoria,"No se pudo cerrar el archivo."); }
             }
             return;
         }
