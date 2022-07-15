@@ -32,7 +32,7 @@ void *gestionar_conexion_kernel(void *arg) {
                 pthread_mutex_lock(&mutex_logger);
                 log_warning(logger_memoria, "Operacion desconocida.");
                 pthread_mutex_unlock(&mutex_logger);
-                break;
+                return EXIT_FAILURE;
 		}
     }
 }

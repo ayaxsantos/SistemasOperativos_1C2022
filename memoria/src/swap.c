@@ -29,15 +29,16 @@ void crear_archivo(int id, int id_tabla_1n, int tamanio_proceso){
 
 	if (particion->archivo != -1) {
 		truncado = ftruncate(particion->archivo, tamanio_proceso);
-		if (truncado != 0){ log_info(logger_memoria,"No se pudo establecer el tamanio del archivo."); }
+		if (truncado != 0){ log_error(logger_memoria,"No se pudo establecer el tamanio del archivo."); }
 
 		cerrado = close (particion->archivo);
-		if (cerrado != 0){ log_info(logger_memoria,"No se pudo cerrar el archivo."); }
+		if (cerrado != 0){ log_error(logger_memoria,"No se pudo cerrar el archivo."); }
 
 		list_add(swap.particiones, particion);
+        log_info(logger_memoria,"El archivo swap del proceso %d se realizó con éxito.", id);
 	}
 	else {
-		log_info(logger_memoria,"No se pudo crear el archivo.");
+        log_error(logger_memoria,"No se pudo crear el archivo.");
 	}
 }
 

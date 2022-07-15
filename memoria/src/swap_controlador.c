@@ -2,10 +2,11 @@
 
 void realizar_page_fault(int32_t id_tabla_1n, int nro_pagina, void *a_leer) {
     usleep(config_memoria.retardo_swap*1000);
+    log_info(logger_memoria,"Realizando PAGE FAULT tabla primer nivel: %d", id_tabla_1n);
     t_particion* particion = encontrar_particion_de(id_tabla_1n);
 
     if (!particion){
-        log_info(logger_memoria,"El proceso no tiene páginas en swap que pueda pedir.");
+        log_error(logger_memoria,"El proceso no tiene páginas en swap que pueda pedir.");
     }
     else{
         int nro_pag_en_swap = nro_pagina_en_swap(particion, nro_pagina);
@@ -74,10 +75,10 @@ void escribir_pagina_en_swap(int32_t id_tabla_1n, int nro_pagina, void *a_escrib
         }
 
         int cod = munmap(ptro_archivo, config_memoria.tamanio_pagina);
-        if (cod != 0){ log_info(logger_memoria,"No se pudo 'desmapear' el archivo."); }
+        if (cod != 0){ log_error(logger_memoria,"No se pudo 'desmapear' el archivo."); }
 
         int cerrado = close (particion->archivo);
-        if (cerrado != 0){ log_info(logger_memoria,"No se pudo cerrar el archivo."); }
+        if (cerrado != 0){ log_error(logger_memoria,"No se pudo cerrar el archivo."); }
 
         log_info(logger_memoria,"La escritura en swap se realizó con éxito.");
     }

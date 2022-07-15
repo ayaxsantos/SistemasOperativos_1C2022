@@ -15,7 +15,7 @@ t_frame *realizar_algoritmo_clock(t_tabla_pagina *tabla_1n, t_col_pagina *regist
 
 	while(frame_a_asignar == NULL) {
 		posicion_actual_puntero = tabla_1n->puntero;
-		posible_frame_a_reemplazar = list_get(tabla_1n->frames_asignados, posicion_actual_puntero);
+		posible_frame_a_reemplazar = (t_frame_asignado *)list_get(tabla_1n->frames_asignados, posicion_actual_puntero);
 		frame_a_asignar = (t_frame*)list_get(memoria_principal->frames, posible_frame_a_reemplazar->nro_frame);
 
 		if(frame_a_asignar->usado) { // BIT DE USO == 1
@@ -53,5 +53,5 @@ t_frame *realizar_algoritmo_clock(t_tabla_pagina *tabla_1n, t_col_pagina *regist
 }
 
 void incrementar_puntero(t_tabla_pagina *tabla_1n) {
-	tabla_1n->puntero == (cantidad_maxima_frames - 1)? tabla_1n->puntero = 0 : tabla_1n->puntero++;
+	tabla_1n->puntero == (config_memoria.marcos_por_proceso - 1)? tabla_1n->puntero = 0 : tabla_1n->puntero++;
 }

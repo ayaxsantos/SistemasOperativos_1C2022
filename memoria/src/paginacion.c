@@ -220,7 +220,7 @@ void asignar_primer_marco_a_pagina(t_tabla_pagina *tabla_1n, t_tabla_pagina *tab
         list_add(tabla_1n->frames_asignados, frame_asignado);
     }
     else {
-        frame = realizar_algoritmo(tabla_2n, pagina, solicitud->accion_solicitada, entrada_tabla_1n_temporal,solicitud->entrada_tabla);
+        frame = realizar_algoritmo(tabla_1n, pagina, solicitud->accion_solicitada, entrada_tabla_1n_temporal,solicitud->entrada_tabla);
         solicitud->nro_frame = frame->nro_frame;
     }
 }

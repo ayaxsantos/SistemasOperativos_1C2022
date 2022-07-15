@@ -102,7 +102,7 @@ void iniciar_semaforos() {
     pthread_mutex_init(&mutex_logger, NULL);
     pthread_mutex_init(&mutex_lista_tablas_paginas, NULL);
     pthread_mutex_init(&mutex_contador_tablas_1n, NULL);
-    sem_init(&sem_algoritmo, 0, 0);
+    sem_init(&sem_algoritmo, 0, 1);
 }
 
 void setear_algoritmo_reemplazo() {

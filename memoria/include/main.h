@@ -87,7 +87,6 @@ typedef struct t_frame_asignado
 t_config_memoria config_memoria;
 t_log *logger_memoria;
 algoritmo tipo_algoritmo;
-int cantidad_maxima_frames;
 int cantidad_tablas_1n;
 int32_t entrada_tabla_1n_temporal;
 
