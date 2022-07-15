@@ -42,10 +42,11 @@ void setear_operacion(t_operacion *operacion, void *valor) {
 			break;
         case PCB:
 		case BLOQUEO:
+		case FIN_PROCESO:
 			serializar_proceso_pcb((t_proceso_pcb *)valor,operacion);
 			break;
 		case INTERRUPCION:
-		case FIN_PROCESO:
+		case FIN_PROCESO_MEMORIA:
 			size = sizeof(int);
 			stream = malloc(size);
 			memcpy(stream, valor, size);

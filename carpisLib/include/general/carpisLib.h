@@ -37,6 +37,7 @@ typedef enum
     BLOQUEO,
     INTERRUPCION,
 	FIN_PROCESO,
+    FIN_PROCESO_MEMORIA,
     /*Memoria + CPU*/
     PRIMERA_SOLICITUD,
     SEGUNDA_SOLICITUD,

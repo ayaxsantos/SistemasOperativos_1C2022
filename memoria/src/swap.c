@@ -12,18 +12,19 @@ void formatear_swap(){
 void crear_archivo(int id, int tamanio_proceso){
 	int truncado = 0, cerrado = 0;
 	char *nombre_archivo = string_new();
-		string_append(&nombre_archivo,"proceso_");
+		string_append(&nombre_archivo,"/proceso_");
 		string_append(&nombre_archivo, string_itoa(id));
 		string_append(&nombre_archivo,".swap");
 
 	t_fcb *fcb_aux = malloc(sizeof(t_fcb));
 	fcb_aux->id_archivo = id;
-	fcb_aux->path_archivo = nombre_archivo;
+	fcb_aux->path_archivo = string_duplicate(config_memoria.path_swap);
+	string_append(&(fcb_aux->path_archivo), nombre_archivo);
 	fcb_aux->pags_en_archivo = formatear_pags_en_archivo(tamanio_proceso);
 
 	t_particion *particion = malloc(sizeof(t_particion));
 	particion->fcb = fcb_aux;
-	particion->archivo = creat(nombre_archivo, S_IRWXG);
+	particion->archivo = creat(fcb_aux->path_archivo, S_IRWXG);
 
 	if (particion->archivo != -1) {
 		truncado = ftruncate(particion->archivo, tamanio_proceso);

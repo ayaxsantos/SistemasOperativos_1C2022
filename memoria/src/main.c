@@ -6,8 +6,8 @@ int main() {
     leer_configuracion();
     habilitar_log(logger_memoria, 1);
     iniciar_semaforos();
-    iniciar_memoria();
     iniciar_swap();
+    iniciar_memoria();
 
     return EXIT_SUCCESS;
 }

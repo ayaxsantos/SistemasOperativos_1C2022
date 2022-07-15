@@ -38,7 +38,7 @@ void iniciar_proceso(int socket_cliente) {
 	enviar_operacion(operacion,socket_cliente);
 	eliminar_operacion(operacion);
 
-	//crear_archivo(inicio_proceso->pid, inicio_proceso->tamanio_proceso);
+	crear_archivo(inicio_proceso->pid, inicio_proceso->tamanio_proceso);
 }
 
 void terminar_proceso(int socket_cliente) {
