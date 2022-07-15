@@ -103,6 +103,7 @@ t_list *tablas_primer_nivel;
 pthread_mutex_t mutex_mp;
 pthread_mutex_t mutex_logger;
 pthread_mutex_t mutex_lista_tablas_paginas;
+pthread_mutex_t mutex_contador_tablas_1n;
 sem_t sem_algoritmo;
 
 ////////////////////////////////////////////////

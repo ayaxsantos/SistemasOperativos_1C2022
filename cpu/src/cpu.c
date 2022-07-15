@@ -2,9 +2,9 @@
 
 
 void iniciar() {
+    iniciar_mmu();
     conectar_a_memoria_y_recibir_config();
     esperar_a_kernel();
-    iniciar_mmu();
 }
 
 void esperar_a_kernel() {
@@ -190,7 +190,7 @@ void desalojar_cpu() {
 		proceso_a_enviar->pcb = pcb;
 		enviar_proceso_pcb(socket_kernel_dispatch, proceso_a_enviar, operacion_a_enviar);
 		free(proceso_a_enviar);// Preguntar si está OK el free acá
-
+        limpiar_tlb();
 		sem_post(&sem_busqueda_proceso_nuevo);
 }
 

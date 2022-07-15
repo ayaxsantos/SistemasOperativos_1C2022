@@ -29,17 +29,16 @@ void iniciar_proceso(int socket_cliente) {
 
 	pthread_mutex_lock(&mutex_lista_tablas_paginas);
 	list_add(tablas_primer_nivel, tabla_principal_del_proceso);
-	int index_tabla = list_size(tablas_primer_nivel)-1;
 	pthread_mutex_unlock(&mutex_lista_tablas_paginas);
 
-	inicio_proceso->id_tabla_1n = index_tabla;
+	inicio_proceso->id_tabla_1n = tabla_principal_del_proceso->id_tabla;
 
     t_operacion *operacion = crear_operacion(INICIO_PROCESO);
 	setear_operacion(operacion,inicio_proceso);
 	enviar_operacion(operacion,socket_cliente);
 	eliminar_operacion(operacion);
 
-	crear_archivo(inicio_proceso->pid, inicio_proceso->tamanio_proceso);
+	//crear_archivo(inicio_proceso->pid, inicio_proceso->tamanio_proceso);
 }
 
 void terminar_proceso(int socket_cliente) {

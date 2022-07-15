@@ -6,6 +6,7 @@
 void iniciar_tlb();
 void actualizar_tlb(unsigned nro_frame, int nro_pagina);
 void limpiar_entrada_tlb(int nro_pagina);
+void limpiar_tlb();
 
 int obtener_nro_frame_de_tlb(int nro_pagina, unsigned int *nro_frame);
 t_columna_tlb *buscar_registro_tlb(int nro_pagina);

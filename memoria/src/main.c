@@ -96,7 +96,11 @@ void iniciar_particionamiento_en_frames() {
 }
 
 void iniciar_semaforos() {
-    // TODO
+    pthread_mutex_init(&mutex_mp, NULL);
+    pthread_mutex_init(&mutex_logger, NULL);
+    pthread_mutex_init(&mutex_lista_tablas_paginas, NULL);
+    pthread_mutex_init(&mutex_contador_tablas_1n, NULL);
+    sem_init(&sem_algoritmo, 0, 0);
 }
 
 void setear_algoritmo_reemplazo() {

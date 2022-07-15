@@ -6,6 +6,7 @@ void iniciar_tlb() {
         t_columna_tlb *registro = malloc(sizeof(t_columna_tlb));
         registro->is_free = true;
         registro->pagina = UNDEFINED;
+        registro->nro_marco = UNDEFINED;
         registro->entrada = i;
         list_add(tlb, registro);
     }
@@ -30,6 +31,15 @@ void actualizar_tlb(unsigned int nro_frame, int nro_pagina) {
     }
     realizar_algoritmo_reemplazo(nro_frame, nro_pagina);
     //monitorear_registros_tlb();
+}
+
+void limpiar_tlb() {
+    for (int i = 0; i < config_cpu.cantidad_entradas_tlb; i++) {
+        t_columna_tlb *registro = list_get(tlb, i);
+        registro->is_free = true;
+        registro->pagina = UNDEFINED;
+        registro->nro_marco = UNDEFINED;
+    }
 }
 
 void limpiar_entrada_tlb(int nro_pagina) {

@@ -4,10 +4,13 @@
 
 t_tabla_pagina *crear_tabla_principal(int tamanio){
 	t_tabla_pagina *tabla_principal = inicializar_tabla(tamanio);
-	tabla_principal->id_tabla = cantidad_tablas_1n;
     tabla_principal->frames_asignados = list_create();
     tabla_principal->fue_suspendido = false;
+
+    pthread_mutex_lock(&mutex_contador_tablas_1n);
+    tabla_principal->id_tabla = cantidad_tablas_1n;
 	cantidad_tablas_1n++;
+    pthread_mutex_unlock(&mutex_contador_tablas_1n);
 
 	crear_tablas_segundo_nivel(tabla_principal);
 
@@ -203,10 +206,7 @@ void asignar_primer_marco_a_pagina(t_tabla_pagina *tabla_1n, t_tabla_pagina *tab
         pagina->presencia = true;
         pagina->nro_frame = frame->nro_frame;
         if(tabla_1n->fue_suspendido) {
-            /*
-             * TODO: gestionar un page fault
-             * realizar_page_fault(frame->base,tabla_1n->id_tabla_1n, entrada_tabla_1n_temporal, solicitud->entrada_tabla);
-             */
+            realizar_page_fault(tabla_1n->id_tabla, calcular_nro_pagina(entrada_tabla_1n_temporal,solicitud->entrada_tabla),frame->base);
         }
         frame->usado = 1;
         frame->modificado = solicitud->accion_solicitada;
@@ -250,18 +250,27 @@ int calcular_nro_pagina(int32_t entrada_tabla_1n, int32_t entrada_tabla_2n) {
 /* ---------- Cierre ----------*/
 
 void liberar_todas_las_paginas_del_proceso(t_tabla_pagina* tabla_proceso){
-    char *nro_pagina;
-    t_col_pagina *pagina;
-    t_frame *frame;
-    int ultima_pagina = dictionary_size(tabla_proceso->tabla);
-    for(int i=0; i<ultima_pagina;i++) {
-        nro_pagina = string_itoa(i);
-        pagina = (t_col_pagina *)dictionary_remove(tabla_proceso->tabla, nro_pagina);
-        frame = list_get(memoria_principal->frames,pagina->nro_frame);
-        frame->is_free = true;
-        free(pagina);
+    char *entrada_tabla_1n;
+    char *entrada_tabla_2n;
+    for (int i = 0; i < dictionary_size(tabla_proceso->tabla); ++i) {
+        entrada_tabla_1n = string_itoa(i);
+        t_tabla_pagina *tabla_2n = dictionary_get(tabla_proceso->tabla, entrada_tabla_1n);
+        for (int j = 0; j < dictionary_size(tabla_2n->tabla); ++j) {
+            entrada_tabla_2n = string_itoa(j);
+            t_col_pagina *registro_pagina = dictionary_get(tabla_2n->tabla, entrada_tabla_2n);
+            if(registro_pagina->presencia){
+                registro_pagina->presencia = false;
+                t_frame *frame = list_get(memoria_principal->frames,registro_pagina->nro_frame);
+                frame->is_free = true;
+            }
+            registro_pagina->nro_frame = UNDEFINED;
+            free(entrada_tabla_2n);
+        }
+        free(entrada_tabla_1n);
     }
-    dictionary_clean_and_destroy_elements(tabla_proceso->tabla, eliminar_columna_tabla);
+    list_clean_and_destroy_elements(tabla_proceso->frames_asignados, liberar_frame_asignado);
+    destruir_archivo(tabla_proceso->id_tabla);
+    //dictionary_clean_and_destroy_elements(tabla_proceso->tabla, eliminar_columna_tabla);
 }
 
 void eliminar_columna_tabla(void *arg) {

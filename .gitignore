@@ -265,3 +265,4 @@ fabric.properties
 
 #other
 *.log
+*.swap
