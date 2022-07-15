@@ -43,6 +43,7 @@ void *algoritmo_fifo(void * args)
     {
         //Tomar el primer elemento de la lista
         sem_wait(&hay_procesos_en_ready);
+
         pthread_mutex_lock(&mutex_procesos_en_ready);
         proceso_en_exec = list_remove(procesos_en_ready, 0);
         proceso_en_exec->un_pcb->un_estado = EXEC;
@@ -73,28 +74,26 @@ void *algoritmo_sjf_con_desalojo(void *args)
     pthread_t *hilo_monitoreo_tiempos = malloc(sizeof(pthread_t));
 
     //Para el primer orden, asi sabemos cual tenemos que mandar a ejecutar!!
-    sem_wait(&hay_que_ordenar_cola_ready);
+    sem_wait(&hay_que_ordenar_cola_ready); //semaforo que avisa que hay procesos en ready para el monitoreo de desalojo
+
+    pthread_create(hilo_monitoreo_tiempos, NULL, rutina_monitoreo_desalojo, NULL);
+    pthread_detach(*hilo_monitoreo_tiempos);
 
     while(true)
     {
         sem_wait(&hay_procesos_en_ready);
-
-        //sem_wait(&hay_proceso_ejecutando); //monitoreo
-
-        //Ordenar lista
-        organizacionPlani();
 
         //Tomar el primer elemento de la lista
         pthread_mutex_lock(&mutex_procesos_en_ready);
         proceso_en_exec = list_remove(procesos_en_ready, 0);
         pthread_mutex_unlock( &mutex_procesos_en_ready);
 
+        //Tomamos tiempo inicial APENAS lo pasamos a EXEC
+        time(&tiempoI);
+
         pthread_mutex_lock(&mutex_log);
         log_info(un_logger,"Se pasa a EXEC el proceso PID = %u",proceso_en_exec->un_pcb->pid);
         pthread_mutex_unlock(&mutex_log);
-
-        pthread_create(hilo_monitoreo_tiempos, NULL, rutina_monitoreo_desalojo, (void*)proceso_en_exec);
-        pthread_detach(*hilo_monitoreo_tiempos);
 
         t_proceso_pcb *un_proceso_pcb = malloc(sizeof(t_proceso_pcb));
         un_proceso_pcb->pcb = proceso_en_exec->un_pcb;
@@ -109,75 +108,55 @@ void *algoritmo_sjf_con_desalojo(void *args)
     }
 }
 
-void *rutina_monitoreo_desalojo(void *param_proceso_vinculado)
+void *rutina_monitoreo_desalojo(void *args)
 {
-    t_proceso *un_proceso_vinculado = (t_proceso*)param_proceso_vinculado;
-
     t_proceso *proceso_candidato;
-
-    pthread_mutex_lock(&mutex_log);
-    log_info(un_logger,"Se inicio una rutina desalojo!!");
-    pthread_mutex_unlock(&mutex_log);
-
-    //Tomamos tiempo inicial APENAS lo pasamos a EXEC
-    time(&tiempoI);
     while(true)
     {
         sem_wait(&hay_que_ordenar_cola_ready);
 
         //Tomamos le tiempo final, este se ira actualizando
-        time(&tiempoF);
-
         organizacionPlani();
-        proceso_candidato = list_get(procesos_en_ready,0);
 
-        //El problema es que hay que desalojar verifica con proceso en exec
-
-        if(un_proceso_vinculado != proceso_en_exec)
-            break;
-        else if(hay_que_desalojar(proceso_candidato))
+        pthread_mutex_lock(&mutex_procesos_en_ready);
+        if(!list_is_empty(procesos_en_ready))
         {
-            pthread_mutex_lock(&mutex_log);
-            log_info(un_logger, "Se debe desalojar al proceso con PID = %u",proceso_en_exec->un_pcb->pid);
-            log_info(un_logger,"El proceso con PID = %u tiene una estimacion menor, de: %f",
-                     proceso_candidato->un_pcb->pid,
-                     proceso_candidato->un_pcb->una_estimacion);
-            pthread_mutex_unlock(&mutex_log);
+            proceso_candidato = list_get(procesos_en_ready,0);
+            time(&tiempoF);
 
-            solicitar_desalojo_a_cpu();
-            break;
+            if(hay_que_desalojar(proceso_candidato))
+            {
+                pthread_mutex_lock(&mutex_log);
+                log_info(un_logger, "Se debe desalojar al proceso con PID = %u",proceso_en_exec->un_pcb->pid);
+                log_info(un_logger,"El proceso con PID = %u tiene una estimacion menor, de: %f",
+                         proceso_candidato->un_pcb->pid,
+                         proceso_candidato->un_pcb->una_estimacion);
+                pthread_mutex_unlock(&mutex_log);
+
+                solicitar_desalojo_a_cpu();
+            }
         }
-        //sem_post(&hay_proceso_ejecutando); //monitoreo
-
+        pthread_mutex_unlock(&mutex_procesos_en_ready);
         //Volvemos a tomar el tiempo inicial, lo medido anteriormente se guardo (OJO ESTO)
         //time(&tiempoI);
     }
-
-    sem_post(&puedo_liberar_proceso);
-    //sem_post(&hay_proceso_ejecutando);
-
-    pthread_mutex_lock(&mutex_log);
-    log_info(un_logger,"Se finalizo una rutina desalojo!!");
-    pthread_mutex_unlock(&mutex_log);
-
-    return NULL;
 }
 
 void solicitar_desalojo_a_cpu()
 {
     pthread_mutex_lock(&mutex_flag_interrupt);
-    flag_interrupt = true;
+    enviar_interrupcion(socket_interrupt);
     pthread_mutex_unlock(&mutex_flag_interrupt);
 }
 
 bool hay_que_desalojar(t_proceso *proceso_candidato)
 {
     double tiempo_que_lleva = calcular_tiempo_ejecutando();
-    proceso_en_exec->tiempo_ejecutando_estimacion += tiempo_que_lleva;
+    //proceso_en_exec->tiempo_ejecutando_estimacion += tiempo_que_lleva;
 
-    if(proceso_en_exec->tiempo_ejecutando_estimacion <= 0)
+    if(tiempo_que_lleva <= 0)
         return false;
-    else if (proceso_candidato->un_pcb->una_estimacion < proceso_en_exec->tiempo_ejecutando_estimacion)
+    else if (proceso_candidato->un_pcb->una_estimacion < tiempo_que_lleva)
         return true;
     else
         return false;
@@ -327,7 +306,6 @@ void organizacionPlani()
     }
     list_sort(procesos_en_ready, comparador_procesos_SJF);
     pthread_mutex_unlock(&mutex_procesos_en_ready);
-
 }
 
 bool comparador_de_procesos_SJF(t_proceso *un_proceso_primero, t_proceso *un_proceso_segundo)
