@@ -144,8 +144,10 @@ t_pcb *inicializar_pcb(t_com_proceso *comunicacion_proceso)
     enviar_operacion(operacion, un_pcb->mi_socket_memoria);
     eliminar_operacion(operacion);
     free(inicio_proceso);
+
     //Espera de retorno
     int codigo_retorno = recibir_operacion(un_pcb->mi_socket_memoria);
+
     if(codigo_retorno == INICIO_PROCESO) {
         inicio_proceso = recibir_dato_inicio(un_pcb->mi_socket_memoria);
         un_pcb->id_tabla_1n = inicio_proceso->id_tabla_1n;
@@ -158,6 +160,7 @@ t_pcb *inicializar_pcb(t_com_proceso *comunicacion_proceso)
         log_error(un_logger,"Operacion Desconocida al iniciar el proceso");
         pthread_mutex_unlock(&mutex_log);
     }
+
     return un_pcb;
 }
 
@@ -198,8 +201,6 @@ void responder_fin_proceso(int socket_proceso)
     pthread_mutex_lock(&mutex_log);
     log_info(un_logger,"Se envio mensaje de finalizacion!!");
     pthread_mutex_unlock(&mutex_log);
-
-    sem_post(&grado_multiprog_lo_permite);
 }
 
 //////////////////////////////////////////////////

@@ -65,8 +65,6 @@ t_proceso *obtener_proceso_en_new()
 
 void transicionar_proceso_a_ready(t_proceso *un_proceso)
 {
-
-
     pthread_mutex_lock(&mutex_procesos_en_ready);
     list_add(procesos_en_ready,(void*) un_proceso);
     pthread_mutex_unlock(&mutex_procesos_en_ready);
@@ -102,6 +100,7 @@ void finalizar_proceso_ejecutando()
     }
 
     responder_fin_proceso(proceso_en_exec->comunicacion_proceso->socket_proceso);
+
     transicionar_proceso_a_exit();
     proceso_en_exec = NULL;
 
