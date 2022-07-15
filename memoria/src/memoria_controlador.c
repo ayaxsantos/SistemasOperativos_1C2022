@@ -15,19 +15,19 @@ t_frame *recorrer_frames() {
     return NULL;
 }
 
-t_frame *realizar_algoritmo(t_tabla_pagina *tabla_pagina, t_col_pagina *pagina,
-                            accion accion, int32_t id_tabla_2n, int32_t entrada_tabla_2n) {
+t_frame *realizar_algoritmo_reemplazo(t_tabla_pagina *tabla_pagina, t_col_pagina *pagina,
+                                      accion accion, int32_t entrada_tabla_1n, int32_t entrada_tabla_2n) {
     t_frame *frame = NULL;
 
     switch (tipo_algoritmo) {
     case CLOCK:
             sem_wait(&sem_algoritmo);
-            frame = realizar_algoritmo_clock(tabla_pagina, pagina, accion, id_tabla_2n, entrada_tabla_2n);
+            frame = realizar_algoritmo_clock(tabla_pagina, pagina, accion, entrada_tabla_1n, entrada_tabla_2n);
             sem_post(&sem_algoritmo);
         break;
     case CLOCKM:
             sem_wait(&sem_algoritmo);
-            //frame = realizar_algoritmo_lru(tabla_pagina, pagina, accion, nro_pagina);
+            frame = realizar_algoritmo_clock_mejorado(tabla_pagina, pagina, accion, entrada_tabla_1n, entrada_tabla_2n);
             sem_post(&sem_algoritmo);
         break;
     }

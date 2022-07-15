@@ -1,6 +1,6 @@
 #include "../include/clock_mejorado.h"
 
-t_frame *realizar_algoritmo_clock(t_tabla_pagina *tabla_1n, t_col_pagina *registro,
+t_frame *realizar_algoritmo_clock_mejorado(t_tabla_pagina *tabla_1n, t_col_pagina *registro,
                                   accion accion_memoria, int32_t entrada_tabla_1n, int32_t entrada_tabla_2n) {
 
 	t_frame *frame_a_asignar = NULL;
@@ -11,6 +11,7 @@ t_frame *realizar_algoritmo_clock(t_tabla_pagina *tabla_1n, t_col_pagina *regist
 			frame_a_asignar = realizar_segundo_paso(tabla_1n, registro, accion_memoria, entrada_tabla_1n, entrada_tabla_2n);
 		}
 	}
+    return frame_a_asignar;
 
 }
 
@@ -19,7 +20,7 @@ t_frame *realizar_primer_paso(t_tabla_pagina *tabla_1n, t_col_pagina *registro, 
 	t_frame *frame_a_asignar = NULL;
 	t_frame_asignado *posible_frame_a_reemplazar;
 
-	for(int i = 0; i <= cantidad_maxima_frames - 1 ; i++) {
+	for(int i = 0; i <= config_memoria.marcos_por_proceso - 1 ; i++) {
 		posible_frame_a_reemplazar = (t_frame_asignado*)list_get(tabla_1n->frames_asignados, tabla_1n->puntero);
 		frame_a_asignar = (t_frame*)list_get(memoria_principal->frames, posible_frame_a_reemplazar->nro_frame);
 
@@ -55,7 +56,7 @@ t_frame *realizar_segundo_paso(t_tabla_pagina *tabla_1n, t_col_pagina *registro,
 	t_frame *frame_a_asignar = NULL;
 	t_frame_asignado *posible_frame_a_reemplazar;
 
-	for(int i = 0; i <= cantidad_maxima_frames - 1 ; i++) {
+	for(int i = 0; i <= config_memoria.marcos_por_proceso  - 1 ; i++) {
 		posible_frame_a_reemplazar = (t_frame_asignado*)list_get(tabla_1n->frames_asignados, tabla_1n->puntero);
 		frame_a_asignar = (t_frame*)list_get(memoria_principal->frames, posible_frame_a_reemplazar->nro_frame);
 

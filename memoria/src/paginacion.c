@@ -76,7 +76,7 @@ int agregar_pag_a_tabla_2n(t_tabla_pagina *tabla_2n, char *nro_pag) {
         frame = recorrer_frames(tabla_2n);
     }
     else {
-        frame = realizar_algoritmo(tabla_2n,col,READ_ACCION, atoi(nro_pag));
+        frame = realizar_algoritmo_reemplazo(tabla_2n,col,READ_ACCION, atoi(nro_pag));
     }*/
     col->presencia = false;
     col->nro_frame = UNDEFINED;
@@ -129,7 +129,8 @@ void segunda_solicitud_mmu(t_solicitud* solicitud){
 
 	if (!pagina->presencia){
         if(pagina->nro_frame != UNDEFINED) {
-            t_frame *frame = realizar_algoritmo(tabla_2n, pagina, solicitud->accion_solicitada, entrada_tabla_1n_temporal,solicitud->entrada_tabla);
+            t_frame *frame = realizar_algoritmo_reemplazo(tabla_2n, pagina, solicitud->accion_solicitada,
+                                                          entrada_tabla_1n_temporal, solicitud->entrada_tabla);
             solicitud->nro_frame = frame->nro_frame;
         }
         /*
@@ -220,7 +221,8 @@ void asignar_primer_marco_a_pagina(t_tabla_pagina *tabla_1n, t_tabla_pagina *tab
         list_add(tabla_1n->frames_asignados, frame_asignado);
     }
     else {
-        frame = realizar_algoritmo(tabla_1n, pagina, solicitud->accion_solicitada, entrada_tabla_1n_temporal,solicitud->entrada_tabla);
+        frame = realizar_algoritmo_reemplazo(tabla_1n, pagina, solicitud->accion_solicitada, entrada_tabla_1n_temporal,
+                                             solicitud->entrada_tabla);
         solicitud->nro_frame = frame->nro_frame;
     }
 }

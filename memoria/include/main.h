@@ -129,5 +129,6 @@ void esperar_handshake_kernel(int server);
 #include "paginacion.h"
 #include "memoria_controlador.h"
 #include "clock.h"
+#include "clock_mejorado.h"
 
 #endif /* MAIN_H_INCLUDED */
