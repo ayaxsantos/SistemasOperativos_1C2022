@@ -30,7 +30,7 @@ void monitorear_estado_y_tiempo(t_proceso *un_proceso)
     if(el_proceso_no_esta_suspendido(un_proceso))
     {
         un_proceso->un_pcb->un_estado = SUSP_BLOCKED;
-        sem_post(&grado_multiprog_lo_permite); //TODO Toda la logica con memoria
+        sem_post(&grado_multiprog_lo_permite); //TODO Toda la logica con memoria --> ya esta no?
 
         t_operacion *operacion = crear_operacion(SUSPENSION_PROCESO);
         setear_operacion(operacion,&(un_proceso->un_pcb->id_tabla_1n));

@@ -65,6 +65,7 @@ t_proceso *obtener_proceso_en_new()
 
 void transicionar_proceso_a_ready(t_proceso *un_proceso)
 {
+    un_proceso->un_pcb->un_estado = READY; //todo agrege cambio de estado
     pthread_mutex_lock(&mutex_procesos_en_ready);
     list_add(procesos_en_ready,(void*) un_proceso);
     pthread_mutex_unlock(&mutex_procesos_en_ready);
