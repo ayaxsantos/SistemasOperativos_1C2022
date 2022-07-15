@@ -130,12 +130,12 @@ void liberar_configuracion_y_log() {
 }
 
 void liberar_memoria() {
-    list_destroy_and_destroy_elements(memoria_principal->frames, eliminar_frames);
+    list_destroy_and_destroy_elements(memoria_principal->frames, eliminar_frame);
     free(memoria_principal->memoria);
     free(memoria_principal);
 }
 
-void eliminar_frames(void *arg) {
+void eliminar_frame(void *arg) {
     t_frame *frame = (t_frame *)arg;
     free(frame);
 }
