@@ -31,6 +31,25 @@ void monitorear_estado_y_tiempo(t_proceso *un_proceso)
     {
         un_proceso->un_pcb->un_estado = SUSP_BLOCKED;
         sem_post(&grado_multiprog_lo_permite); //TODO Toda la logica con memoria
+
+        t_operacion *operacion = crear_operacion(SUSPENSION_PROCESO);
+        setear_operacion(operacion,&(un_proceso->un_pcb->id_tabla_1n));
+        enviar_operacion(operacion,un_proceso->mi_socket_memoria);
+        eliminar_operacion(operacion);
+
+        codigo_operacion cod_op = recibir_operacion(un_proceso->mi_socket_memoria);
+        if(cod_op != SUSPENSION_PROCESO) {
+            pthread_mutex_lock(&mutex_log);
+            log_error(un_logger,"Error al recibir la suspension del proceso %d",un_proceso->un_pcb->pid);
+            pthread_mutex_unlock(&mutex_log);
+        }
+        else {
+            int id_tabla_1n = recibir_entero(un_proceso->mi_socket_memoria);
+            pthread_mutex_lock(&mutex_log);
+            log_info(un_logger,"Se suspende proceso con PID = %u con ID tabla = %d",un_proceso->un_pcb->pid, id_tabla_1n);
+            pthread_mutex_unlock(&mutex_log);
+        }
+
         pthread_mutex_lock(&mutex_log);
         log_warning(un_logger,"El proceso con PID: %u paso a suspendido bloqueado | Tiempo: %f",
                  un_proceso->un_pcb->pid,

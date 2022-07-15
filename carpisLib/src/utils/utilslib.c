@@ -47,6 +47,7 @@ void setear_operacion(t_operacion *operacion, void *valor) {
 			break;
 		case INTERRUPCION:
 		case FIN_PROCESO_MEMORIA:
+		case SUSPENSION_PROCESO:
 			size = sizeof(int);
 			stream = malloc(size);
 			memcpy(stream, valor, size);

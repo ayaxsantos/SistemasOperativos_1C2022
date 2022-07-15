@@ -95,7 +95,8 @@ void swapear_proceso(t_tabla_pagina *tabla_1n){
                 t_frame *frame = list_get(memoria_principal->frames,registro_pagina->nro_frame);
                 //El numero de pagina esta formado por: entrada_tabla_1n:entrada_tabla_2n
                 nro_pagina = calcular_nro_pagina(i,j);
-                escribir_pagina_en_swap(tabla_1n->id_tabla, nro_pagina, frame->base);
+                //TODO: @jume
+                //escribir_pagina_en_swap(tabla_1n->id_tabla, nro_pagina, frame->base);
                 frame->is_free = true;
             }
             registro_pagina->nro_frame = UNDEFINED;
