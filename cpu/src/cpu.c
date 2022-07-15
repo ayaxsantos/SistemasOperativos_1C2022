@@ -161,6 +161,7 @@ void ejecutar_instruccion(t_instruccion *instruccion, uint32_t valor_a_copiar) {
 
         case READ:
             log_info(logger_cpu,"CPU ejecutando READ");
+            log_info(logger_cpu, "Leer valor de la direccion logica: %d",instruccion->parametro1);
         	log_info(logger_cpu, "Valor leido de memoria: %i en la direccion: %d", obtener_dato_memoria(instruccion->parametro1), instruccion->parametro1);
         	//printf("Valor leido de memoria: %i \n", obtener_dato_memoria(instruccion->parametro1));
         	chequear_si_hay_interrupcion();
