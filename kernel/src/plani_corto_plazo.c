@@ -50,7 +50,7 @@ void *algoritmo_fifo(void * args)
         pthread_mutex_unlock(&mutex_procesos_en_ready);
 
         pthread_mutex_lock(&mutex_log);
-        log_info(un_logger,"Se pasa a EXEC el proceso PID = %u",proceso_en_exec->un_pcb->pid);
+        log_warning(un_logger,"Se pasa a EXEC el proceso PID = %u",proceso_en_exec->un_pcb->pid);
         pthread_mutex_unlock(&mutex_log);
 
 
@@ -92,7 +92,7 @@ void *algoritmo_sjf_con_desalojo(void *args)
         time(&tiempoI);
 
         pthread_mutex_lock(&mutex_log);
-        log_info(un_logger,"Se pasa a EXEC el proceso PID = %u",proceso_en_exec->un_pcb->pid);
+        log_warning(un_logger,"Se pasa a EXEC el proceso PID = %u",proceso_en_exec->un_pcb->pid);
         pthread_mutex_unlock(&mutex_log);
 
         t_proceso_pcb *un_proceso_pcb = malloc(sizeof(t_proceso_pcb));
@@ -151,7 +151,12 @@ void solicitar_desalojo_a_cpu()
 
 bool hay_que_desalojar(t_proceso *proceso_candidato)
 {
-    double tiempo_que_lleva = calcular_tiempo_ejecutando();
+    double tiempo_que_lleva = calcular_tiempo_ejecutando() * 1000;
+
+    pthread_mutex_lock(&mutex_log);
+    log_error(un_logger,"El tiempo que lleva es: %f",tiempo_que_lleva);
+    pthread_mutex_unlock(&mutex_log);
+
     //proceso_en_exec->tiempo_ejecutando_estimacion += tiempo_que_lleva;
 
     if(tiempo_que_lleva <= 0)
@@ -166,8 +171,7 @@ double calcular_tiempo_ejecutando()
 {
     //time(tiempoF);
     double tiempo_transcurrido_exec = difftime(tiempoF,tiempoI);
-    double resultado = proceso_en_exec->tiempo_ejecutando_estimacion - tiempo_transcurrido_exec;
-    return round(resultado);
+    return round(tiempo_transcurrido_exec);
 }
 
 void pasar_proceso_a_bloqueado()
