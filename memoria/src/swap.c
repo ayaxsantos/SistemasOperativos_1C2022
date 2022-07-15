@@ -67,7 +67,7 @@ void destruir_archivo(int id){
         remove(particion->fcb->path_archivo);
 	}
 	else{
-		log_info(logger_memoria,"ERROR: El proceso que se intenta cerrar no existe en swap.");
+		log_error(logger_memoria,"ERROR: El proceso que se intenta cerrar no existe en swap.");
 	}
 }
 

@@ -50,4 +50,5 @@ t_frame *realizar_algoritmo_clock(t_tabla_pagina *tabla_1n, t_col_pagina *regist
 			return frame_a_asignar;
 		}
 	}
+	return frame_a_asignar;
 }

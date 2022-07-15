@@ -161,19 +161,19 @@ void ejecutar_instruccion(t_instruccion *instruccion, uint32_t valor_a_copiar) {
 
         case READ:
             log_info(logger_cpu,"CPU ejecutando READ");
-        	log_info(logger_cpu, "Valor leido de memoria: %i ", obtener_dato_memoria(instruccion->parametro1));
+        	log_info(logger_cpu, "Valor leido de memoria: %i en la direccion: %d", obtener_dato_memoria(instruccion->parametro1), instruccion->parametro1);
         	//printf("Valor leido de memoria: %i \n", obtener_dato_memoria(instruccion->parametro1));
         	chequear_si_hay_interrupcion();
            break;
 
         case WRITE:
-            log_info(logger_cpu,"CPU ejecutando WRITE");
+            log_info(logger_cpu,"CPU ejecutando WRITE en la direccion: %d", instruccion->parametro1);
         	escribir_dato_memoria(instruccion->parametro1, instruccion->parametro2);
         	chequear_si_hay_interrupcion();
            break;
 
         case COPY:
-            log_info(logger_cpu,"CPU ejecutando COPY");
+            log_info(logger_cpu,"CPU ejecutando COPY en la direccion: %d con el valor de la direccion %d: ", instruccion->parametro1, instruccion->parametro2);
         	escribir_dato_memoria(instruccion->parametro1, valor_a_copiar);
         	chequear_si_hay_interrupcion();
            break;

@@ -1,8 +1,8 @@
 #include "../include/swap_controlador.h"
 
 void realizar_page_fault(int32_t id_tabla_1n, int nro_pagina, void *a_leer) {
-    usleep(config_memoria.retardo_swap*1000);
     log_info(logger_memoria,"Realizando PAGE FAULT tabla primer nivel: %d", id_tabla_1n);
+    usleep(config_memoria.retardo_swap*1000);
     t_particion* particion = encontrar_particion_de(id_tabla_1n);
 
     if (!particion){
@@ -35,16 +35,17 @@ void realizar_page_fault(int32_t id_tabla_1n, int nro_pagina, void *a_leer) {
             }
             return;
         }
-        log_info(logger_memoria,"PF: El proceso no tiene la pagina pedida en swap.");
+        log_warning(logger_memoria,"PF: El proceso no tiene la pagina pedida en swap.");
     }
 }
 
 void escribir_pagina_en_swap(int32_t id_tabla_1n, int nro_pagina, void *a_escribir){
+    log_info(logger_memoria,"Realizando PAGE WRITE tabla primer nivel: %d", id_tabla_1n);
     usleep(config_memoria.retardo_swap*1000);
     t_particion* particion = encontrar_particion_de(id_tabla_1n);
 
     if (!particion){
-    	log_info(logger_memoria,"Error en la recuperación del archivo en swap para este proceso.");
+    	log_error(logger_memoria,"Error en la recuperación del archivo en swap para este proceso.");
     }
 
     int nro_pag_en_swap = nro_pagina_en_swap(particion, nro_pagina);

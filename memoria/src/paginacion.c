@@ -30,7 +30,8 @@ void crear_tablas_segundo_nivel(t_tabla_pagina *tabla_principal){
 		}
 
 		if (tablas_2n_necesarias.rem > 0){
-			agregar_ultima_pag_a_tabla_1n(tabla_principal, atoi(nro_pag) + 1);
+            nro_pag = string_itoa(i);
+			agregar_ultima_pag_a_tabla_1n(tabla_principal, atoi(nro_pag));
 		}
 	}
 	else
@@ -59,7 +60,7 @@ int agregar_ultima_pag_a_tabla_1n(t_tabla_pagina *tabla_proceso, int nro_ultima_
 	tabla_2n_aux->id_tabla = nro_ultima_pag;
 	int i;
 
-	int pags_necesarias_ultima_tabla = tabla_proceso->pags_necesarias - config_memoria.entradas_por_tabla * (nro_ultima_pag-1);
+	int pags_necesarias_ultima_tabla = tabla_proceso->pags_necesarias - config_memoria.entradas_por_tabla * nro_ultima_pag;
 
 	for (i=0; i < pags_necesarias_ultima_tabla; i++){
 		agregar_pag_a_tabla_2n(tabla_2n_aux, string_itoa(i));
