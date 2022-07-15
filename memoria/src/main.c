@@ -40,7 +40,9 @@ void leer_configuracion() {
     config_memoria.marcos_por_proceso = config_get_int_value(un_config,"MARCOS_POR_PROCESO");
     config_memoria.retardo_swap = config_get_int_value(un_config,"RETARDO_SWAP");
     config_memoria.path_swap = strdup(config_get_string_value(un_config,"PATH_SWAP"));
-    
+
+    log_info(logger_memoria,"Tiempo de retardo de %d ms para acceso a memoria", config_memoria.retardo_memoria);
+    log_info(logger_memoria,"Tiempo de retardo de %d ms para acceso a swap", config_memoria.retardo_swap);
     config_destroy(un_config);
 
 }

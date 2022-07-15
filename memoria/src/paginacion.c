@@ -116,6 +116,7 @@ void primera_solicitud_mmu(t_solicitud* solicitud){
 
 	solicitud->id_tabla_2n = tabla_2n->id_tabla;
 
+    usleep(config_memoria.retardo_memoria*1000);
 	pthread_mutex_lock(&mutex_logger);
 	log_info(logger_memoria, "Primera solicitud MMU recibida con exito.");
 	pthread_mutex_unlock(&mutex_logger);
@@ -143,6 +144,7 @@ void segunda_solicitud_mmu(t_solicitud* solicitud){
         solicitud->nro_frame = pagina->nro_frame;
 	}
 
+    usleep(config_memoria.retardo_memoria*1000);
 	pthread_mutex_lock(&mutex_logger);
 	log_info(logger_memoria, "Segunda solicitud MMU recibida con exito.");
 	pthread_mutex_unlock(&mutex_logger);
@@ -168,6 +170,7 @@ void tercera_solicitud_mmu(t_solicitud *solicitud){
 		log_info(logger_memoria,"Accion no valida.");
 	}
     entrada_tabla_1n_temporal = UNDEFINED;
+    usleep(config_memoria.retardo_memoria*1000);
 	pthread_mutex_lock(&mutex_logger);
 	log_info(logger_memoria, "Tercera solicitud MMU recibida con exito.");
 	pthread_mutex_unlock(&mutex_logger);

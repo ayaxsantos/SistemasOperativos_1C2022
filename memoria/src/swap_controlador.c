@@ -1,6 +1,7 @@
 #include "../include/swap_controlador.h"
 
 void realizar_page_fault(int32_t id_tabla_1n, int nro_pagina, void *a_leer) {
+    usleep(config_memoria.retardo_swap*1000);
     t_particion* particion = encontrar_particion_de(id_tabla_1n);
 
     if (!particion){
@@ -38,6 +39,7 @@ void realizar_page_fault(int32_t id_tabla_1n, int nro_pagina, void *a_leer) {
 }
 
 void escribir_pagina_en_swap(int32_t id_tabla_1n, int nro_pagina, void *a_escribir){
+    usleep(config_memoria.retardo_swap*1000);
     t_particion* particion = encontrar_particion_de(id_tabla_1n);
 
     if (!particion){

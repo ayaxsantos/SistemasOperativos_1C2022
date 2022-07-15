@@ -9,7 +9,7 @@ void formatear_swap(){
     swap.particiones = list_create();
 }
 
-void crear_archivo(int id, int tamanio_proceso){
+void crear_archivo(int id, int id_tabla_1n, int tamanio_proceso){
 	int truncado = 0, cerrado = 0;
 	char *nombre_archivo = string_new();
 		string_append(&nombre_archivo,"/proceso_");
@@ -18,6 +18,7 @@ void crear_archivo(int id, int tamanio_proceso){
 
 	t_fcb *fcb_aux = malloc(sizeof(t_fcb));
 	fcb_aux->id_archivo = id;
+    fcb_aux->id_tabla = id_tabla_1n;
 	fcb_aux->path_archivo = string_duplicate(config_memoria.path_swap);
 	string_append(&(fcb_aux->path_archivo), nombre_archivo);
 	fcb_aux->pags_en_archivo = formatear_pags_en_archivo(tamanio_proceso);
@@ -62,6 +63,7 @@ void destruir_archivo(int id){
 			liberar_pagina(i, particion);
 			list_remove(particion->fcb->pags_en_archivo, i);
 		}
+        remove(particion->fcb->path_archivo);
 	}
 	else{
 		log_info(logger_memoria,"ERROR: El proceso que se intenta cerrar no existe en swap.");

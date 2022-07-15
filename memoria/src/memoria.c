@@ -38,21 +38,21 @@ void iniciar_proceso(int socket_cliente) {
 	enviar_operacion(operacion,socket_cliente);
 	eliminar_operacion(operacion);
 
-	crear_archivo(inicio_proceso->pid, inicio_proceso->tamanio_proceso);
+	crear_archivo((int)inicio_proceso->pid, inicio_proceso->id_tabla_1n,inicio_proceso->tamanio_proceso);
 }
 
 void terminar_proceso(int socket_cliente) {
 	uint32_t id_tabla = recibir_entero(socket_cliente);
-	t_tabla_pagina* tabla_1n = list_get(tablas_primer_nivel, id_tabla);
+	t_tabla_pagina* tabla_1n = list_get(tablas_primer_nivel, (int)id_tabla);
 
 	liberar_todas_las_paginas_del_proceso(tabla_1n);
 
-	t_operacion *operacion = crear_operacion(FIN_PROCESO);
+	t_operacion *operacion = crear_operacion(FIN_PROCESO_MEMORIA);
 	setear_operacion(operacion,&id_tabla);
 	enviar_operacion(operacion,socket_cliente);
 	eliminar_operacion(operacion);
 
-	//destruir_archivo(id_tabla);
+	destruir_archivo((int)id_tabla);
 }
 
 void suspender_proceso(int socket_cliente) {

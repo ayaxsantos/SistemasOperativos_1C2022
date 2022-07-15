@@ -44,7 +44,7 @@ t_swap swap;
 void iniciar_swap();
 
 void formatear_swap();
-void crear_archivo(int id, int tamanio_proceso);
+void crear_archivo(int id, int id_tabla_1n ,int tamanio_proceso);
 t_list* formatear_pags_en_archivo(int tamanio_proceso);
 
 void destruir_archivo(int id_tabla);
