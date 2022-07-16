@@ -18,6 +18,7 @@ bool buscar_por_numero_marco(void *arg, unsigned int nro_frame);
 
 void realizar_algoritmo_reemplazo(unsigned int nro_frame, int nro_pagina);
 bool ordenar_por_tiempo_desc_tlb(void *arg1, void *arg2);
+void loggear_resultados(t_columna_tlb *registro, int nro_frame, int nro_pagina);
 
-void setear_algoritmo_reemplazo_tlb();
+        void setear_algoritmo_reemplazo_tlb();
 #endif //CPU_TLB_H

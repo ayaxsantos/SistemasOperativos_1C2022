@@ -108,11 +108,10 @@ bool buscar_por_numero_marco(void *arg, unsigned int nro_frame) {
 }
 
 void realizar_algoritmo_reemplazo(unsigned int nro_frame, int nro_pagina) {
-    log_info(logger_cpu,"Realizando algoritmo de reemplazo de entrada en TLB");
     t_list *registros_candidatos;
     registros_candidatos = list_sorted(tlb, ordenar_por_tiempo_desc_tlb);
     t_columna_tlb *registro = list_get(registros_candidatos, 0);
-    //loggear_resultados(registro, nro_frame, nro_pagina, pid);
+    loggear_resultados(registro, (int)nro_frame, nro_pagina);
     registro->nro_marco = nro_frame;
     registro->pagina = nro_pagina;
     long tiempo;
@@ -138,4 +137,9 @@ void setear_algoritmo_reemplazo_tlb() {
     else {
         log_error(logger_cpu,"No se pudo setear el algoritmo de TLB. Error en el archivo config.");
     }
+}
+
+void loggear_resultados(t_columna_tlb *registro, int nro_frame, int nro_pagina) {
+    log_info(logger_cpu, "Entrada victima: %d  Numero de Pagina: %d  Marco: %d", registro->entrada, registro->pagina, registro->nro_marco);
+    log_info(logger_cpu, "Nueva entrada -> Numero de Pagina: %d  Marco: %d", nro_pagina, nro_frame);
 }
