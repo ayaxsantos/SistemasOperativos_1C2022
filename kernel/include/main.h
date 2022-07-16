@@ -75,7 +75,7 @@ sem_t hay_procesos_en_ready;
 sem_t hay_procesos_en_blocked;
 sem_t hay_que_ordenar_cola_ready;
 sem_t hay_proceso_ejecutando;
-sem_t puedo_liberar_proceso;
+sem_t se_produjo_desalojo;
 
 pthread_t *hilo_corto_plazo;
 pthread_t *hilo_largo_plazo;

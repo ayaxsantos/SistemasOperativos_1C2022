@@ -134,6 +134,7 @@ void *rutina_monitoreo_desalojo(void *args)
                 pthread_mutex_unlock(&mutex_log);
 
                 solicitar_desalojo_a_cpu();
+                sem_wait(&se_produjo_desalojo);
             }
         }
         pthread_mutex_unlock(&mutex_procesos_en_ready);
@@ -287,6 +288,7 @@ void devolver_proceso_a_ready(t_proceso *un_proceso)
     pthread_mutex_lock(&mutex_procesos_en_ready);
 
     proceso_en_exec = NULL;
+    sem_post(&se_produjo_desalojo);
 
     if(proceso_en_exec != NULL)
         sem_post(&hay_que_ordenar_cola_ready);
@@ -325,6 +327,7 @@ void organizacionPlani()
     list_sort(procesos_en_ready, comparador_procesos_SJF);
 
     //todo todo esto se va no?
+    //SI, es solo para probar xd
     void mostrar_procesos_en_ready_inner(void *un_proceso)
     {
         mostrar_procesos_en_ready((t_proceso*)un_proceso);
