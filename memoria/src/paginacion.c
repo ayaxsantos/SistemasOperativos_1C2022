@@ -40,8 +40,7 @@ void crear_tablas_segundo_nivel(t_tabla_pagina *tabla_principal){
 		log_error(logger_memoria, "El proceso que se intenta cargar en memoria es demasiado grande para la configuracion ingresada");
 		pthread_mutex_unlock(&mutex_logger);
 	}
-    
-    free(nro_pag);
+
 }
 
 int agregar_pag_a_tabla_1n(t_tabla_pagina *tabla_proceso, char *nro_pag){

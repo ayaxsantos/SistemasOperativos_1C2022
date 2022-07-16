@@ -102,6 +102,7 @@ void *algoritmo_sjf_con_desalojo(void *args)
 
         //gestionar_pcb_para_probar_sin_cpu();
         gestionar_pcb();
+        free(un_proceso_pcb);
     }
 }
 
