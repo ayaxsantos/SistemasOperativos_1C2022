@@ -101,6 +101,7 @@ void responder_handshake(int *socket,modulo modulo_actual)
     memcpy(buffer, &handshake, sizeof(int));
     memcpy(buffer + sizeof(int), &modulo_actual, sizeof(int));
     send(*socket, buffer, sizeof(int)*2, 0);
+    free(buffer);
 }
 
 void gestionar_primera_solicitud() {

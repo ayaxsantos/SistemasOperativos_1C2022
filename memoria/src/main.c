@@ -19,6 +19,7 @@ void arrancar_logger() {
 	if(logger_memoria ==  NULL)
 	{
 		write(0,"ERROR -> No se pudo crear el log \n",30);
+        free(logger_memoria);
 		exit(EXIT_FAILURE);
 	}
 

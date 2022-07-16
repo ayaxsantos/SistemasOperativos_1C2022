@@ -15,7 +15,7 @@ void crear_archivo(int id, int id_tabla_1n, int tamanio_proceso){
 
 	char *nombre_archivo = string_new();
 		string_append(&nombre_archivo,"/proceso_");
-		string_append(&nombre_archivo, string_itoa(id));
+		string_append(&nombre_archivo, id_s);
 		string_append(&nombre_archivo,".swap");
 
 	t_fcb *fcb_aux = malloc(sizeof(t_fcb));
@@ -38,12 +38,13 @@ void crear_archivo(int id, int id_tabla_1n, int tamanio_proceso){
 		if (cerrado != 0){ log_error(logger_memoria,"No se pudo cerrar el archivo."); }
 
 		list_add(swap.particiones, particion);
-        log_info(logger_memoria,"El archivo swap del proceso %d se realizó con éxito.", id);
+        log_info(logger_memoria,"El archivo swap del proceso %d se creó con éxito.", id);
 	}
 	else {
         log_error(logger_memoria,"No se pudo crear el archivo.");
 	}
 
+	free(id_s);
 	free(nombre_archivo);
 }
 
@@ -64,13 +65,14 @@ t_list* formatear_pags_en_archivo(int tamanio_proceso){
 
 void destruir_archivo(int id){
 	t_particion *particion = encontrar_particion_de(id);
-
+	
 	if(particion != NULL){
 		for (int i = 0; i < list_size(particion->fcb->pags_en_archivo); i++){
 			liberar_pagina_swap(i, particion);
 		}
 		list_destroy(particion->fcb->pags_en_archivo);
         remove(particion->fcb->path_archivo);
+		free(particion->fcb->path_archivo);
 		free(particion->fcb);
 	}
 	else{
