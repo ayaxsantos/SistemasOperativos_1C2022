@@ -11,7 +11,7 @@ void inicializar_plani_corto_plazo()
     {
         lanzar_hilo_plani_corto_plazo_con(algoritmo_fifo);
     }
-    else if(strcmp("SJF",una_config_kernel.algoritmo_planificacion) == 0)
+    else if(strcmp("SRT",una_config_kernel.algoritmo_planificacion) == 0)
     {
         lanzar_hilo_plani_corto_plazo_con(algoritmo_sjf_con_desalojo);
     }
@@ -114,11 +114,6 @@ void *rutina_monitoreo_desalojo(void *args)
     {
         sem_wait(&hay_que_ordenar_cola_ready);
 
-        pthread_mutex_lock(&mutex_log);
-        log_warning(un_logger,"he pasado por aqui  = %d",i);
-        pthread_mutex_unlock(&mutex_log);
-        i++;
-
         //Tomamos le tiempo final, este se ira actualizando
         organizacionPlani();
 
@@ -141,8 +136,6 @@ void *rutina_monitoreo_desalojo(void *args)
             }
         }
         pthread_mutex_unlock(&mutex_procesos_en_ready);
-        //Volvemos a tomar el tiempo inicial, lo medido anteriormente se guardo (OJO ESTO)
-        //time(&tiempoI);
     }
 }
 
@@ -173,7 +166,6 @@ bool hay_que_desalojar(t_proceso *proceso_candidato)
 
 double calcular_tiempo_ejecutando()
 {
-    //time(tiempoF);
     double tiempo_transcurrido_exec = difftime(tiempoF,tiempoI);
     return round(tiempo_transcurrido_exec);
 }
@@ -215,8 +207,9 @@ void gestionar_pcb()
     switch(un_codigo)
     {
         case PCB:
+            //todo este logger se podria eliminar o no?
             pthread_mutex_lock(&mutex_log);
-            log_info(un_logger,"Volvio un PCB desaloja3!!");
+            log_info(un_logger,"Volvio un PCB desaloja!!");
             pthread_mutex_unlock(&mutex_log);
 
             pthread_mutex_lock(&mutex_socket_dispatch);
@@ -315,6 +308,7 @@ void organizacionPlani()
     }
     list_sort(procesos_en_ready, comparador_procesos_SJF);
 
+    //todo todo esto se va no?
     void mostrar_procesos_en_ready_inner(void *un_proceso)
     {
         mostrar_procesos_en_ready((t_proceso*)un_proceso);
