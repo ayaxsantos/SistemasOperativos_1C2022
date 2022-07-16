@@ -84,7 +84,7 @@ t_frame *realizar_segundo_paso(t_tabla_pagina *tabla_1n, t_col_pagina *registro,
 
 			return frame_a_asignar;
 		} else {
-			frame_a_asignar->usado = true;
+			frame_a_asignar->usado = false;
 			incrementar_puntero(tabla_1n);
 		}
 	}

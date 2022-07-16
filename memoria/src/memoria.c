@@ -73,8 +73,8 @@ void suspender_proceso(int socket_cliente) {
 
 	pthread_mutex_lock(&mutex_lista_tablas_paginas);
 	t_tabla_pagina* tabla_1n = list_get(tablas_primer_nivel, id_tabla_1n);
+    pthread_mutex_unlock(&mutex_lista_tablas_paginas);
     swapear_proceso(tabla_1n);
-	pthread_mutex_unlock(&mutex_lista_tablas_paginas);
 
 	t_operacion *operacion = crear_operacion(SUSPENSION_PROCESO);
 	setear_operacion(operacion,&id_tabla_1n);
