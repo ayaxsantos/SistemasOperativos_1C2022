@@ -70,7 +70,7 @@ void *algoritmo_sjf_con_desalojo(void *args)
     pthread_t *hilo_monitoreo_tiempos = malloc(sizeof(pthread_t));
 
     //Para el primer orden, asi sabemos cual tenemos que mandar a ejecutar!!
-    sem_wait(&hay_que_ordenar_cola_ready); //semaforo que avisa que hay procesos en ready para el monitoreo de desalojo
+    //sem_wait(&hay_que_ordenar_cola_ready); //semaforo que avisa que hay procesos en ready para el monitoreo de desalojo
 
     pthread_create(hilo_monitoreo_tiempos, NULL, rutina_monitoreo_desalojo, NULL);
     pthread_detach(*hilo_monitoreo_tiempos);
@@ -82,6 +82,7 @@ void *algoritmo_sjf_con_desalojo(void *args)
         //Tomar el primer elemento de la lista
         pthread_mutex_lock(&mutex_procesos_en_ready);
         proceso_en_exec = list_remove(procesos_en_ready, 0);
+        //sem_post(&hay_proceso_ejecutando);
         pthread_mutex_unlock( &mutex_procesos_en_ready);
 
         proceso_en_exec->un_pcb->un_estado = EXEC;
@@ -111,6 +112,7 @@ void *rutina_monitoreo_desalojo(void *args)
     t_proceso *proceso_candidato;
     while(true)
     {
+        //sem_wait(&hay_proceso_ejecutando);
         sem_wait(&hay_que_ordenar_cola_ready);
 
         //Tomamos le tiempo final, este se ira actualizando
@@ -286,7 +288,10 @@ void devolver_proceso_a_ready(t_proceso *un_proceso)
 
     proceso_en_exec = NULL;
 
-    sem_post(&hay_que_ordenar_cola_ready);
+    if(proceso_en_exec != NULL)
+        sem_post(&hay_que_ordenar_cola_ready);
+
+    //sem_post(&hay_que_ordenar_cola_ready);
     sem_post(&hay_procesos_en_ready);
 }
 

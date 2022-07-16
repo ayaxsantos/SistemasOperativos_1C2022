@@ -74,7 +74,10 @@ void transicionar_proceso_a_ready(t_proceso *un_proceso)
     log_info(un_logger,"Se pasa proceso a READY -> PID = %u",un_proceso->un_pcb->pid);
     pthread_mutex_unlock(&mutex_log);
 
-    sem_post(&hay_que_ordenar_cola_ready);
+    if(proceso_en_exec != NULL)
+        sem_post(&hay_que_ordenar_cola_ready);
+
+    //sem_post(&hay_que_ordenar_cola_ready);
     sem_post(&hay_procesos_en_ready);
 }
 

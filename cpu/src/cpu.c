@@ -79,11 +79,7 @@ void *ciclo_de_instruccion(void *arg) {
     int valor_sem = 0;
     while (true) {
         sem_wait(&sem_ciclo_de_instruccion);
-        sem_getvalue(&sem_ciclo_de_instruccion,&valor_sem);
-
-        pthread_mutex_lock(&mutex_logger);
-        log_info(logger_cpu,"SemVal: %d",valor_sem);
-        pthread_mutex_unlock(&mutex_logger);
+        //sem_getvalue(&sem_ciclo_de_instruccion,&valor_sem);
 
         pthread_mutex_lock(&mutex_logger);
         log_info(logger_cpu,"Iniciando ciclo de instruccion");
@@ -170,7 +166,7 @@ void ejecutar_instruccion(t_instruccion *instruccion, uint32_t valor_a_copiar) {
            break;
 
         case COPY:
-            log_info(logger_cpu,"CPU ejecutando COPY en la direccion: %d con el valor de la direccion %d: ", instruccion->parametro1, instruccion->parametro2);
+            log_info(logger_cpu,"CPU ejecutando COPY en la direccion: %d con el valor de la direccion %d ", instruccion->parametro1, instruccion->parametro2);
         	escribir_dato_memoria(instruccion->parametro1, valor_a_copiar);
         	chequear_si_hay_interrupcion();
            break;

@@ -1,7 +1,7 @@
 #include "../include/swap_controlador.h"
 
 void realizar_page_fault(int32_t id_tabla_1n, int nro_pagina, void *a_leer) {
-    log_info(logger_memoria,"Realizando PAGE FAULT tabla primer nivel: %d, pagina nro: %d", id_tabla_1n, nro_pagina);
+    log_info(logger_memoria,"Realizando PAGE FAULT, id tabla primer nivel: %d, pagina nro: %d", id_tabla_1n, nro_pagina);
     usleep(config_memoria.retardo_swap*1000);
     t_particion* particion = encontrar_particion_de(id_tabla_1n);
 
@@ -48,7 +48,7 @@ void realizar_page_fault(int32_t id_tabla_1n, int nro_pagina, void *a_leer) {
 }
 
 void escribir_pagina_en_swap(int32_t id_tabla_1n, int nro_pagina, void *a_escribir){
-    log_info(logger_memoria,"Realizando PAGE WRITE tabla primer nivel: %d, pagina nro: %d", id_tabla_1n, nro_pagina);
+    log_info(logger_memoria,"Realizando PAGE WRITE, id tabla primer nivel: %d, pagina nro: %d", id_tabla_1n, nro_pagina);
     usleep(config_memoria.retardo_swap*1000);
     t_particion* particion = encontrar_particion_de(id_tabla_1n);
 
@@ -67,10 +67,6 @@ void escribir_pagina_en_swap(int32_t id_tabla_1n, int nro_pagina, void *a_escrib
 	else{
 		log_warning(logger_memoria,"El proceso alcanzó el máximo número de páginas que puede pedir.");
 	}
-
-    t_pagina_swap * log_pag = list_get(particion->fcb->pags_en_archivo,nro_pag_en_swap);
-    log_info(logger_memoria,"El frame asignado es el nro %d", log_pag->id_memoria);
-
     int inicio_pag = nro_pag_en_swap * config_memoria.tamanio_pagina;
     int file;
     int mode = 0x0777;

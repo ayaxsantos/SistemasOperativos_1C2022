@@ -6,21 +6,12 @@ void *gestionar_conexion_kernel(void *arg) {
 		int cod_op = recibir_operacion(socket_cliente);
 		switch (cod_op) {
             case INICIO_PROCESO:
-                pthread_mutex_lock(&mutex_logger);
-                log_info(logger_memoria,"Llego un INICIO_PROCESO");
-                pthread_mutex_unlock(&mutex_logger);
                 iniciar_proceso(socket_cliente);
                 break;
             case FIN_PROCESO_MEMORIA:
-                pthread_mutex_lock(&mutex_logger);
-                log_info(logger_memoria,"Llego un FIN_PROCESO");
-                pthread_mutex_unlock(&mutex_logger);
                 terminar_proceso(socket_cliente);
                 break;
             case SUSPENSION_PROCESO:
-				pthread_mutex_lock(&mutex_logger);
-				log_info(logger_memoria,"Llego un SUSPENSION_PROCESO");
-				pthread_mutex_unlock(&mutex_logger);
 				suspender_proceso(socket_cliente);
 				break;
             case -1:
