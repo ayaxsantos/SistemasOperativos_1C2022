@@ -107,7 +107,7 @@ sem_t sem_algoritmo;
 
 ////////////////////////////////////////////////
 
-void leer_configuracion();
+void leer_configuracion(char *);
 void arrancar_logger();
 void setear_estructuras_de_memoria();
 void iniciar_particionamiento_en_frames();

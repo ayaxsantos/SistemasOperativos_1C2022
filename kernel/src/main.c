@@ -2,10 +2,15 @@
 
 /////////////////////////////////////////////////
 
-int main(void)
+int main(int argc, char *argv[])
 {
+    if(argc < 1) {
+        printf("Faltan parameters\n");
+        return EXIT_FAILURE;
+    }
+    char *path = strdup(argv[1]);
     iniciar_logger();
-    iniciar_config();
+    iniciar_config(path);
     iniciar_semaforos();
     iniciar_mutex();
     iniciar_estructuras();
@@ -43,9 +48,9 @@ void iniciar_logger()
     log_info(un_logger,"---------------- Log modulo KERNEL ----------------");
 }
 
-void iniciar_config()
+void iniciar_config(char *path_config)
 {
-    una_config = config_create("kernel.config");
+    una_config = config_create(path_config);
 
     una_config_kernel.ip_memoria = config_get_string_value(una_config,"IP_MEMORIA");
     una_config_kernel.puerto_memoria = config_get_string_value(una_config,"PUERTO_MEMORIA");

@@ -1,9 +1,13 @@
 #include "../include/main.h"
 
-int main() {   
-
+int main(int argc, char *argv[]) {
+    if(argc < 1) {
+        printf("Faltan parameters\n");
+        return EXIT_FAILURE;
+    }
+    char *path = strdup(argv[1]);
     arrancar_logger();
-    leer_configuracion();
+    leer_configuracion(path);
     iniciar_semaforos();
     iniciar();
     return EXIT_SUCCESS;
@@ -25,10 +29,10 @@ void arrancar_logger() {
 	log_info(logger_cpu,"--------- Log modulo CPU ---------");
 }
 
-void leer_configuracion() {   
+void leer_configuracion(char *path_config) {
     t_config *un_config;
 
-    un_config = config_create("./cpu.config");
+    un_config = config_create(path_config);
     
     config_cpu.ip_memoria = strdup(config_get_string_value(un_config,"IP_MEMORIA"));
     config_cpu.puerto_memoria = strdup(config_get_string_value(un_config,"PUERTO_MEMORIA"));

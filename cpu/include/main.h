@@ -70,7 +70,7 @@ pthread_mutex_t mutex_logger;
 pthread_mutex_t mutex_flag_interrupcion;
 ////////////////////////////////////////////////////////////
 
-void leer_configuracion();
+void leer_configuracion(char *);
 void arrancar_logger();
 void conectar_a_memoria_y_recibir_config();
 void obtener_configuracion(int *socket, modulo modulo);

@@ -88,7 +88,7 @@ unsigned int contador_pid;
 ///////////////////////////////////////////
 
 void iniciar_logger();
-void iniciar_config();
+void iniciar_config(char *);
 void iniciar_semaforos();
 void iniciar_mutex();
 void iniciar_hilos();
