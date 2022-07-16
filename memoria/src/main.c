@@ -74,6 +74,7 @@ void setear_estructuras_de_memoria() {
 		memoria_principal->memoria = malloc(config_memoria.tamanio_memoria);
 		memoria_principal->tamanio_frame = config_memoria.tamanio_pagina;
 		memoria_principal->cantidad_frames = config_memoria.tamanio_memoria / config_memoria.tamanio_pagina;
+        memoria_principal->frames = list_create();
     
         iniciar_particionamiento_en_frames();
         setear_algoritmo_reemplazo();
@@ -85,14 +86,16 @@ void setear_estructuras_de_memoria() {
 
 void iniciar_particionamiento_en_frames() {
     int i, desplazamiento = 0;
-    memoria_principal->frames = list_create();
     t_frame *frame = NULL;
+
     for(i=0; i<memoria_principal->cantidad_frames; i++) {
         frame = malloc(sizeof(t_frame));
         frame->base = memoria_principal->memoria + desplazamiento;
         frame->is_free = true;
         frame->nro_frame = i;
+
         list_add(memoria_principal->frames, frame);
+
         desplazamiento+= memoria_principal->tamanio_frame;
     }
 }
@@ -118,7 +121,7 @@ void setear_algoritmo_reemplazo() {
 }
 
 void finalizar_memoria() {
-    // list_destroy_and_destroy_elements(tablas_paginas, eliminar_paginas);
+    list_destroy_and_destroy_elements(tablas_primer_nivel, eliminar_tabla);
     liberar_configuracion_y_log();
     liberar_memoria();
     exit(EXIT_SUCCESS);
@@ -135,6 +138,11 @@ void liberar_memoria() {
     list_destroy_and_destroy_elements(memoria_principal->frames, eliminar_frame);
     free(memoria_principal->memoria);
     free(memoria_principal);
+}
+
+void eliminar_tabla(void *arg) {
+    t_tabla_pagina *tabla = (t_tabla_pagina *)arg;
+    free(tabla);
 }
 
 void eliminar_frame(void *arg) {

@@ -50,7 +50,7 @@ void crear_archivo(int id, int id_tabla_1n ,int tamanio_proceso);
 t_list* formatear_pags_en_archivo(int tamanio_proceso);
 
 void destruir_archivo(int id_tabla);
-void liberar_pagina(int nro_pag_swap, t_particion* particion);
+void liberar_pagina_swap(int nro_pag_swap, t_particion* particion);
 
 #include "swap_controlador.h"
 

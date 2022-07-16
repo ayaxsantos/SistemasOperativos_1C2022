@@ -31,7 +31,8 @@ int calcular_nro_pagina(int32_t entrada_tabla_1n, int32_t entrada_tabla_2n);
 void incrementar_puntero(t_tabla_pagina *tabla_1n);
 
 /* ---------- Cierre ---------- */
-void liberar_todas_las_paginas_del_proceso(t_tabla_pagina* tabla_proceso);
+void liberar_tabla_principal(t_tabla_pagina* tabla_principal);
+void liberar_tablas_2n(t_dictionary* tabla_principal);
 void eliminar_columna_tabla(void *arg);
 
 #endif /* PAGINACION_H_INCLUDED */

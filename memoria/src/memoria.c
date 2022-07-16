@@ -45,7 +45,7 @@ void terminar_proceso(int socket_cliente) {
 	uint32_t id_tabla = recibir_entero(socket_cliente);
 	t_tabla_pagina* tabla_1n = list_get(tablas_primer_nivel, (int)id_tabla);
 
-	liberar_todas_las_paginas_del_proceso(tabla_1n);
+	liberar_tabla_principal(tabla_1n);
 
 	t_operacion *operacion = crear_operacion(FIN_PROCESO_MEMORIA);
 	setear_operacion(operacion,&id_tabla);

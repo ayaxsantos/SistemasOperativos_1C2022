@@ -116,6 +116,7 @@ void iniciar_semaforos();
 
 void finalizar_memoria();
 void eliminar_frame(void *arg);
+void eliminar_tabla(void *arg);
 void liberar_memoria();
 void liberar_configuracion_y_log();
 

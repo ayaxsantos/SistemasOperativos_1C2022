@@ -43,6 +43,7 @@ void realizar_page_fault(int32_t id_tabla_1n, int nro_pagina, void *a_leer) {
                 int cerrado = close (particion->archivo);
                 if (cerrado != 0){ log_error(logger_memoria,"No se pudo cerrar el archivo."); }
             }
+            free(a_leer);
             return;
         }
         log_warning(logger_memoria,"PF: El proceso no tiene la pagina pedida en swap.");
@@ -108,9 +109,12 @@ void escribir_pagina_en_swap(int32_t id_tabla_1n, int nro_pagina, void *a_escrib
 void swapear_proceso(t_tabla_pagina *tabla_1n){
     int nro_pagina;
     for (int i = 0; i < dictionary_size(tabla_1n->tabla); ++i) {
-        t_tabla_pagina *tabla_2n = dictionary_get(tabla_1n->tabla, string_itoa(i));
+        char *i_s = string_itoa(i);
+        t_tabla_pagina *tabla_2n = dictionary_get(tabla_1n->tabla, i_s);
         for (int j = 0; j < dictionary_size(tabla_2n->tabla); ++j) {
-            t_col_pagina *registro_pagina = dictionary_get(tabla_2n->tabla, string_itoa(j));
+            char* j_s = string_itoa(j);
+            t_col_pagina *registro_pagina = dictionary_get(tabla_2n->tabla, j_s);
+            free(j_s);
             if(registro_pagina->presencia){
                 registro_pagina->presencia = false;
                 t_frame *frame = list_get(memoria_principal->frames,registro_pagina->nro_frame);
