@@ -25,6 +25,7 @@ void gestionar_pcb();
 //////////////////////////////////////
 
 bool hay_que_desalojar(t_proceso *);
+bool no_hay_procesos_en_ready();
 void solicitar_desalojo_a_cpu();
 double calcular_tiempo_ejecutando();
 void *rutina_monitoreo_desalojo(void *);

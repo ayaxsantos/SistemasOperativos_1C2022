@@ -99,7 +99,7 @@ void finalizar_proceso_ejecutando()
     else {
         int id_tabla_1n = recibir_entero(proceso_en_exec->mi_socket_memoria);
         pthread_mutex_lock(&mutex_log);
-        log_info(un_logger,"Se finaliza el proceso con PID = %u con ID tabla = %d",proceso_en_exec->un_pcb->pid, id_tabla_1n);
+        log_warning(un_logger,"Se finaliza el proceso con PID = %u con ID tabla = %d",proceso_en_exec->un_pcb->pid, id_tabla_1n);
         pthread_mutex_unlock(&mutex_log);
     }
 

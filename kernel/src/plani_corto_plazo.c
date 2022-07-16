@@ -118,10 +118,11 @@ void *rutina_monitoreo_desalojo(void *args)
         //Tomamos le tiempo final, este se ira actualizando
         organizacionPlani();
 
-        pthread_mutex_lock(&mutex_procesos_en_ready);
-        if(!list_is_empty(procesos_en_ready))
+        if(no_hay_procesos_en_ready())
         {
+            pthread_mutex_lock(&mutex_procesos_en_ready);
             proceso_candidato = list_get(procesos_en_ready,0);
+            pthread_mutex_unlock(&mutex_procesos_en_ready);
             time(&tiempoF);
 
             if(proceso_en_exec != NULL && hay_que_desalojar(proceso_candidato))
@@ -137,8 +138,33 @@ void *rutina_monitoreo_desalojo(void *args)
                 sem_wait(&se_produjo_desalojo);
             }
         }
-        pthread_mutex_unlock(&mutex_procesos_en_ready);
     }
+}
+
+bool no_hay_procesos_en_ready()
+{
+    pthread_mutex_lock(&mutex_procesos_en_ready);
+    bool una_condicion = !list_is_empty(procesos_en_ready);
+    pthread_mutex_unlock(&mutex_procesos_en_ready);
+
+    return una_condicion;
+}
+
+void devolver_proceso_a_ready(t_proceso *un_proceso)
+{
+    pthread_mutex_lock(&mutex_log);
+    log_info(un_logger,"Se desaloja al proceso con PID: %u",un_proceso->un_pcb->pid);
+    pthread_mutex_unlock(&mutex_log);
+
+    pthread_mutex_lock(&mutex_procesos_en_ready);
+    list_add(procesos_en_ready,un_proceso);
+    pthread_mutex_unlock(&mutex_procesos_en_ready);
+
+    organizacionPlani();
+
+    proceso_en_exec = NULL;
+    sem_post(&se_produjo_desalojo);
+    sem_post(&hay_procesos_en_ready);
 }
 
 void solicitar_desalojo_a_cpu()
@@ -274,27 +300,6 @@ void gestionar_pcb()
             pthread_mutex_unlock(&mutex_log);
             break;
     }
-}
-
-void devolver_proceso_a_ready(t_proceso *un_proceso)
-{
-    pthread_mutex_lock(&mutex_log);
-    log_info(un_logger,"Se desaloja al proceso con PID: %u",un_proceso->un_pcb->pid);
-    pthread_mutex_unlock(&mutex_log);
-
-
-    //pthread_mutex_lock(&mutex_procesos_en_ready);
-    list_add(procesos_en_ready,un_proceso);
-    //pthread_mutex_unlock(&mutex_procesos_en_ready);
-
-    proceso_en_exec = NULL;
-    sem_post(&se_produjo_desalojo);
-
-    //if(proceso_en_exec != NULL)
-    //    sem_post(&hay_que_ordenar_cola_ready);
-
-    //sem_post(&hay_que_ordenar_cola_ready);
-    sem_post(&hay_procesos_en_ready);
 }
 
 /////////////////////////////////////////////////
