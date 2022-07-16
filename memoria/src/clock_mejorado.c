@@ -19,14 +19,18 @@ t_frame *realizar_primer_paso(t_tabla_pagina *tabla_1n, t_col_pagina *registro, 
 							  int32_t entrada_tabla_1n, int32_t entrada_tabla_2n) {
 	t_frame *frame_a_asignar = NULL;
 	t_frame_asignado *posible_frame_a_reemplazar;
+    char *entrada_tabla_1n_s;
+    char *entrada_tabla_2n_s;
 
 	for(int i = 0; i <= config_memoria.marcos_por_proceso - 1 ; i++) {
 		posible_frame_a_reemplazar = (t_frame_asignado*)list_get(tabla_1n->frames_asignados, tabla_1n->puntero);
 		frame_a_asignar = (t_frame*)list_get(memoria_principal->frames, posible_frame_a_reemplazar->nro_frame);
 
 		if(!frame_a_asignar->usado && !frame_a_asignar->modificado) {
-			t_tabla_pagina *tabla_2n_pagina_victima = (t_tabla_pagina*)dictionary_get(tabla_1n->tabla, string_itoa(posible_frame_a_reemplazar->entrada_tabla_1n));
-			t_col_pagina *registro_pagina_victima = (t_col_pagina*)dictionary_get(tabla_2n_pagina_victima->tabla, string_itoa(posible_frame_a_reemplazar->entrada_tabla_2n));
+            entrada_tabla_1n_s = string_itoa(posible_frame_a_reemplazar->entrada_tabla_1n);
+            entrada_tabla_2n_s = string_itoa(posible_frame_a_reemplazar->entrada_tabla_2n);
+			t_tabla_pagina *tabla_2n_pagina_victima = (t_tabla_pagina*)dictionary_get(tabla_1n->tabla, entrada_tabla_1n_s);
+			t_col_pagina *registro_pagina_victima = (t_col_pagina*)dictionary_get(tabla_2n_pagina_victima->tabla, entrada_tabla_2n_s);
 
             realizar_page_fault(tabla_1n->id_tabla, calcular_nro_pagina(entrada_tabla_1n, entrada_tabla_2n),
             					frame_a_asignar->base);
@@ -43,6 +47,9 @@ t_frame *realizar_primer_paso(t_tabla_pagina *tabla_1n, t_col_pagina *registro, 
 
 			incrementar_puntero(tabla_1n);
 
+            free(entrada_tabla_1n_s);
+            free(entrada_tabla_2n_s);
+
 			return frame_a_asignar;
 		} else {
 			incrementar_puntero(tabla_1n);
@@ -55,14 +62,18 @@ t_frame *realizar_segundo_paso(t_tabla_pagina *tabla_1n, t_col_pagina *registro,
 							  int32_t entrada_tabla_1n, int32_t entrada_tabla_2n) {
 	t_frame *frame_a_asignar = NULL;
 	t_frame_asignado *posible_frame_a_reemplazar;
+    char *entrada_tabla_1n_s;
+    char *entrada_tabla_2n_s;
 
-	for(int i = 0; i <= config_memoria.marcos_por_proceso  - 1 ; i++) {
+    for(int i = 0; i <= config_memoria.marcos_por_proceso  - 1 ; i++) {
 		posible_frame_a_reemplazar = (t_frame_asignado*)list_get(tabla_1n->frames_asignados, tabla_1n->puntero);
 		frame_a_asignar = (t_frame*)list_get(memoria_principal->frames, posible_frame_a_reemplazar->nro_frame);
 
 		if(!frame_a_asignar->usado && frame_a_asignar->modificado) {
-			t_tabla_pagina *tabla_2n_pagina_victima = (t_tabla_pagina*)dictionary_get(tabla_1n->tabla, string_itoa(posible_frame_a_reemplazar->entrada_tabla_1n));
-			t_col_pagina *registro_pagina_victima = (t_col_pagina*)dictionary_get(tabla_2n_pagina_victima->tabla, string_itoa(posible_frame_a_reemplazar->entrada_tabla_2n));
+            entrada_tabla_1n_s = string_itoa(posible_frame_a_reemplazar->entrada_tabla_1n);
+            entrada_tabla_2n_s = string_itoa(posible_frame_a_reemplazar->entrada_tabla_2n);
+			t_tabla_pagina *tabla_2n_pagina_victima = (t_tabla_pagina*)dictionary_get(tabla_1n->tabla, entrada_tabla_1n_s);
+			t_col_pagina *registro_pagina_victima = (t_col_pagina*)dictionary_get(tabla_2n_pagina_victima->tabla, entrada_tabla_2n_s);
 
 			escribir_pagina_en_swap(tabla_1n->id_tabla, calcular_nro_pagina(posible_frame_a_reemplazar->entrada_tabla_1n,
 			                         posible_frame_a_reemplazar->entrada_tabla_2n), frame_a_asignar->base);
@@ -81,6 +92,9 @@ t_frame *realizar_segundo_paso(t_tabla_pagina *tabla_1n, t_col_pagina *registro,
 			frame_a_asignar->usado = true;
 
 			incrementar_puntero(tabla_1n);
+
+            free(entrada_tabla_1n_s);
+            free(entrada_tabla_2n_s);
 
 			return frame_a_asignar;
 		} else {

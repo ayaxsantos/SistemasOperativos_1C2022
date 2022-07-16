@@ -38,10 +38,10 @@ void realizar_page_fault(int32_t id_tabla_1n, int nro_pagina, void *a_leer) {
                 int cod = munmap(ptro_archivo, config_memoria.tamanio_pagina);
                 if (cod != 0){ log_error(logger_memoria,"No se pudo 'desmapear' el archivo."); }
 
-                int cerrado = close (particion->archivo);
+                int cerrado = close (file);
                 if (cerrado != 0){ log_error(logger_memoria,"No se pudo cerrar el archivo."); }
             }
-            free(a_leer);
+            //free(a_leer);
             return;
         }
         log_warning(logger_memoria,"PF: El proceso no tiene la pagina pedida en swap.");
@@ -119,6 +119,7 @@ void swapear_proceso(t_tabla_pagina *tabla_1n){
             }
             registro_pagina->nro_frame = UNDEFINED;
         }
+        free(i_s);
     }
     tabla_1n->fue_suspendido = true;
     list_clean_and_destroy_elements(tabla_1n->frames_asignados, liberar_frame_asignado);

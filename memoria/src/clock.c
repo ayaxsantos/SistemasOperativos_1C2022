@@ -10,6 +10,8 @@ t_frame *realizar_algoritmo_clock(t_tabla_pagina *tabla_1n, t_col_pagina *regist
 
 	t_frame *frame_a_asignar = NULL;
 	t_frame_asignado *posible_frame_a_reemplazar;
+    char *entrada_tabla_1n_s;
+    char *entrada_tabla_2n_s;
 
 	int posicion_actual_puntero;
 
@@ -23,8 +25,10 @@ t_frame *realizar_algoritmo_clock(t_tabla_pagina *tabla_1n, t_col_pagina *regist
 			frame_a_asignar = NULL;
 			incrementar_puntero(tabla_1n);
 		} else { 					// BIT DE USO == 0
-			t_tabla_pagina *tabla_2n_pagina_victima = (t_tabla_pagina*)dictionary_get(tabla_1n->tabla, string_itoa(posible_frame_a_reemplazar->entrada_tabla_1n));
-			t_col_pagina *registro_pagina_victima = (t_col_pagina*)dictionary_get(tabla_2n_pagina_victima->tabla, string_itoa(posible_frame_a_reemplazar->entrada_tabla_2n));
+            entrada_tabla_1n_s = string_itoa(posible_frame_a_reemplazar->entrada_tabla_1n);
+            entrada_tabla_2n_s = string_itoa(posible_frame_a_reemplazar->entrada_tabla_2n);
+			t_tabla_pagina *tabla_2n_pagina_victima = (t_tabla_pagina*)dictionary_get(tabla_1n->tabla, entrada_tabla_1n_s);
+			t_col_pagina *registro_pagina_victima = (t_col_pagina*)dictionary_get(tabla_2n_pagina_victima->tabla, entrada_tabla_2n_s);
 
 			if(frame_a_asignar->modificado) {
                 escribir_pagina_en_swap(tabla_1n->id_tabla,
@@ -47,6 +51,8 @@ t_frame *realizar_algoritmo_clock(t_tabla_pagina *tabla_1n, t_col_pagina *regist
 
 			incrementar_puntero(tabla_1n);
 
+            free(entrada_tabla_1n_s);
+            free(entrada_tabla_2n_s);
 			return frame_a_asignar;
 		}
 	}

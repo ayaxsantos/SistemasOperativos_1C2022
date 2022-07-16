@@ -27,6 +27,7 @@ void crear_tablas_segundo_nivel(t_tabla_pagina *tabla_principal){
 		for (i=0; i < tablas_2n_necesarias.quot; i++){
 			nro_pag = string_itoa(i);
 			agregar_pag_a_tabla_1n(tabla_principal, nro_pag);
+            free(nro_pag);
 		}
 
 		if (tablas_2n_necesarias.rem > 0){
@@ -51,10 +52,10 @@ int agregar_pag_a_tabla_1n(t_tabla_pagina *tabla_proceso, char *nro_pag){
     for (int i=0; i < config_memoria.entradas_por_tabla; i++){
 	    i_s = string_itoa(i);
         agregar_pag_a_tabla_2n(tabla_2n_aux, i_s);
+        free(i_s);
     }
 
     dictionary_put(tabla_proceso->tabla, nro_pag, tabla_2n_aux);
-    free(i_s);
     return 0;
 }
 
@@ -311,9 +312,8 @@ void liberar_tablas_2n(t_dictionary *tabla_principal){
         // list_destroy_and_destroy_elements(tabla_2n->frames_asignados, liberar_frame_asignado);
         dictionary_destroy_and_destroy_elements(tabla_2n->tabla, eliminar_columna_tabla);
         free(tabla_2n);
+        free(entrada_tabla_1n);
     }
-
-    free(entrada_tabla_1n);
 }
 
 void eliminar_columna_tabla(void *arg) {

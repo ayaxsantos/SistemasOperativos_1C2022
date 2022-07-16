@@ -46,6 +46,7 @@ void iniciar_proceso(int socket_cliente) {
     pthread_mutex_lock(&mutex_logger);
     log_info(logger_memoria,"Respondo con el id tabla primer nivel %d del PID: %d", inicio_proceso->id_tabla_1n,inicio_proceso->pid);
     pthread_mutex_unlock(&mutex_logger);
+    free(inicio_proceso);
 }
 
 void terminar_proceso(int socket_cliente) {
