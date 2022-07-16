@@ -100,6 +100,7 @@ void iniciar_hilos()
     hilo_largo_plazo = malloc(sizeof(pthread_t));
     hilo_mediano_plazo = malloc(sizeof(pthread_t));
     hilo_gestor_io = malloc(sizeof(pthread_t));
+    hilo_monitoreo_tiempos = malloc(sizeof(pthread_t));
 }
 
 /////////////////////////////////////////////////
@@ -146,6 +147,7 @@ void liberar_hilos()
     free(hilo_largo_plazo);
     free(hilo_mediano_plazo);
     free(hilo_gestor_io);
+    free(hilo_monitoreo_tiempos);
 }
 
 /////////////////////////////////////////////////

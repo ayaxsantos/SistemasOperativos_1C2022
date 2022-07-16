@@ -67,8 +67,6 @@ void *algoritmo_fifo(void * args)
 
 void *algoritmo_sjf_con_desalojo(void *args)
 {
-    pthread_t *hilo_monitoreo_tiempos = malloc(sizeof(pthread_t));
-
     //Para el primer orden, asi sabemos cual tenemos que mandar a ejecutar!!
     //sem_wait(&hay_que_ordenar_cola_ready); //semaforo que avisa que hay procesos en ready para el monitoreo de desalojo
 
