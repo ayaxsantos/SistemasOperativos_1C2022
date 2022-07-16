@@ -80,9 +80,9 @@ void *ciclo_de_instruccion(void *arg) {
     while (true) {
         sem_wait(&sem_ciclo_de_instruccion);
 
-        pthread_mutex_lock(&mutex_logger);
+        //pthread_mutex_lock(&mutex_logger);
         log_info(logger_cpu,"Iniciando ciclo de instruccion");
-        pthread_mutex_unlock(&mutex_logger);
+        //pthread_mutex_unlock(&mutex_logger);
 
         t_instruccion *instruccion = (t_instruccion *) queue_pop(pcb->consola->instrucciones); // FETCH
 
@@ -109,17 +109,17 @@ void *ciclo_de_instruccion(void *arg) {
 void *ejecutar_interrupcion(void *arg) {
     int cpu_interrupt = iniciar_servidor(config_cpu.ip_cpu, config_cpu.puerto_escucha_interrupt);
     socket_kernel_interrupt = esperar_cliente(cpu_interrupt);
-    pthread_mutex_lock(&mutex_logger);
+    //pthread_mutex_lock(&mutex_logger);
     log_info(logger_cpu,"Puerto de interrupcion conectado");
-    pthread_mutex_unlock(&mutex_logger);
+    //pthread_mutex_unlock(&mutex_logger);
 	while(true) {
 
 		int operacion = recibir_operacion(socket_kernel_interrupt);
 
 		if(operacion == INTERRUPCION) {
-            pthread_mutex_lock(&mutex_logger);
+            //pthread_mutex_lock(&mutex_logger);
             log_info(logger_cpu,"Hubo una interrupcion");
-            pthread_mutex_unlock(&mutex_logger);
+            //pthread_mutex_unlock(&mutex_logger);
             pthread_mutex_lock(&mutex_flag_interrupcion);
             hay_interrupcion =  recibir_interrupcion(socket_kernel_interrupt);
             pthread_mutex_unlock(&mutex_flag_interrupcion);
