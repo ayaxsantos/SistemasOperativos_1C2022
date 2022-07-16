@@ -134,7 +134,7 @@ void inicializar_proceso(t_com_proceso *comunicacion_proceso)
         pthread_mutex_unlock(&mutex_log);
     }
 
-    free(inicio_proceso);
+    //free(inicio_proceso);
     pasar_proceso_a_new(un_proceso);
 }
 
