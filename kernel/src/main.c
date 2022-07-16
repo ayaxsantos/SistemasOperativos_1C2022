@@ -52,6 +52,7 @@ void iniciar_config(char *path_config)
 {
     una_config = config_create(path_config);
 
+    una_config_kernel.ip_kernel = config_get_string_value(una_config,"IP_KERNEL");
     una_config_kernel.ip_memoria = config_get_string_value(una_config,"IP_MEMORIA");
     una_config_kernel.puerto_memoria = config_get_string_value(una_config,"PUERTO_MEMORIA");
     una_config_kernel.ip_cpu = config_get_string_value(una_config,"IP_CPU");

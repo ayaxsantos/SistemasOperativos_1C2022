@@ -13,6 +13,7 @@
 
 typedef struct config_kernel
 {
+    char *ip_kernel;
     char *ip_memoria;
     char *puerto_memoria;
     char *ip_cpu;

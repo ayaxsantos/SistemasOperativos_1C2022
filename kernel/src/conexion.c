@@ -4,7 +4,7 @@
 
 void conexion(void)
 {
-    int socket_kernel_serv = iniciar_servidor("127.0.0.1",una_config_kernel.puerto_escucha);
+    int socket_kernel_serv = iniciar_servidor(una_config_kernel.ip_kernel,una_config_kernel.puerto_escucha);
     log_warning(un_logger, "Inicializando modulo KERNEL ... ");
 
     int socket_proceso = 0;
