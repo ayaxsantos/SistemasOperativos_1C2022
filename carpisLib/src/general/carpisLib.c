@@ -10,6 +10,7 @@ void enviar_handshake(int *socket, modulo modulo_solicitante) {
     memcpy(buffer, &handshake, sizeof(int));
     memcpy(buffer + sizeof(int), &modulo_solicitante, sizeof(int));
     send(*socket, buffer, sizeof(int)*2, 0);
+    free(buffer);
 }
 
 int esperar_handshake(int *socket, void(*mapeador)(int*, modulo)) {

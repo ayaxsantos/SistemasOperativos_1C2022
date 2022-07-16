@@ -108,7 +108,6 @@ void *algoritmo_sjf_con_desalojo(void *args)
 
 void *rutina_monitoreo_desalojo(void *args)
 {
-    int i = 0;
     t_proceso *proceso_candidato;
     while(true)
     {
@@ -216,8 +215,12 @@ void gestionar_pcb()
             un_proceso_pcb = deserializar_proceso_pcb(socket_dispatch);
             pthread_mutex_unlock(&mutex_socket_dispatch);
 
+            free(proceso_en_exec->un_pcb);
+
             proceso_en_exec->un_pcb = un_proceso_pcb->pcb;
             proceso_en_exec->tiempo_bloqueo = un_proceso_pcb->tiempo_bloqueo;
+
+            free(un_proceso_pcb);
 
             // CUANDO SE DESALOJA NO SE VUELVE A ESTIMAR!!
             //proceso_en_exec->un_pcb->una_estimacion = calcular_estimacion(tiempoF,tiempoI,proceso_en_exec);
@@ -233,8 +236,12 @@ void gestionar_pcb()
             t_proceso_pcb *proceso_para_bloquear = deserializar_proceso_pcb(socket_dispatch);
             pthread_mutex_unlock(&mutex_socket_dispatch);
 
+            free(proceso_en_exec->un_pcb);
+
             proceso_en_exec->un_pcb = proceso_para_bloquear->pcb;
             proceso_en_exec->tiempo_bloqueo = proceso_para_bloquear->tiempo_bloqueo;
+
+            free(proceso_para_bloquear);
 
             // Esto solo deberia ejecutarse con SJF, por ahora aqui pues no afecta!!
             proceso_en_exec->un_pcb->una_estimacion = calcular_estimacion(tiempoF,tiempoI,proceso_en_exec);
@@ -249,8 +256,12 @@ void gestionar_pcb()
             un_proceso_pcb = deserializar_proceso_pcb(socket_dispatch);
             pthread_mutex_unlock(&mutex_socket_dispatch);
 
+            free(proceso_en_exec->un_pcb);
+
             proceso_en_exec->un_pcb = un_proceso_pcb->pcb;
             proceso_en_exec->tiempo_bloqueo = un_proceso_pcb->tiempo_bloqueo;
+
+            free(un_proceso_pcb);
 
             finalizar_proceso_ejecutando();
             break;
