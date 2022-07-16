@@ -114,6 +114,9 @@ void iniciar_particionamiento_en_frames();
 void setear_algoritmo_reemplazo();
 void iniciar_semaforos();
 
+void esperar_seniales();
+void signal_handler(int senial);
+
 void finalizar_memoria();
 void eliminar_frame(void *arg);
 void eliminar_tabla(void *arg);

@@ -79,6 +79,7 @@ void setear_estructuras_de_memoria() {
     
         iniciar_particionamiento_en_frames();
         setear_algoritmo_reemplazo();
+        esperar_seniales();
     } else {
     	log_error(logger_memoria,"No se pudo setear las estructuras de memoria."
     			"Error en el archivo config: Es necesario que el tamanio_pagina sea multiplo de tamanio_memoria.");
@@ -119,6 +120,16 @@ void setear_algoritmo_reemplazo() {
     else {
         log_error(logger_memoria,"No se pudo setear el algoritmo de reemplazo. Error en el archivo config.");
     } 
+}
+
+void esperar_seniales(){
+    signal(SIGINT, signal_handler);
+}
+
+void signal_handler(int senial){
+    if(senial == SIGINT){
+        finalizar_memoria();
+    }
 }
 
 void finalizar_memoria() {
