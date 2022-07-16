@@ -179,7 +179,7 @@ bool hay_que_desalojar(t_proceso *proceso_candidato)
     double tiempo_que_lleva = calcular_tiempo_ejecutando() * 1000;
 
     pthread_mutex_lock(&mutex_log);
-    log_error(un_logger,"El tiempo que lleva es: %f",tiempo_que_lleva);
+    log_info(un_logger,"El tiempo que lleva es: %f",tiempo_que_lleva);
     pthread_mutex_unlock(&mutex_log);
 
     double tiempo_total = proceso_en_exec->un_pcb->una_estimacion - tiempo_que_lleva;
@@ -345,7 +345,7 @@ void organizacionPlani()
 void mostrar_procesos_en_ready(t_proceso *un_proceso)
 {
     pthread_mutex_lock(&mutex_log);
-    log_warning(un_logger,"HEL PROZEZO EZ: pid: %d | Eztimazion: %f",
+    log_info(un_logger,"El proceso es: pid: %d | Con estimacion: %f",
                 un_proceso->un_pcb->pid,
                 un_proceso->un_pcb->una_estimacion);
     pthread_mutex_unlock(&mutex_log);
