@@ -10,6 +10,7 @@ void enviar_handshake(int *socket, modulo modulo_solicitante) {
     memcpy(buffer, &handshake, sizeof(int));
     memcpy(buffer + sizeof(int), &modulo_solicitante, sizeof(int));
     send(*socket, buffer, sizeof(int)*2, 0);
+    free(buffer);
 }
 
 int esperar_handshake(int *socket, void(*mapeador)(int*, modulo)) {
@@ -100,6 +101,7 @@ void *serializar_pcb(t_pcb *pcb, int *size_pcb) {
     memcpy(stream + desplazamiento, consola_serializada, size_consola);
     desplazamiento+= size_consola;
     memcpy(stream + desplazamiento, &(pcb->id_tabla_1n), sizeof(int32_t));
+    free(consola_serializada);
     return stream;
 }
 
@@ -142,6 +144,7 @@ void *serializar_instrucciones(t_queue *instrucciones, int *size_cola) {
         desplazamiento+= sizeof(int);
         memcpy(stream + desplazamiento, &(instruccion->parametro2), sizeof(int));
         desplazamiento+= sizeof(int);
+        free(instruccion);
     }
     //*size_cola = desplazamiento;
     return stream;
@@ -212,7 +215,7 @@ t_consola *deserializar_consola(void *buffer) {
     memcpy(&(size_cola), buffer+desplazamiento, sizeof(int));
     desplazamiento+=sizeof(int);
     consola->instrucciones = deserializar_instrucciones(buffer+desplazamiento, size_cola);
-
+    
     return consola;
 }
 

@@ -25,6 +25,9 @@ void iniciar_memoria() {
 
 void iniciar_proceso(int socket_cliente) {
     t_dato_inicio *inicio_proceso = recibir_dato_inicio(socket_cliente);
+    pthread_mutex_lock(&mutex_logger);
+    log_info(logger_memoria,"Llego un INICIO_PROCESO -> PID: %d", inicio_proceso->pid);
+    pthread_mutex_unlock(&mutex_logger);
 	t_tabla_pagina* tabla_principal_del_proceso = crear_tabla_principal((int )inicio_proceso->tamanio_proceso);
 
 	pthread_mutex_lock(&mutex_lista_tablas_paginas);
@@ -39,10 +42,17 @@ void iniciar_proceso(int socket_cliente) {
 	eliminar_operacion(operacion);
 
 	crear_archivo((int)inicio_proceso->pid, inicio_proceso->id_tabla_1n,inicio_proceso->tamanio_proceso);
+
+    pthread_mutex_lock(&mutex_logger);
+    log_info(logger_memoria,"Respondo con el id tabla primer nivel %d del PID: %d", inicio_proceso->id_tabla_1n,inicio_proceso->pid);
+    pthread_mutex_unlock(&mutex_logger);
 }
 
 void terminar_proceso(int socket_cliente) {
 	uint32_t id_tabla = recibir_entero(socket_cliente);
+    pthread_mutex_lock(&mutex_logger);
+    log_info(logger_memoria,"Llego un FIN_PROCESO para el proceso con id tabla primer nivel %d", id_tabla);
+    pthread_mutex_unlock(&mutex_logger);
 	t_tabla_pagina* tabla_1n = list_get(tablas_primer_nivel, (int)id_tabla);
 
 	liberar_tabla_principal(tabla_1n);
@@ -57,11 +67,14 @@ void terminar_proceso(int socket_cliente) {
 
 void suspender_proceso(int socket_cliente) {
 	int32_t id_tabla_1n = (int32_t)recibir_entero(socket_cliente);
+    pthread_mutex_lock(&mutex_logger);
+    log_info(logger_memoria,"Llego un SUSPENSION_PROCESO para el proceso con id tabla primer nivel %d", id_tabla_1n);
+    pthread_mutex_unlock(&mutex_logger);
 
 	pthread_mutex_lock(&mutex_lista_tablas_paginas);
 	t_tabla_pagina* tabla_1n = list_get(tablas_primer_nivel, id_tabla_1n);
+    pthread_mutex_unlock(&mutex_lista_tablas_paginas);
     swapear_proceso(tabla_1n);
-	pthread_mutex_unlock(&mutex_lista_tablas_paginas);
 
 	t_operacion *operacion = crear_operacion(SUSPENSION_PROCESO);
 	setear_operacion(operacion,&id_tabla_1n);

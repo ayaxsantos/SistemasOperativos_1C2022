@@ -65,6 +65,7 @@ t_proceso *obtener_proceso_en_new()
 
 void transicionar_proceso_a_ready(t_proceso *un_proceso)
 {
+    un_proceso->un_pcb->un_estado = READY; //todo agrege cambio de estado
     pthread_mutex_lock(&mutex_procesos_en_ready);
     list_add(procesos_en_ready,(void*) un_proceso);
     pthread_mutex_unlock(&mutex_procesos_en_ready);
@@ -73,7 +74,10 @@ void transicionar_proceso_a_ready(t_proceso *un_proceso)
     log_info(un_logger,"Se pasa proceso a READY -> PID = %u",un_proceso->un_pcb->pid);
     pthread_mutex_unlock(&mutex_log);
 
-    sem_post(&hay_que_ordenar_cola_ready);
+    if(proceso_en_exec != NULL)
+        sem_post(&hay_que_ordenar_cola_ready);
+
+    //sem_post(&hay_que_ordenar_cola_ready);
     sem_post(&hay_procesos_en_ready);
 }
 
@@ -95,7 +99,7 @@ void finalizar_proceso_ejecutando()
     else {
         int id_tabla_1n = recibir_entero(proceso_en_exec->mi_socket_memoria);
         pthread_mutex_lock(&mutex_log);
-        log_info(un_logger,"Se finaliza el proceso con PID = %u con ID tabla = %d",proceso_en_exec->un_pcb->pid, id_tabla_1n);
+        log_warning(un_logger,"Se finaliza el proceso con PID = %u con ID tabla = %d",proceso_en_exec->un_pcb->pid, id_tabla_1n);
         pthread_mutex_unlock(&mutex_log);
     }
 

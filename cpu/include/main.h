@@ -48,7 +48,7 @@ typedef struct t_columna_tlb {
 /////////////////////////////////////////////////////////////
 t_pcb *pcb;
 int operacion_a_enviar;
-t_proceso_pcb *proceso_a_enviar;
+t_proceso_pcb *proceso_pcb;;
 bool hay_interrupcion;
 
 t_list *tlb;
@@ -62,10 +62,12 @@ int socket_kernel_dispatch;
 int socket_kernel_interrupt;
 
 sem_t sem_interrupt;
+sem_t sem_interrupt_fin;
 sem_t sem_ciclo_de_instruccion;
 sem_t sem_busqueda_proceso_nuevo;
 
 pthread_mutex_t mutex_logger;
+pthread_mutex_t mutex_flag_interrupcion;
 ////////////////////////////////////////////////////////////
 
 void leer_configuracion();

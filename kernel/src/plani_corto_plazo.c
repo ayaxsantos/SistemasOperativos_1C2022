@@ -11,7 +11,7 @@ void inicializar_plani_corto_plazo()
     {
         lanzar_hilo_plani_corto_plazo_con(algoritmo_fifo);
     }
-    else if(strcmp("SJF",una_config_kernel.algoritmo_planificacion) == 0)
+    else if(strcmp("SRT",una_config_kernel.algoritmo_planificacion) == 0)
     {
         lanzar_hilo_plani_corto_plazo_con(algoritmo_sjf_con_desalojo);
     }
@@ -70,7 +70,7 @@ void *algoritmo_sjf_con_desalojo(void *args)
     pthread_t *hilo_monitoreo_tiempos = malloc(sizeof(pthread_t));
 
     //Para el primer orden, asi sabemos cual tenemos que mandar a ejecutar!!
-    sem_wait(&hay_que_ordenar_cola_ready); //semaforo que avisa que hay procesos en ready para el monitoreo de desalojo
+    //sem_wait(&hay_que_ordenar_cola_ready); //semaforo que avisa que hay procesos en ready para el monitoreo de desalojo
 
     pthread_create(hilo_monitoreo_tiempos, NULL, rutina_monitoreo_desalojo, NULL);
     pthread_detach(*hilo_monitoreo_tiempos);
@@ -82,6 +82,7 @@ void *algoritmo_sjf_con_desalojo(void *args)
         //Tomar el primer elemento de la lista
         pthread_mutex_lock(&mutex_procesos_en_ready);
         proceso_en_exec = list_remove(procesos_en_ready, 0);
+        //sem_post(&hay_proceso_ejecutando);
         pthread_mutex_unlock( &mutex_procesos_en_ready);
 
         proceso_en_exec->un_pcb->un_estado = EXEC;
@@ -108,27 +109,23 @@ void *algoritmo_sjf_con_desalojo(void *args)
 
 void *rutina_monitoreo_desalojo(void *args)
 {
-    int i = 0;
     t_proceso *proceso_candidato;
     while(true)
     {
+        //sem_wait(&hay_proceso_ejecutando);
         sem_wait(&hay_que_ordenar_cola_ready);
-
-        pthread_mutex_lock(&mutex_log);
-        log_warning(un_logger,"he pasado por aqui  = %d",i);
-        pthread_mutex_unlock(&mutex_log);
-        i++;
 
         //Tomamos le tiempo final, este se ira actualizando
         organizacionPlani();
 
-        pthread_mutex_lock(&mutex_procesos_en_ready);
-        if(!list_is_empty(procesos_en_ready))
+        if(no_hay_procesos_en_ready())
         {
+            pthread_mutex_lock(&mutex_procesos_en_ready);
             proceso_candidato = list_get(procesos_en_ready,0);
+            pthread_mutex_unlock(&mutex_procesos_en_ready);
             time(&tiempoF);
 
-            if(hay_que_desalojar(proceso_candidato))
+            if(proceso_en_exec != NULL && hay_que_desalojar(proceso_candidato))
             {
                 pthread_mutex_lock(&mutex_log);
                 log_info(un_logger, "Se debe desalojar al proceso con PID = %u",proceso_en_exec->un_pcb->pid);
@@ -138,12 +135,36 @@ void *rutina_monitoreo_desalojo(void *args)
                 pthread_mutex_unlock(&mutex_log);
 
                 solicitar_desalojo_a_cpu();
+                sem_wait(&se_produjo_desalojo);
             }
         }
-        pthread_mutex_unlock(&mutex_procesos_en_ready);
-        //Volvemos a tomar el tiempo inicial, lo medido anteriormente se guardo (OJO ESTO)
-        //time(&tiempoI);
     }
+}
+
+bool no_hay_procesos_en_ready()
+{
+    pthread_mutex_lock(&mutex_procesos_en_ready);
+    bool una_condicion = !list_is_empty(procesos_en_ready);
+    pthread_mutex_unlock(&mutex_procesos_en_ready);
+
+    return una_condicion;
+}
+
+void devolver_proceso_a_ready(t_proceso *un_proceso)
+{
+    pthread_mutex_lock(&mutex_log);
+    log_info(un_logger,"Se desaloja al proceso con PID: %u",un_proceso->un_pcb->pid);
+    pthread_mutex_unlock(&mutex_log);
+
+    pthread_mutex_lock(&mutex_procesos_en_ready);
+    list_add(procesos_en_ready,un_proceso);
+    pthread_mutex_unlock(&mutex_procesos_en_ready);
+
+    organizacionPlani();
+
+    proceso_en_exec = NULL;
+    sem_post(&se_produjo_desalojo);
+    sem_post(&hay_procesos_en_ready);
 }
 
 void solicitar_desalojo_a_cpu()
@@ -158,7 +179,7 @@ bool hay_que_desalojar(t_proceso *proceso_candidato)
     double tiempo_que_lleva = calcular_tiempo_ejecutando() * 1000;
 
     pthread_mutex_lock(&mutex_log);
-    log_error(un_logger,"El tiempo que lleva es: %f",tiempo_que_lleva);
+    log_info(un_logger,"El tiempo que lleva es: %f",tiempo_que_lleva);
     pthread_mutex_unlock(&mutex_log);
 
     double tiempo_total = proceso_en_exec->un_pcb->una_estimacion - tiempo_que_lleva;
@@ -173,7 +194,6 @@ bool hay_que_desalojar(t_proceso *proceso_candidato)
 
 double calcular_tiempo_ejecutando()
 {
-    //time(tiempoF);
     double tiempo_transcurrido_exec = difftime(tiempoF,tiempoI);
     return round(tiempo_transcurrido_exec);
 }
@@ -215,16 +235,18 @@ void gestionar_pcb()
     switch(un_codigo)
     {
         case PCB:
-            pthread_mutex_lock(&mutex_log);
-            log_info(un_logger,"Volvio un PCB desaloja3!!");
-            pthread_mutex_unlock(&mutex_log);
-
             pthread_mutex_lock(&mutex_socket_dispatch);
             un_proceso_pcb = deserializar_proceso_pcb(socket_dispatch);
             pthread_mutex_unlock(&mutex_socket_dispatch);
 
+            queue_destroy_and_destroy_elements(proceso_en_exec->un_pcb->consola->instrucciones,free);
+            free(proceso_en_exec->un_pcb->consola);
+            free(proceso_en_exec->un_pcb);
+
             proceso_en_exec->un_pcb = un_proceso_pcb->pcb;
             proceso_en_exec->tiempo_bloqueo = un_proceso_pcb->tiempo_bloqueo;
+
+            free(un_proceso_pcb);
 
             // CUANDO SE DESALOJA NO SE VUELVE A ESTIMAR!!
             //proceso_en_exec->un_pcb->una_estimacion = calcular_estimacion(tiempoF,tiempoI,proceso_en_exec);
@@ -240,8 +262,14 @@ void gestionar_pcb()
             t_proceso_pcb *proceso_para_bloquear = deserializar_proceso_pcb(socket_dispatch);
             pthread_mutex_unlock(&mutex_socket_dispatch);
 
+            queue_destroy_and_destroy_elements(proceso_en_exec->un_pcb->consola->instrucciones,free);
+            free(proceso_en_exec->un_pcb->consola);
+            free(proceso_en_exec->un_pcb);
+
             proceso_en_exec->un_pcb = proceso_para_bloquear->pcb;
             proceso_en_exec->tiempo_bloqueo = proceso_para_bloquear->tiempo_bloqueo;
+
+            free(proceso_para_bloquear);
 
             // Esto solo deberia ejecutarse con SJF, por ahora aqui pues no afecta!!
             proceso_en_exec->un_pcb->una_estimacion = calcular_estimacion(tiempoF,tiempoI,proceso_en_exec);
@@ -256,8 +284,14 @@ void gestionar_pcb()
             un_proceso_pcb = deserializar_proceso_pcb(socket_dispatch);
             pthread_mutex_unlock(&mutex_socket_dispatch);
 
+            queue_destroy_and_destroy_elements(proceso_en_exec->un_pcb->consola->instrucciones,free);
+            free(proceso_en_exec->un_pcb->consola);
+            free(proceso_en_exec->un_pcb);
+
             proceso_en_exec->un_pcb = un_proceso_pcb->pcb;
             proceso_en_exec->tiempo_bloqueo = un_proceso_pcb->tiempo_bloqueo;
+
+            free(un_proceso_pcb);
 
             finalizar_proceso_ejecutando();
             break;
@@ -267,23 +301,6 @@ void gestionar_pcb()
             pthread_mutex_unlock(&mutex_log);
             break;
     }
-}
-
-void devolver_proceso_a_ready(t_proceso *un_proceso)
-{
-    pthread_mutex_lock(&mutex_log);
-    log_info(un_logger,"Se desaloja al proceso con PID: %u",un_proceso->un_pcb->pid);
-    pthread_mutex_unlock(&mutex_log);
-
-
-    pthread_mutex_lock(&mutex_procesos_en_ready);
-    list_add(procesos_en_ready,un_proceso);
-    pthread_mutex_lock(&mutex_procesos_en_ready);
-
-    proceso_en_exec = NULL;
-
-    sem_post(&hay_que_ordenar_cola_ready);
-    sem_post(&hay_procesos_en_ready);
 }
 
 /////////////////////////////////////////////////
@@ -315,6 +332,8 @@ void organizacionPlani()
     }
     list_sort(procesos_en_ready, comparador_procesos_SJF);
 
+    //todo todo esto se va no?
+    //SI, es solo para probar xd
     void mostrar_procesos_en_ready_inner(void *un_proceso)
     {
         mostrar_procesos_en_ready((t_proceso*)un_proceso);
@@ -326,7 +345,7 @@ void organizacionPlani()
 void mostrar_procesos_en_ready(t_proceso *un_proceso)
 {
     pthread_mutex_lock(&mutex_log);
-    log_warning(un_logger,"HEL PROZEZO EZ: pid: %d | Eztimazion: %f",
+    log_info(un_logger,"El proceso es: pid: %d | Con estimacion: %f",
                 un_proceso->un_pcb->pid,
                 un_proceso->un_pcb->una_estimacion);
     pthread_mutex_unlock(&mutex_log);
@@ -334,7 +353,10 @@ void mostrar_procesos_en_ready(t_proceso *un_proceso)
 
 bool comparador_de_procesos_SJF(t_proceso *un_proceso_primero, t_proceso *un_proceso_segundo)
 {
-    return un_proceso_primero->un_pcb->una_estimacion < un_proceso_segundo->un_pcb->una_estimacion;
+    if(un_proceso_primero->un_pcb->una_estimacion == un_proceso_segundo->un_pcb->una_estimacion){
+        return un_proceso_primero->un_pcb->pid < un_proceso_segundo->un_pcb->pid;
+    }
+    else return (un_proceso_primero->un_pcb->una_estimacion < un_proceso_segundo->un_pcb->una_estimacion);
 }
 
 /////////////////////////////////////////////////////

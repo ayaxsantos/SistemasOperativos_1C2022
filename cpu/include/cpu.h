@@ -17,4 +17,6 @@ void desalojar_cpu();
 bool hay_que_desalojar_cpu();
 void chequear_si_hay_interrupcion();
 
+void borrar_instruccion_consola(void *instruccion);
+
 #endif /* CPU_H_INCLUDED */
