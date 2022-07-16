@@ -50,6 +50,10 @@ void *ejecutar_pcb(void *arg) {
 	while(true) {
 
 		sem_wait(&sem_busqueda_proceso_nuevo);
+        log_info(logger_cpu,"Atendiendo nuevo PCB");
+        pthread_mutex_lock(&mutex_flag_interrupcion);
+        hay_interrupcion = false;
+        pthread_mutex_unlock(&mutex_flag_interrupcion);
 		int operacion = recibir_operacion(socket_kernel_dispatch);
         t_proceso_pcb *proceso_pcb;
         switch (operacion) {
@@ -57,7 +61,6 @@ void *ejecutar_pcb(void *arg) {
                 proceso_pcb = deserializar_proceso_pcb(socket_kernel_dispatch);
                 pcb = proceso_pcb->pcb;
                 free(proceso_pcb);
-
                 sem_post(&sem_ciclo_de_instruccion);
 				break;
             case -1:
@@ -76,10 +79,8 @@ void *ejecutar_pcb(void *arg) {
 
 
 void *ciclo_de_instruccion(void *arg) {
-    int valor_sem = 0;
     while (true) {
         sem_wait(&sem_ciclo_de_instruccion);
-        //sem_getvalue(&sem_ciclo_de_instruccion,&valor_sem);
 
         pthread_mutex_lock(&mutex_logger);
         log_info(logger_cpu,"Iniciando ciclo de instruccion");
@@ -87,7 +88,6 @@ void *ciclo_de_instruccion(void *arg) {
 
         t_instruccion *instruccion = (t_instruccion *) queue_pop(pcb->consola->instrucciones); // FETCH
 
-        hay_interrupcion = false;
         operacion_a_enviar = UNDEFINED;
         proceso_a_enviar = malloc(sizeof(t_proceso_pcb));
         uint32_t valor_a_copiar;
@@ -121,12 +121,14 @@ void *ejecutar_interrupcion(void *arg) {
             pthread_mutex_lock(&mutex_logger);
             log_info(logger_cpu,"Hubo una interrupcion");
             pthread_mutex_unlock(&mutex_logger);
-			hay_interrupcion =  recibir_interrupcion(socket_kernel_interrupt);
+            pthread_mutex_lock(&mutex_flag_interrupcion);
+            hay_interrupcion =  recibir_interrupcion(socket_kernel_interrupt);
+            pthread_mutex_unlock(&mutex_flag_interrupcion);
             sem_wait(&sem_interrupt);
             log_info(logger_cpu,"Atendiendo Interrupcion");
 			proceso_a_enviar->tiempo_bloqueo = UNDEFINED;
-			operacion_a_enviar = INTERRUPCION;
-
+			operacion_a_enviar = PCB;
+            sem_post(&sem_interrupt_fin);
 		}
 	}
 }
@@ -187,6 +189,7 @@ void desalojar_cpu() {
         free(pcb);
 		free(proceso_a_enviar);
         limpiar_tlb();
+        log_info(logger_cpu, "Desalojando PCB");
 		sem_post(&sem_busqueda_proceso_nuevo);
 }
 /*
@@ -202,6 +205,9 @@ void chequear_si_hay_interrupcion() {
 
 	if(hay_interrupcion) {
 		sem_post(&sem_interrupt);
+        log_info(logger_cpu, "Estoy en interrupcion");
+        sem_wait(&sem_interrupt_fin);
+        log_info(logger_cpu, "Termine interrupcion");
 	} else {
 		sem_post(&sem_ciclo_de_instruccion);
 	}

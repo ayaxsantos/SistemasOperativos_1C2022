@@ -124,7 +124,7 @@ void *rutina_monitoreo_desalojo(void *args)
             proceso_candidato = list_get(procesos_en_ready,0);
             time(&tiempoF);
 
-            if(hay_que_desalojar(proceso_candidato))
+            if(proceso_en_exec != NULL && hay_que_desalojar(proceso_candidato))
             {
                 pthread_mutex_lock(&mutex_log);
                 log_info(un_logger, "Se debe desalojar al proceso con PID = %u",proceso_en_exec->un_pcb->pid);
@@ -283,15 +283,15 @@ void devolver_proceso_a_ready(t_proceso *un_proceso)
     pthread_mutex_unlock(&mutex_log);
 
 
-    pthread_mutex_lock(&mutex_procesos_en_ready);
+    //pthread_mutex_lock(&mutex_procesos_en_ready);
     list_add(procesos_en_ready,un_proceso);
-    pthread_mutex_lock(&mutex_procesos_en_ready);
+    //pthread_mutex_unlock(&mutex_procesos_en_ready);
 
     proceso_en_exec = NULL;
     sem_post(&se_produjo_desalojo);
 
-    if(proceso_en_exec != NULL)
-        sem_post(&hay_que_ordenar_cola_ready);
+    //if(proceso_en_exec != NULL)
+    //    sem_post(&hay_que_ordenar_cola_ready);
 
     //sem_post(&hay_que_ordenar_cola_ready);
     sem_post(&hay_procesos_en_ready);
@@ -347,7 +347,10 @@ void mostrar_procesos_en_ready(t_proceso *un_proceso)
 
 bool comparador_de_procesos_SJF(t_proceso *un_proceso_primero, t_proceso *un_proceso_segundo)
 {
-    return un_proceso_primero->un_pcb->una_estimacion < un_proceso_segundo->un_pcb->una_estimacion;
+    if(un_proceso_primero->un_pcb->una_estimacion == un_proceso_segundo->un_pcb->una_estimacion){
+        return un_proceso_primero->un_pcb->pid < un_proceso_segundo->un_pcb->pid;
+    }
+    else return (un_proceso_primero->un_pcb->una_estimacion < un_proceso_segundo->un_pcb->una_estimacion);
 }
 
 /////////////////////////////////////////////////////

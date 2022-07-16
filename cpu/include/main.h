@@ -62,10 +62,12 @@ int socket_kernel_dispatch;
 int socket_kernel_interrupt;
 
 sem_t sem_interrupt;
+sem_t sem_interrupt_fin;
 sem_t sem_ciclo_de_instruccion;
 sem_t sem_busqueda_proceso_nuevo;
 
 pthread_mutex_t mutex_logger;
+pthread_mutex_t mutex_flag_interrupcion;
 ////////////////////////////////////////////////////////////
 
 void leer_configuracion();
