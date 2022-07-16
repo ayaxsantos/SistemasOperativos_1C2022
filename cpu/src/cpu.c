@@ -55,12 +55,10 @@ void *ejecutar_pcb(void *arg) {
         hay_interrupcion = false;
         pthread_mutex_unlock(&mutex_flag_interrupcion);
 		int operacion = recibir_operacion(socket_kernel_dispatch);
-        t_proceso_pcb *proceso_pcb;
         switch (operacion) {
 			case PCB:
                 proceso_pcb = deserializar_proceso_pcb(socket_kernel_dispatch);
                 pcb = proceso_pcb->pcb;
-                free(proceso_pcb);
                 sem_post(&sem_ciclo_de_instruccion);
 				break;
             case -1:
@@ -89,7 +87,7 @@ void *ciclo_de_instruccion(void *arg) {
         t_instruccion *instruccion = (t_instruccion *) queue_pop(pcb->consola->instrucciones); // FETCH
 
         operacion_a_enviar = UNDEFINED;
-        proceso_a_enviar = malloc(sizeof(t_proceso_pcb));
+        //proceso_a_enviar = malloc(sizeof(t_proceso_pcb));
         uint32_t valor_a_copiar;
 
         if(necesita_fetch_operands(instruccion->instruc)) { // DECODE
@@ -101,9 +99,10 @@ void *ciclo_de_instruccion(void *arg) {
         free(instruccion);
         if(hay_que_desalojar_cpu()) {
             desalojar_cpu();
-        } else {
+        } 
+        /*else {
             free(proceso_a_enviar);
-        }
+        }*/
     }
 }
 
@@ -126,7 +125,7 @@ void *ejecutar_interrupcion(void *arg) {
             pthread_mutex_unlock(&mutex_flag_interrupcion);
             sem_wait(&sem_interrupt);
             log_info(logger_cpu,"Atendiendo Interrupcion");
-			proceso_a_enviar->tiempo_bloqueo = UNDEFINED;
+			proceso_pcb->tiempo_bloqueo = UNDEFINED;
 			operacion_a_enviar = PCB;
             sem_post(&sem_interrupt_fin);
 		}
@@ -151,7 +150,7 @@ void ejecutar_instruccion(t_instruccion *instruccion, uint32_t valor_a_copiar) {
 
         case IO:
             log_info(logger_cpu,"CPU ejecutando IO -> PID %d", pcb->pid);
-        	proceso_a_enviar->tiempo_bloqueo = instruccion->parametro1;
+        	proceso_pcb->tiempo_bloqueo = instruccion->parametro1;
         	operacion_a_enviar = BLOQUEO;
            break;
 
@@ -175,28 +174,28 @@ void ejecutar_instruccion(t_instruccion *instruccion, uint32_t valor_a_copiar) {
 
         case I_EXIT:
             log_info(logger_cpu,"CPU ejecutando EXIT -> PID %d", pcb->pid);
-			proceso_a_enviar->tiempo_bloqueo = UNDEFINED;
+			proceso_pcb->tiempo_bloqueo = UNDEFINED;
 			operacion_a_enviar = FIN_PROCESO;
            break;
     }
 }
 
 void desalojar_cpu() {
-		proceso_a_enviar->pcb = pcb;
-		enviar_proceso_pcb(socket_kernel_dispatch, proceso_a_enviar, operacion_a_enviar);
-        queue_destroy_and_destroy_elements(pcb->consola->instrucciones, free);
-        free(pcb->consola);
-        free(pcb);
-		free(proceso_a_enviar);
+		//proceso_a_enviar->pcb = pcb;
+		enviar_proceso_pcb(socket_kernel_dispatch, proceso_pcb, operacion_a_enviar);
+        queue_destroy_and_destroy_elements(pcb->consola->instrucciones, borrar_instruccion_consola);
+        free(proceso_pcb->pcb->consola);
+        free(proceso_pcb->pcb);
+		free(proceso_pcb);
         limpiar_tlb();
         log_info(logger_cpu, "Desalojando PCB");
 		sem_post(&sem_busqueda_proceso_nuevo);
 }
-/*
-void borrar_instruccion_consola(t_instruccion *instruccion) {
+
+void borrar_instruccion_consola(void *instruccion) {
     free(instruccion);
 }
-*/
+
 bool hay_que_desalojar_cpu() {
 	return operacion_a_enviar != UNDEFINED;
 }

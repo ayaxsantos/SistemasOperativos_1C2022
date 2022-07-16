@@ -48,7 +48,7 @@ typedef struct t_columna_tlb {
 /////////////////////////////////////////////////////////////
 t_pcb *pcb;
 int operacion_a_enviar;
-t_proceso_pcb *proceso_a_enviar;
+t_proceso_pcb *proceso_pcb;;
 bool hay_interrupcion;
 
 t_list *tlb;
