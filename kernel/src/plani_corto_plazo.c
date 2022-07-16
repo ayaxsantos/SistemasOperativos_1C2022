@@ -235,15 +235,12 @@ void gestionar_pcb()
     switch(un_codigo)
     {
         case PCB:
-            //todo este logger se podria eliminar o no?
-            pthread_mutex_lock(&mutex_log);
-            log_info(un_logger,"Volvio un PCB desaloja!!");
-            pthread_mutex_unlock(&mutex_log);
-
             pthread_mutex_lock(&mutex_socket_dispatch);
             un_proceso_pcb = deserializar_proceso_pcb(socket_dispatch);
             pthread_mutex_unlock(&mutex_socket_dispatch);
 
+            queue_destroy_and_destroy_elements(proceso_en_exec->un_pcb->consola->instrucciones,free);
+            free(proceso_en_exec->un_pcb->consola);
             free(proceso_en_exec->un_pcb);
 
             proceso_en_exec->un_pcb = un_proceso_pcb->pcb;
@@ -265,6 +262,8 @@ void gestionar_pcb()
             t_proceso_pcb *proceso_para_bloquear = deserializar_proceso_pcb(socket_dispatch);
             pthread_mutex_unlock(&mutex_socket_dispatch);
 
+            queue_destroy_and_destroy_elements(proceso_en_exec->un_pcb->consola->instrucciones,free);
+            free(proceso_en_exec->un_pcb->consola);
             free(proceso_en_exec->un_pcb);
 
             proceso_en_exec->un_pcb = proceso_para_bloquear->pcb;
@@ -285,6 +284,8 @@ void gestionar_pcb()
             un_proceso_pcb = deserializar_proceso_pcb(socket_dispatch);
             pthread_mutex_unlock(&mutex_socket_dispatch);
 
+            queue_destroy_and_destroy_elements(proceso_en_exec->un_pcb->consola->instrucciones,free);
+            free(proceso_en_exec->un_pcb->consola);
             free(proceso_en_exec->un_pcb);
 
             proceso_en_exec->un_pcb = un_proceso_pcb->pcb;
