@@ -100,6 +100,7 @@ void *serializar_pcb(t_pcb *pcb, int *size_pcb) {
     memcpy(stream + desplazamiento, consola_serializada, size_consola);
     desplazamiento+= size_consola;
     memcpy(stream + desplazamiento, &(pcb->id_tabla_1n), sizeof(int32_t));
+    free(consola_serializada);
     return stream;
 }
 
@@ -212,7 +213,7 @@ t_consola *deserializar_consola(void *buffer) {
     memcpy(&(size_cola), buffer+desplazamiento, sizeof(int));
     desplazamiento+=sizeof(int);
     consola->instrucciones = deserializar_instrucciones(buffer+desplazamiento, size_cola);
-
+    
     return consola;
 }
 

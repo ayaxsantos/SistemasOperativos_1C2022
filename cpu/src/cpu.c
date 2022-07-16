@@ -102,7 +102,7 @@ void *ciclo_de_instruccion(void *arg) {
 
         ejecutar_instruccion(instruccion, valor_a_copiar); // EXECUTE
         pcb->program_counter ++;
-
+        free(instruccion);
         if(hay_que_desalojar_cpu()) {
             desalojar_cpu();
         } else {
@@ -187,11 +187,18 @@ void ejecutar_instruccion(t_instruccion *instruccion, uint32_t valor_a_copiar) {
 void desalojar_cpu() {
 		proceso_a_enviar->pcb = pcb;
 		enviar_proceso_pcb(socket_kernel_dispatch, proceso_a_enviar, operacion_a_enviar);
+        queue_destroy_and_destroy_elements(pcb->consola->instrucciones, free);
+        free(pcb->consola);
+        free(pcb);
 		free(proceso_a_enviar);
         limpiar_tlb();
 		sem_post(&sem_busqueda_proceso_nuevo);
 }
-
+/*
+void borrar_instruccion_consola(t_instruccion *instruccion) {
+    free(instruccion);
+}
+*/
 bool hay_que_desalojar_cpu() {
 	return operacion_a_enviar != UNDEFINED;
 }
