@@ -24,8 +24,6 @@ void realizar_page_fault(int32_t id_tabla_1n, int nro_pagina, void *a_leer) {
 
             char* ptro_archivo = (char*)mmap(0, config_memoria.tamanio_pagina, PROT_READ | PROT_WRITE, MAP_SHARED, file, 0);
 
-            a_leer = malloc(config_memoria.tamanio_pagina);
-
             if (ptro_archivo != 0){
                 /*
                 char c;
@@ -62,12 +60,12 @@ void escribir_pagina_en_swap(int32_t id_tabla_1n, int nro_pagina, void *a_escrib
     if (nro_pag_en_swap == -1){                                            // Página nueva
 		int nro_pagina_libre = obtener_nro_pagina_libre(particion);
 		if (nro_pagina_libre > -1){
-			asignar_pagina_a(particion, nro_pagina_libre);
+			asignar_pagina_a(particion, nro_pagina);
 		}
 		nro_pag_en_swap = nro_pagina_libre;
     }
 	else{
-		log_info(logger_memoria,"El proceso alcanzó el máximo número de páginas que puede pedir.");
+		log_warning(logger_memoria,"El proceso alcanzó el máximo número de páginas que puede pedir.");
 	}
 
     t_pagina_swap * log_pag = list_get(particion->fcb->pags_en_archivo,nro_pag_en_swap);
