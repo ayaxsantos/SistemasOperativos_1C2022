@@ -32,7 +32,9 @@ void incrementar_puntero(t_tabla_pagina *tabla_1n);
 
 /* ---------- Cierre ---------- */
 void liberar_tabla_principal(t_tabla_pagina* tabla_principal);
-void liberar_tablas_2n(t_dictionary* tabla_principal);
-void eliminar_columna_tabla(void *arg);
+void liberar_tablas_2n(char *key, void *value);
+void liberar_fila_tabla_2n(char *key, void *value);
+void eliminar_fila_tabla(void *arg);
+void eliminar_fila_tabla_2n(void *arg);
 
 #endif /* PAGINACION_H_INCLUDED */

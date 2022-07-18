@@ -68,12 +68,11 @@ int agregar_ultima_pag_a_tabla_1n(t_tabla_pagina *tabla_proceso, int nro_ultima_
 	for (int i=0; i < pags_necesarias_ultima_tabla; i++){
 	    i_s = string_itoa(i);
 		agregar_pag_a_tabla_2n(tabla_2n_aux, i_s);
+        free(i_s);
 	}
-
-	dictionary_put(tabla_proceso->tabla, string_itoa(nro_ultima_pag), tabla_2n_aux);
-    
+    i_s = string_itoa(nro_ultima_pag);
+	dictionary_put(tabla_proceso->tabla, i_s, tabla_2n_aux);
     free(i_s);
-
 	return 0;
 }
 
@@ -276,46 +275,31 @@ void incrementar_puntero(t_tabla_pagina *tabla_1n) {
 
 void liberar_tabla_principal(t_tabla_pagina* tabla_principal){
     list_destroy_and_destroy_elements(tabla_principal->frames_asignados, liberar_frame_asignado);
-
-    liberar_tablas_2n(tabla_principal->tabla);
-
-    // char *entrada_tabla;
-    // for (int i = 0; i < dictionary_size(tabla_principal->tabla); ++i) {
-    //     entrada_tabla = string_itoa(i);
-    //     t_col_pagina *registro_pagina = dictionary_get(tabla_principal->tabla, entrada_tabla);
-    //     free(registro_pagina);
-    // }
-    // free(entrada_tabla);
-    
-    // dictionary_destroy_and_destroy_elements(tabla_principal->tabla, eliminar_columna_tabla);
-    dictionary_destroy(tabla_principal->tabla);
-    free(tabla_principal);
+    dictionary_iterator(tabla_principal->tabla,liberar_tablas_2n);
+    tabla_principal->tamanio_proceso = UNDEFINED;
+    tabla_principal->pags_necesarias = UNDEFINED;
+    tabla_principal->puntero = 0;
 }
 
-void liberar_tablas_2n(t_dictionary *tabla_principal){
-    char *entrada_tabla_1n;
-    t_tabla_pagina *tabla_2n;
-
-    for (int i = 0; i < dictionary_size(tabla_principal); ++i) {
-        entrada_tabla_1n = string_itoa(i);
-
-        tabla_2n = dictionary_get(tabla_principal, entrada_tabla_1n);
-
-    //     for (int j = 0; j < dictionary_size(tabla_2n->tabla); ++j) {
-    //         entrada_tabla_2n = string_itoa(j);
-    //         t_col_pagina *registro_pagina = dictionary_get(tabla_2n->tabla, entrada_tabla_2n);
-    //         free(registro_pagina);
-    //     }
-    //     free(tabla_2n);
-
-        // list_destroy_and_destroy_elements(tabla_2n->frames_asignados, liberar_frame_asignado);
-        dictionary_destroy_and_destroy_elements(tabla_2n->tabla, eliminar_columna_tabla);
-        free(tabla_2n);
-        free(entrada_tabla_1n);
-    }
+void liberar_tablas_2n(char *key, void *value){
+    t_tabla_pagina *tabla_2n = (t_tabla_pagina *)value;
+    tabla_2n->tamanio_proceso = UNDEFINED;
+    dictionary_iterator(tabla_2n->tabla, liberar_fila_tabla_2n);
 }
 
-void eliminar_columna_tabla(void *arg) {
-    t_col_pagina *registro = (t_col_pagina *)arg;
-    free(registro);
+void liberar_fila_tabla_2n(char *key, void *value) {
+    t_col_pagina *un_registro = (t_col_pagina *)value;
+    un_registro->nro_frame = UNDEFINED;
+    un_registro->presencia = false;
+}
+
+void eliminar_fila_tabla(void *arg) {
+    t_tabla_pagina *una_tabla_2n = (t_tabla_pagina *)arg;
+    dictionary_destroy_and_destroy_elements(una_tabla_2n->tabla, eliminar_fila_tabla_2n);
+    free(una_tabla_2n);
+}
+
+void eliminar_fila_tabla_2n(void *arg) {
+    t_col_pagina *un_registro = (t_col_pagina *)arg;
+    free(un_registro);
 }

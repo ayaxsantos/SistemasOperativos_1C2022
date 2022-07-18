@@ -118,13 +118,13 @@ void *ejecutar_interrupcion(void *arg) {
 
 		if(operacion == INTERRUPCION) {
             //pthread_mutex_lock(&mutex_logger);
-            log_info(logger_cpu,"Hubo una interrupcion");
+            log_warning(logger_cpu,"Hubo una interrupcion");
             //pthread_mutex_unlock(&mutex_logger);
             pthread_mutex_lock(&mutex_flag_interrupcion);
             hay_interrupcion =  recibir_interrupcion(socket_kernel_interrupt);
             pthread_mutex_unlock(&mutex_flag_interrupcion);
             sem_wait(&sem_interrupt);
-            log_info(logger_cpu,"Atendiendo Interrupcion");
+            log_warning(logger_cpu,"Atendiendo Interrupcion");
 			proceso_pcb->tiempo_bloqueo = UNDEFINED;
 			operacion_a_enviar = PCB;
             sem_post(&sem_interrupt_fin);
@@ -188,7 +188,7 @@ void desalojar_cpu() {
         free(proceso_pcb->pcb);
 		free(proceso_pcb);
         limpiar_tlb();
-        log_info(logger_cpu, "Desalojando PCB");
+        log_warning(logger_cpu, "Desalojando PCB");
 		sem_post(&sem_busqueda_proceso_nuevo);
 }
 
@@ -204,9 +204,7 @@ void chequear_si_hay_interrupcion() {
 
 	if(hay_interrupcion) {
 		sem_post(&sem_interrupt);
-        log_info(logger_cpu, "Estoy en interrupcion");
         sem_wait(&sem_interrupt_fin);
-        log_info(logger_cpu, "Termine interrupcion");
 	} else {
 		sem_post(&sem_ciclo_de_instruccion);
 	}

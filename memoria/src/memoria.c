@@ -20,6 +20,7 @@ void iniciar_memoria() {
 		pthread_create(hilo_cliente, NULL, &gestionar_conexion_kernel, socket_cliente);
 
 		pthread_detach(*hilo_cliente);
+		free(hilo_cliente);
 	}
 }
 

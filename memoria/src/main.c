@@ -146,6 +146,7 @@ void finalizar_memoria() {
 
 void liberar_configuracion_y_log() {
     free(config_memoria.puerto_escucha);
+    free(config_memoria.ip_memoria);
     free(config_memoria.algoritmo_reemplazo);
     free(config_memoria.path_swap);
     log_destroy(logger_memoria);
@@ -158,8 +159,9 @@ void liberar_memoria() {
 }
 
 void eliminar_tabla(void *arg) {
-    t_tabla_pagina *tabla = (t_tabla_pagina *)arg;
-    free(tabla);
+    t_tabla_pagina *una_tabla_1n = (t_tabla_pagina *)arg;
+    dictionary_destroy_and_destroy_elements(una_tabla_1n->tabla, eliminar_fila_tabla);
+    free(una_tabla_1n);
 }
 
 void eliminar_frame(void *arg) {
