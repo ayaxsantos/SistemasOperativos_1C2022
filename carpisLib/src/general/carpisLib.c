@@ -144,7 +144,7 @@ void *serializar_instrucciones(t_queue *instrucciones, int *size_cola) {
         desplazamiento+= sizeof(int);
         memcpy(stream + desplazamiento, &(instruccion->parametro2), sizeof(int));
         desplazamiento+= sizeof(int);
-        //free(instruccion);
+        free(instruccion);
     }
     //*size_cola = desplazamiento;
     return stream;

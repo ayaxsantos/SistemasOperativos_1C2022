@@ -193,8 +193,7 @@ bool hay_que_desalojar(t_proceso *proceso_candidato)
 
 double calcular_tiempo_ejecutando()
 {
-    double tiempo_transcurrido_exec = difftime(tiempoF,tiempoI);
-    return round(tiempo_transcurrido_exec);
+    return difftime(tiempoF,tiempoI);
 }
 
 void pasar_proceso_a_bloqueado()
@@ -204,8 +203,11 @@ void pasar_proceso_a_bloqueado()
     t_proceso *proceso_a_bloquear = proceso_en_exec;
 
     proceso_en_exec = NULL;
+
+    pthread_mutex_lock(&proceso_a_bloquear->mutex_proceso);
     proceso_a_bloquear->un_pcb->un_estado = BLOCKED;
     time(&proceso_a_bloquear->tiempoI);
+    pthread_mutex_unlock(&proceso_a_bloquear->mutex_proceso);
 
     pthread_mutex_lock(&mutex_procesos_en_bloq);
     list_add(procesos_en_bloq,(void*) proceso_a_bloquear);

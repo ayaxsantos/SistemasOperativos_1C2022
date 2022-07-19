@@ -13,24 +13,29 @@ void inicializar_gestor_io()
 
 void *gestor_io(void)
 {
+    int tiempo_a_bloquear = 0;
+    double tiempo_bloq_mostrar = 0;
+
     while(true)
     {
         sem_wait(&hay_procesos_en_blocked);
         pthread_mutex_lock(&mutex_procesos_en_bloq);
         t_proceso *un_proceso = list_get(procesos_en_bloq,0);
         pthread_mutex_unlock(&mutex_procesos_en_bloq);
-        int pepito = 0;
+
+        tiempo_bloq_mostrar = ((double) un_proceso->tiempo_bloqueo)/1000;
+
         pthread_mutex_lock(&mutex_log);
-        log_warning(un_logger,"El proceso con PID: %u hace su I/O de %d segundos",
+        log_warning(un_logger,"El proceso con PID: %u hace su I/O de %f segundos",
                  un_proceso->un_pcb->pid,
-                 un_proceso->tiempo_bloqueo/1000);
+                 tiempo_bloq_mostrar);
         pthread_mutex_unlock(&mutex_log);
 
         pthread_mutex_lock(&un_proceso->mutex_proceso);
-        pepito = un_proceso->tiempo_bloqueo * 1000;
+        tiempo_a_bloquear = un_proceso->tiempo_bloqueo * 1000;
         pthread_mutex_unlock(&un_proceso->mutex_proceso);
 
-        usleep(pepito);
+        usleep(tiempo_a_bloquear);
         pthread_mutex_lock(&mutex_log);
 
         log_warning(un_logger,"El proceso con PID: %u salio del I/O",un_proceso->un_pcb->pid);
@@ -44,7 +49,7 @@ void *gestor_io(void)
         {
             //Pasar a susp ready
             pthread_mutex_lock(&mutex_log);
-            log_warning(un_logger,"El proceso con PID: %u pasa a suspendido_ready",un_proceso->un_pcb->pid);
+            log_warning(un_logger,"El proceso con PID: %u pasa a SUSPENDIDO READY",un_proceso->un_pcb->pid);
             pthread_mutex_unlock(&mutex_log);
 
             un_proceso->un_pcb->un_estado = SUSP_READY;
@@ -59,7 +64,7 @@ void *gestor_io(void)
         {
             //Pasar a ready
             pthread_mutex_lock(&mutex_log);
-            log_warning(un_logger,"El proceso con PID: %u pasa a ready",un_proceso->un_pcb->pid);
+            log_warning(un_logger,"El proceso con PID: %u pasa a READY",un_proceso->un_pcb->pid);
             pthread_mutex_unlock(&mutex_log);
             un_proceso->un_pcb->un_estado = READY;
             pthread_mutex_lock(&mutex_procesos_en_ready);

@@ -30,7 +30,7 @@ void monitorear_estado_y_tiempo(t_proceso *un_proceso)
     if(el_proceso_no_esta_suspendido(un_proceso))
     {
         un_proceso->un_pcb->un_estado = SUSP_BLOCKED;
-        sem_post(&grado_multiprog_lo_permite); //TODO Toda la logica con memoria --> ya esta no?
+        sem_post(&grado_multiprog_lo_permite);
 
         t_operacion *operacion = crear_operacion(SUSPENSION_PROCESO);
         setear_operacion(operacion,&(un_proceso->un_pcb->id_tabla_1n));
@@ -51,7 +51,7 @@ void monitorear_estado_y_tiempo(t_proceso *un_proceso)
         }
 
         pthread_mutex_lock(&mutex_log);
-        log_warning(un_logger,"El proceso con PID: %u paso a suspendido bloqueado | Tiempo: %f",
+        log_warning(un_logger,"El proceso con PID: %u paso a SUSPENDIDO BLOQUEADO | Tiempo: %f",
                  un_proceso->un_pcb->pid,
                  difftime(un_proceso->tiempoF,un_proceso->tiempoI));
         pthread_mutex_unlock(&mutex_log);
@@ -69,9 +69,6 @@ bool el_proceso_tiene_que_suspenderse(t_proceso *un_proceso)
 {
     time(&un_proceso->tiempoF);
     double tiempo_delta = difftime(un_proceso->tiempoF,un_proceso->tiempoI);
-    //pthread_mutex_lock(&mutex_log);
-    //log_info(un_logger,"Tiempo DELTA: %f",tiempo_delta);
-    //pthread_mutex_unlock(&mutex_log);
     return tiempo_delta >= una_config_kernel.tiempo_max_bloqueado;
 }
 
