@@ -8,6 +8,7 @@
 
 void *gestor_io();
 void inicializar_gestor_io();
+bool el_proceso_esta_susp_bloqueado(t_proceso *);
 
 //////////////////////////////////////////
 

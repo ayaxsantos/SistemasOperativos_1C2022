@@ -25,7 +25,7 @@ int main(int argc, char *argv[])
     inicializar_plani_largo_plazo();
     inicializar_plani_corto_plazo();
     inicializar_gestor_io();
-    inicializar_plani_mediano_plazo();
+    //inicializar_plani_mediano_plazo();
 
     conexion();
 

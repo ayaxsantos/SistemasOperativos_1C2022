@@ -205,8 +205,15 @@ void pasar_proceso_a_bloqueado()
     proceso_en_exec = NULL;
 
     pthread_mutex_lock(&proceso_a_bloquear->mutex_proceso);
+
+    pthread_cancel(*proceso_a_bloquear->hilo_suspension);
     proceso_a_bloquear->un_pcb->un_estado = BLOCKED;
+
+    pthread_create(proceso_a_bloquear->hilo_suspension, NULL,monitorear_estado_y_tiempo_pri,(void*)proceso_a_bloquear);
+    pthread_detach(*proceso_a_bloquear->hilo_suspension);
+
     time(&proceso_a_bloquear->tiempoI);
+
     pthread_mutex_unlock(&proceso_a_bloquear->mutex_proceso);
 
     pthread_mutex_lock(&mutex_procesos_en_bloq);

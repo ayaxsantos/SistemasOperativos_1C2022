@@ -37,6 +37,8 @@ typedef struct com_proceso
 typedef struct proceso
 {
     t_com_proceso *comunicacion_proceso;
+    pthread_t *hilo_suspension;
+    unsigned int contador_suspe;
     t_pcb *un_pcb;
     int tiempo_bloqueo;
     time_t tiempoI;

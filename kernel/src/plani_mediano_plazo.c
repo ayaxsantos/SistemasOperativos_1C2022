@@ -1,75 +1,86 @@
 #include "plani_mediano_plazo.h"
 
-////////////////////////////////////////////
-void inicializar_plani_mediano_plazo()
-{
-    pthread_create(hilo_mediano_plazo, NULL, mediano_plazo_pri, NULL);
-    pthread_detach(*hilo_mediano_plazo);
-}
+////////////////////////////////////////////////////
 
-///////////////////////////////////////////
-
-void *mediano_plazo_pri(void* args)
+void *monitorear_estado_y_tiempo_pri(void *un_proceso_param)
 {
-    while(true)
-    {
-        pthread_mutex_lock(&mutex_procesos_en_bloq);
-        void monitorear_estado_y_tiempo_inner(void *un_proceso)
-        {
-            monitorear_estado_y_tiempo((t_proceso*)un_proceso);
-        }
-        list_iterate(procesos_en_bloq,monitorear_estado_y_tiempo_inner);
-        pthread_mutex_unlock(&mutex_procesos_en_bloq);
-        usleep(100);
-    }
-}
+    t_proceso *un_proceso = (t_proceso*) un_proceso_param;
+    //Nos habia quedado en segundos...
+    usleep(una_config_kernel.tiempo_max_bloqueado * 1000000);
 
-void monitorear_estado_y_tiempo(t_proceso *un_proceso)
-{
     pthread_mutex_lock(&un_proceso->mutex_proceso);
-    if(el_proceso_no_esta_suspendido(un_proceso))
+    int un_pid = un_proceso->un_pcb->pid;
+    pthread_mutex_unlock(&un_proceso->mutex_proceso);
+
+    if(el_proceso_esta_bloqueado(un_proceso))
     {
+        pthread_mutex_lock(&un_proceso->mutex_proceso);
         un_proceso->un_pcb->un_estado = SUSP_BLOCKED;
+        pthread_mutex_unlock(&un_proceso->mutex_proceso);
         sem_post(&grado_multiprog_lo_permite);
 
+        pthread_mutex_lock(&un_proceso->mutex_proceso);
+        time(&un_proceso->tiempoF);
+        pthread_mutex_unlock(&un_proceso->mutex_proceso);
+
+        pthread_mutex_lock(&mutex_log);
+        log_warning(un_logger,"El proceso con PID: %u SE LO VA A SUSPENDER | Tiempo: %f",
+                    un_pid,
+                    difftime(un_proceso->tiempoF,un_proceso->tiempoI));
+        pthread_mutex_unlock(&mutex_log);
+
         t_operacion *operacion = crear_operacion(SUSPENSION_PROCESO);
+        pthread_mutex_lock(&un_proceso->mutex_proceso);
         setear_operacion(operacion,&(un_proceso->un_pcb->id_tabla_1n));
         enviar_operacion(operacion,un_proceso->mi_socket_memoria);
+        pthread_mutex_unlock(&un_proceso->mutex_proceso);
         eliminar_operacion(operacion);
 
+        pthread_mutex_lock(&mutex_log);
+        log_error(un_logger,"Envie peticion a memoria, pid %d",un_pid);
+        pthread_mutex_unlock(&mutex_log);
+
+        pthread_mutex_lock(&un_proceso->mutex_proceso);
+
+        pthread_mutex_lock(&mutex_log);
+        log_error(un_logger,"Entre a recibir datos de memoria, pid %d",un_pid);
+        pthread_mutex_unlock(&mutex_log);
+
         codigo_operacion cod_op = recibir_operacion(un_proceso->mi_socket_memoria);
+        pthread_mutex_unlock(&un_proceso->mutex_proceso);
+
         if(cod_op != SUSPENSION_PROCESO) {
             pthread_mutex_lock(&mutex_log);
-            log_error(un_logger,"Error al recibir la suspension del proceso %d",un_proceso->un_pcb->pid);
+            log_error(un_logger,"Error al recibir la suspension del proceso %d",un_pid);
             pthread_mutex_unlock(&mutex_log);
         }
         else {
             int id_tabla_1n = recibir_entero(un_proceso->mi_socket_memoria);
             pthread_mutex_lock(&mutex_log);
-            log_info(un_logger,"Se suspende proceso con PID = %u con ID tabla = %d",un_proceso->un_pcb->pid, id_tabla_1n);
+            log_info(un_logger,"Se suspende proceso con PID = %u con ID tabla = %d",un_pid, id_tabla_1n);
             pthread_mutex_unlock(&mutex_log);
         }
 
+        pthread_mutex_lock(&un_proceso->mutex_proceso);
+        time(&un_proceso->tiempoF);
+        pthread_mutex_unlock(&un_proceso->mutex_proceso);
+
         pthread_mutex_lock(&mutex_log);
         log_warning(un_logger,"El proceso con PID: %u paso a SUSPENDIDO BLOQUEADO | Tiempo: %f",
-                 un_proceso->un_pcb->pid,
-                 difftime(un_proceso->tiempoF,un_proceso->tiempoI));
+                    un_pid,
+                    difftime(un_proceso->tiempoF,un_proceso->tiempoI));
         pthread_mutex_unlock(&mutex_log);
     }
-    //un_proceso->tiempo_acumulado = difftime(un_proceso->tiempoF,un_proceso->tiempoI);
+    return NULL;
+}
+
+bool el_proceso_esta_bloqueado(t_proceso *un_proceso)
+{
+    pthread_mutex_lock(&un_proceso->mutex_proceso);
+    bool una_condicion = un_proceso->un_pcb->un_estado == BLOCKED;
     pthread_mutex_unlock(&un_proceso->mutex_proceso);
-}
-
-bool el_proceso_no_esta_suspendido(t_proceso *un_proceso)
-{
-    return un_proceso->un_pcb->un_estado == BLOCKED && el_proceso_tiene_que_suspenderse(un_proceso);
-}
-
-bool el_proceso_tiene_que_suspenderse(t_proceso *un_proceso)
-{
-    time(&un_proceso->tiempoF);
-    double tiempo_delta = difftime(un_proceso->tiempoF,un_proceso->tiempoI);
-    return tiempo_delta >= una_config_kernel.tiempo_max_bloqueado;
+    return una_condicion;
 }
 
 ///////////////////////////////////////////
+

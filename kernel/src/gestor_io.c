@@ -10,7 +10,6 @@ void inicializar_gestor_io()
     pthread_detach(*hilo_corto_plazo);
 }
 
-
 void *gestor_io(void)
 {
     int tiempo_a_bloquear = 0;
@@ -45,14 +44,16 @@ void *gestor_io(void)
         un_proceso = list_remove(procesos_en_bloq,0);
         pthread_mutex_unlock(&mutex_procesos_en_bloq);
 
-        if((un_proceso->un_pcb->un_estado) == SUSP_BLOCKED)
+        if(el_proceso_esta_susp_bloqueado(un_proceso))
         {
             //Pasar a susp ready
             pthread_mutex_lock(&mutex_log);
             log_warning(un_logger,"El proceso con PID: %u pasa a SUSPENDIDO READY",un_proceso->un_pcb->pid);
             pthread_mutex_unlock(&mutex_log);
 
+            pthread_mutex_lock(&un_proceso->mutex_proceso);
             un_proceso->un_pcb->un_estado = SUSP_READY;
+            pthread_mutex_unlock(&un_proceso->mutex_proceso);
 
             pthread_mutex_lock(&mutex_procesos_en_susp_ready);
             queue_push(procesos_en_susp_ready,un_proceso);
@@ -66,7 +67,11 @@ void *gestor_io(void)
             pthread_mutex_lock(&mutex_log);
             log_warning(un_logger,"El proceso con PID: %u pasa a READY",un_proceso->un_pcb->pid);
             pthread_mutex_unlock(&mutex_log);
+
+            pthread_mutex_lock(&un_proceso->mutex_proceso);
             un_proceso->un_pcb->un_estado = READY;
+            pthread_mutex_unlock(&un_proceso->mutex_proceso);
+
             pthread_mutex_lock(&mutex_procesos_en_ready);
             list_add(procesos_en_ready,un_proceso);
             pthread_mutex_unlock(&mutex_procesos_en_ready);
@@ -75,6 +80,15 @@ void *gestor_io(void)
             sem_post(&hay_procesos_en_ready);
         }
     }
+}
+
+
+bool el_proceso_esta_susp_bloqueado(t_proceso *un_proceso)
+{
+    pthread_mutex_lock(&un_proceso->mutex_proceso);
+    bool condicion = un_proceso->un_pcb->un_estado == SUSP_BLOCKED;
+    pthread_mutex_unlock(&un_proceso->mutex_proceso);
+    return condicion;
 }
 
 //////////////////////////////////////////

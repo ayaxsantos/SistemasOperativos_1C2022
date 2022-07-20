@@ -122,6 +122,7 @@ void transicionar_proceso_a_exit()
     pthread_mutex_destroy(&proceso_en_exec->comunicacion_proceso->mutex_socket_proceso);
     free(proceso_en_exec->comunicacion_proceso->hilo_com_proceso);
     free(proceso_en_exec->comunicacion_proceso);
+    free(proceso_en_exec->hilo_suspension);
 
     free(proceso_en_exec);
 }
