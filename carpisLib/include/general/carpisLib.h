@@ -199,6 +199,8 @@ t_tercera_solicitud  *recibir_tercera_solicitud(int socket);
 int32_t recibir_entero(int socket);
 t_dato_inicio *recibir_dato_inicio(int socket);
 
+void borrar_instruccion_consola(void *instruccion);
+
 
 #include "../utils/utilslib.h"
 

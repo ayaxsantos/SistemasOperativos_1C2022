@@ -278,6 +278,12 @@ t_dato_inicio *recibir_dato_inicio(int socket) {
     return inicio_proceso;
 }
 
+/***LIBERACIONES DE MEMORIA***/
+
+void borrar_instruccion_consola(void *arg) {
+    t_instruccion *instruccion = (t_instruccion *)arg;
+    free(instruccion);
+}
 
 /*
 t_solicitud *recibir_solicitud(int socket) {

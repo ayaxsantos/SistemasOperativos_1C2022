@@ -192,10 +192,6 @@ void desalojar_cpu() {
 		sem_post(&sem_busqueda_proceso_nuevo);
 }
 
-void borrar_instruccion_consola(void *instruccion) {
-    free(instruccion);
-}
-
 bool hay_que_desalojar_cpu() {
 	return operacion_a_enviar != UNDEFINED;
 }

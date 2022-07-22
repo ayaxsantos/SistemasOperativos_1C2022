@@ -32,23 +32,31 @@ int main(int argc, char *argv[])
         una_instruccion = malloc(sizeof(t_instruccion));
         una_instruccion->instruc = devolver_enum_instruccion(aux[0]);
         if(una_instruccion->instruc == NO_OP){
-            i = 0;
+            i = 1;
             j = atoi(aux[1]);
             una_instruccion->parametro1 = 0;
             una_instruccion->parametro2 = 0;
+            queue_push(cola_instrucciones, una_instruccion);
         	while(i < j){
+                una_instruccion = malloc(sizeof(t_instruccion));
+                una_instruccion->parametro1 = 0;
+                una_instruccion->parametro2 = 0;
                 queue_push(cola_instrucciones, una_instruccion);
         	    i++;
         	 }
+            free(aux[1]);
         }
         else{
             if(una_instruccion->instruc == IO || una_instruccion->instruc == READ){
 		        una_instruccion->parametro1 = atoi(aux[1]);
                 una_instruccion->parametro2 = 0;
+                free(aux[1]);
 	        }
             if(una_instruccion->instruc == WRITE || una_instruccion->instruc == COPY){
 		        una_instruccion->parametro1 = atoi(aux[1]);
                 una_instruccion->parametro2 = atoi(aux[2]);
+                free(aux[1]);
+                free(aux[2]);
 	        }
             if(una_instruccion->instruc == I_EXIT) {
                una_instruccion->parametro1 = 0;
@@ -56,12 +64,10 @@ int main(int argc, char *argv[])
             }
             queue_push(cola_instrucciones, una_instruccion);
         }
-        
-        for (int i = 0;i<2;i++)
-            free(aux[i]);
 
+        free(aux[0]);
         free(aux);
-        free(una_instruccion);
+        //free(una_instruccion);
     }
 
     monitorear_colita(cola_instrucciones);
@@ -128,6 +134,11 @@ void esperar_mensaje_finalizacion() {
     int estado_finalizacion; // 1: FINALIZO BIEN, 0: FINALIZO MAL
     recv(conexion_kernel, &estado_finalizacion, sizeof(int), MSG_WAITALL); //Se bloquea
     estado_finalizacion == 1 ? liberar_memoria_y_conexiones() : printf("Error al finalizar consola \n");
+    
+    //Liberar configuracion
+    free(config_consola.ip_kernel);
+    free(config_consola.puerto_kernel);
+    close(conexion_kernel);
 }
 
 void leer_configuracion() {
@@ -145,5 +156,5 @@ void leer_configuracion() {
 void liberar_memoria_y_conexiones() 
 {
     printf("Finalizando consola ... \n");
-    queue_destroy(cola_instrucciones);
+    queue_destroy_and_destroy_elements(cola_instrucciones,borrar_instruccion_consola);
 }
