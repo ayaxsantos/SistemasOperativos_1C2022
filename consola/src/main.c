@@ -61,6 +61,7 @@ int main(int argc, char *argv[])
             free(aux[i]);
 
         free(aux);
+        free(una_instruccion);
     }
 
     monitorear_colita(cola_instrucciones);
