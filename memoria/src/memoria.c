@@ -70,7 +70,7 @@ void terminar_proceso(int socket_cliente) {
 void suspender_proceso(int socket_cliente) {
 	int32_t id_tabla_1n = (int32_t)recibir_entero(socket_cliente);
     pthread_mutex_lock(&mutex_logger);
-    log_info(logger_memoria,"Llego un SUSPENSION_PROCESO para el proceso con id tabla primer nivel %d", id_tabla_1n);
+    log_warning(logger_memoria,"Llego un SUSPENSION_PROCESO para el proceso con id tabla primer nivel %d", id_tabla_1n);
     pthread_mutex_unlock(&mutex_logger);
 
 	pthread_mutex_lock(&mutex_lista_tablas_paginas);

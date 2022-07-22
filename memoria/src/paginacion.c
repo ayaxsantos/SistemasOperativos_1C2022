@@ -289,6 +289,10 @@ void liberar_tablas_2n(char *key, void *value){
 
 void liberar_fila_tabla_2n(char *key, void *value) {
     t_col_pagina *un_registro = (t_col_pagina *)value;
+    if(un_registro->presencia) {
+        t_frame *frame = list_get(memoria_principal->frames, un_registro->nro_frame);
+        frame->is_free = true;
+    }
     un_registro->nro_frame = UNDEFINED;
     un_registro->presencia = false;
 }
