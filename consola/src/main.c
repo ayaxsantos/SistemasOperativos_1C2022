@@ -41,6 +41,7 @@ int main(int argc, char *argv[])
                 una_instruccion = malloc(sizeof(t_instruccion));
                 una_instruccion->parametro1 = 0;
                 una_instruccion->parametro2 = 0;
+                una_instruccion->instruc = NO_OP;
                 queue_push(cola_instrucciones, una_instruccion);
         	    i++;
         	 }
