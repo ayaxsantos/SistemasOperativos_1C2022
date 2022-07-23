@@ -29,7 +29,7 @@ void iniciar_memoria() {
 void iniciar_proceso(int socket_cliente) {
     t_dato_inicio *inicio_proceso = recibir_dato_inicio(socket_cliente);
     pthread_mutex_lock(&mutex_logger);
-    log_info(logger_memoria,"Llego un INICIO_PROCESO -> PID: %d", inicio_proceso->pid);
+    log_warning(logger_memoria,"Llego un INICIO_PROCESO -> PID: %d", inicio_proceso->pid);
     pthread_mutex_unlock(&mutex_logger);
 	t_tabla_pagina* tabla_principal_del_proceso = crear_tabla_principal((int )inicio_proceso->tamanio_proceso);
 
@@ -57,7 +57,7 @@ void iniciar_proceso(int socket_cliente) {
 void terminar_proceso(int socket_cliente) {
 	int32_t id_tabla = recibir_entero(socket_cliente);
     pthread_mutex_lock(&mutex_logger);
-    log_info(logger_memoria,"Llego un FIN_PROCESO para el proceso con id tabla primer nivel %d", id_tabla);
+    log_warning(logger_memoria,"Llego un FIN_PROCESO para el proceso con id tabla primer nivel %d", id_tabla);
     pthread_mutex_unlock(&mutex_logger);
 
     pthread_mutex_lock(&mutex_lista_tablas_paginas);

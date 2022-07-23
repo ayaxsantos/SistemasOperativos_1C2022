@@ -1,7 +1,7 @@
 #include "../include/swap_controlador.h"
 
 void realizar_page_fault(int32_t id_tabla_1n, int nro_pagina, void *a_leer) {
-    log_info(logger_memoria,"Realizando PAGE FAULT, id tabla primer nivel: %d, pagina nro: %d", id_tabla_1n, nro_pagina);
+    log_warning(logger_memoria,"Solicitando pág a SWAP. ID Tabla: %d - Página nro: %d", id_tabla_1n, nro_pagina);
     usleep(config_memoria.retardo_swap*1000);
     t_particion* particion = encontrar_particion_de(id_tabla_1n);
 
@@ -35,12 +35,12 @@ void realizar_page_fault(int32_t id_tabla_1n, int nro_pagina, void *a_leer) {
             }
             return;
         }
-        log_warning(logger_memoria,"PF: El proceso no tiene la pagina pedida en swap.");
+        log_info(logger_memoria,"El proceso no tiene la pagina pedida en swap.");
     }
 }
 
 void escribir_pagina_en_swap(int32_t id_tabla_1n, int nro_pagina, void *a_escribir){
-    log_info(logger_memoria,"Realizando PAGE WRITE, id tabla primer nivel: %d, pagina nro: %d", id_tabla_1n, nro_pagina);
+    log_warning(logger_memoria,"Escribiendo pág en SWAP. ID Tabla: %d - Página nro: %d", id_tabla_1n, nro_pagina);
     usleep(config_memoria.retardo_swap*1000);
     t_particion* particion = encontrar_particion_de(id_tabla_1n);
 
@@ -57,7 +57,7 @@ void escribir_pagina_en_swap(int32_t id_tabla_1n, int nro_pagina, void *a_escrib
 		nro_pag_en_swap = nro_pagina_libre;
     }
 	else{
-		log_warning(logger_memoria,"El proceso alcanzó el máximo número de páginas que puede pedir.");
+		log_warning(logger_memoria,"El proceso alcanzó el máximo nro de páginas que puede pedir a SWAP");
 	}
     int inicio_pag = nro_pag_en_swap * config_memoria.tamanio_pagina;
     int file;
