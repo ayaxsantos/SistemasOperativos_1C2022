@@ -29,7 +29,9 @@ void *gestionar_conexion_kernel(void *arg) {
 }
 
 void *gestionar_conexion_cpu(void *arg) {
+    pthread_mutex_lock(&mutex_logger);
     log_info(logger_memoria,"Memoria a la espera de operaciones con CPU ...");
+    pthread_mutex_unlock(&mutex_logger);
     while (true) {
         int cod_op = recibir_operacion(socket_cpu);
         switch (cod_op) {

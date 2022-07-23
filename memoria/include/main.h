@@ -103,6 +103,7 @@ pthread_mutex_t mutex_mp;
 pthread_mutex_t mutex_logger;
 pthread_mutex_t mutex_lista_tablas_paginas;
 pthread_mutex_t mutex_contador_tablas_1n;
+pthread_mutex_t mutex_swap;
 sem_t sem_algoritmo;
 
 ////////////////////////////////////////////////

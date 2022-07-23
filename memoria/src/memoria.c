@@ -11,7 +11,9 @@ void iniciar_memoria() {
     pthread_create(hilo_cpu, NULL, &gestionar_conexion_cpu, NULL);
     pthread_detach(*hilo_cpu);
     int *socket_cliente;
+    pthread_mutex_lock(&mutex_logger);
     log_info(logger_memoria,"Memoria a la espera de conexiones con Kernel ...");
+    pthread_mutex_unlock(&mutex_logger);
 	while(true) {
         socket_cliente = malloc(sizeof(int));
         *socket_cliente = esperar_cliente(server);
@@ -42,7 +44,9 @@ void iniciar_proceso(int socket_cliente) {
 	enviar_operacion(operacion,socket_cliente);
 	eliminar_operacion(operacion);
 
+    pthread_mutex_lock(&mutex_swap);
 	crear_archivo((int)inicio_proceso->pid, inicio_proceso->id_tabla_1n,inicio_proceso->tamanio_proceso);
+    pthread_mutex_unlock(&mutex_swap);
 
     pthread_mutex_lock(&mutex_logger);
     log_info(logger_memoria,"Respondo con el id tabla primer nivel %d del PID: %d", inicio_proceso->id_tabla_1n,inicio_proceso->pid);
@@ -55,9 +59,14 @@ void terminar_proceso(int socket_cliente) {
     pthread_mutex_lock(&mutex_logger);
     log_info(logger_memoria,"Llego un FIN_PROCESO para el proceso con id tabla primer nivel %d", id_tabla);
     pthread_mutex_unlock(&mutex_logger);
-	t_tabla_pagina* tabla_1n = list_get(tablas_primer_nivel, (int)id_tabla);
 
+    pthread_mutex_lock(&mutex_lista_tablas_paginas);
+	t_tabla_pagina* tabla_1n = list_get(tablas_primer_nivel, (int)id_tabla);
+    pthread_mutex_unlock(&mutex_lista_tablas_paginas);
+
+    pthread_mutex_lock(&mutex_swap);
     destruir_archivo((int)id_tabla);
+    pthread_mutex_unlock(&mutex_swap);
 	liberar_tabla_principal(tabla_1n);
 
 	t_operacion *operacion = crear_operacion(FIN_PROCESO_MEMORIA);
@@ -75,7 +84,10 @@ void suspender_proceso(int socket_cliente) {
 	pthread_mutex_lock(&mutex_lista_tablas_paginas);
 	t_tabla_pagina* tabla_1n = list_get(tablas_primer_nivel, id_tabla_1n);
     pthread_mutex_unlock(&mutex_lista_tablas_paginas);
+
+    pthread_mutex_lock(&mutex_swap);
     swapear_proceso(tabla_1n);
+    pthread_mutex_unlock(&mutex_swap);
 
 	t_operacion *operacion = crear_operacion(SUSPENSION_PROCESO);
 	setear_operacion(operacion,&id_tabla_1n);

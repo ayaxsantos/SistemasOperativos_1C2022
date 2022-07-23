@@ -25,14 +25,6 @@ void realizar_page_fault(int32_t id_tabla_1n, int nro_pagina, void *a_leer) {
             char* ptro_archivo = (char*)mmap(0, config_memoria.tamanio_pagina, PROT_READ | PROT_WRITE, MAP_SHARED, file, 0);
 
             if (ptro_archivo != 0){
-                /*
-                char c;
-                int i, desplazamiento = 0;
-                for (i = inicio_pag; i < config_memoria.tamanio_pagina + inicio_pag; i++){
-                    c = ptro_archivo[i];
-                    memcpy(a_leer + desplazamiento, &c, sizeof(char));
-                    desplazamiento+= sizeof(char);
-                }*/
                 memcpy(a_leer,ptro_archivo + inicio_pag, config_memoria.tamanio_pagina);
 
                 int cod = munmap(ptro_archivo, config_memoria.tamanio_pagina);
@@ -41,7 +33,6 @@ void realizar_page_fault(int32_t id_tabla_1n, int nro_pagina, void *a_leer) {
                 int cerrado = close (file);
                 if (cerrado != 0){ log_error(logger_memoria,"No se pudo cerrar el archivo."); }
             }
-            //free(a_leer);
             return;
         }
         log_warning(logger_memoria,"PF: El proceso no tiene la pagina pedida en swap.");
@@ -82,13 +73,6 @@ void escribir_pagina_en_swap(int32_t id_tabla_1n, int nro_pagina, void *a_escrib
     if (ptro_archivo != 0){
 
         memcpy(ptro_archivo + inicio_pag, a_escribir, config_memoria.tamanio_pagina);
-       /* int desplazamiento = inicio_pag;
-        int desplazamiento_data = 0;
-        * for(int i=inicio_pag;i<config_memoria.tamanio_pagina + inicio_pag; i++){
-            memcpy(ptro_archivo + desplazamiento, a_escribir + desplazamiento_data, sizeof(char));
-            desplazamiento += sizeof(char);
-            desplazamiento_data += sizeof(char);
-        }*/
 
         int cod = munmap(ptro_archivo, config_memoria.tamanio_pagina);
         if (cod != 0){ log_error(logger_memoria,"No se pudo 'desmapear' el archivo."); }

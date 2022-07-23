@@ -225,7 +225,9 @@ void asignar_primer_marco_a_pagina(t_tabla_pagina *tabla_1n, t_tabla_pagina *tab
         pagina->presencia = true;
         pagina->nro_frame = frame->nro_frame;
         if(tabla_1n->fue_suspendido) {
+            pthread_mutex_lock(&mutex_swap);
             realizar_page_fault(tabla_1n->id_tabla, calcular_nro_pagina(entrada_tabla_1n_temporal,solicitud->entrada_tabla),frame->base);
+            pthread_mutex_unlock(&mutex_swap);
         }
         frame->usado = 1;
         frame->modificado = solicitud->accion_solicitada;

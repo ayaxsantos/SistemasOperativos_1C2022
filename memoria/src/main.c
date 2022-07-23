@@ -112,6 +112,7 @@ void iniciar_semaforos() {
     pthread_mutex_init(&mutex_logger, NULL);
     pthread_mutex_init(&mutex_lista_tablas_paginas, NULL);
     pthread_mutex_init(&mutex_contador_tablas_1n, NULL);
+    pthread_mutex_init(&mutex_swap, NULL);
     sem_init(&sem_algoritmo, 0, 1);
 }
 
@@ -138,7 +139,9 @@ void signal_handler(int senial){
 }
 
 void finalizar_memoria() {
+    pthread_mutex_lock(&mutex_lista_tablas_paginas);
     list_destroy_and_destroy_elements(tablas_primer_nivel, eliminar_tabla);
+    pthread_mutex_unlock(&mutex_lista_tablas_paginas);
     liberar_configuracion_y_log();
     liberar_memoria();
     exit(EXIT_SUCCESS);
