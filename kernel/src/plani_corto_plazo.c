@@ -69,6 +69,7 @@ void *algoritmo_sjf_con_desalojo(void *args)
 {
     //Para el primer orden, asi sabemos cual tenemos que mandar a ejecutar!!
     //sem_wait(&hay_que_ordenar_cola_ready); //semaforo que avisa que hay procesos en ready para el monitoreo de desalojo
+    t_proceso *proceso_aux;
 
     pthread_create(hilo_monitoreo_tiempos, NULL, rutina_monitoreo_desalojo, NULL);
     pthread_detach(*hilo_monitoreo_tiempos);
@@ -79,22 +80,29 @@ void *algoritmo_sjf_con_desalojo(void *args)
 
         //Tomar el primer elemento de la lista
         pthread_mutex_lock(&mutex_procesos_en_ready);
-        proceso_en_exec = list_remove(procesos_en_ready, 0);
-        //sem_post(&hay_proceso_ejecutando);
+        proceso_aux = list_remove(procesos_en_ready, 0);
         pthread_mutex_unlock( &mutex_procesos_en_ready);
 
+        pthread_mutex_lock(&mutex_proceso_exec);
+        proceso_en_exec = proceso_aux;
         proceso_en_exec->un_pcb->un_estado = EXEC;
+        pthread_mutex_unlock(&mutex_proceso_exec);
 
         //Tomamos tiempo inicial APENAS lo pasamos a EXEC
+        pthread_mutex_lock(&tiempo_inicial);
         time(&tiempoI);
+        pthread_mutex_unlock(&tiempo_inicial);
 
         pthread_mutex_lock(&mutex_log);
         log_warning(un_logger,"Se pasa a EXEC el proceso PID = %u",proceso_en_exec->un_pcb->pid);
         pthread_mutex_unlock(&mutex_log);
 
         t_proceso_pcb *un_proceso_pcb = malloc(sizeof(t_proceso_pcb));
+
+        pthread_mutex_lock(&mutex_proceso_exec);
         un_proceso_pcb->pcb = proceso_en_exec->un_pcb;
         un_proceso_pcb->tiempo_bloqueo = proceso_en_exec->tiempo_bloqueo;
+        pthread_mutex_unlock(&mutex_proceso_exec);
 
         pthread_mutex_lock(&mutex_socket_dispatch);
         enviar_proceso_pcb(socket_dispatch, un_proceso_pcb,PCB);
@@ -103,15 +111,18 @@ void *algoritmo_sjf_con_desalojo(void *args)
         //gestionar_pcb_para_probar_sin_cpu();
         gestionar_pcb();
         free(un_proceso_pcb);
+        proceso_aux = NULL;
     }
 }
 
 void *rutina_monitoreo_desalojo(void *args)
 {
     t_proceso *proceso_candidato;
+    int un_pid_de_exec;
+    double una_estimacion_de_exec;
+
     while(true)
     {
-        //sem_wait(&hay_proceso_ejecutando);
         sem_wait(&hay_que_ordenar_cola_ready);
 
         //Tomamos le tiempo final, este se ira actualizando
@@ -124,13 +135,18 @@ void *rutina_monitoreo_desalojo(void *args)
             pthread_mutex_unlock(&mutex_procesos_en_ready);
             time(&tiempoF);
 
-            if(proceso_en_exec != NULL && hay_que_desalojar(proceso_candidato))
+            if(hay_algun_proceso_ejecutando() && hay_que_desalojar(proceso_candidato))
             {
+                pthread_mutex_lock(&mutex_proceso_exec);
+                un_pid_de_exec = proceso_en_exec->un_pcb->pid;
+                una_estimacion_de_exec = proceso_candidato->un_pcb->una_estimacion;
+                pthread_mutex_unlock(&mutex_proceso_exec);
+
                 pthread_mutex_lock(&mutex_log);
-                log_info(un_logger, "Se debe desalojar al proceso con PID = %u",proceso_en_exec->un_pcb->pid);
+                log_info(un_logger, "Se debe desalojar al proceso con PID = %u",un_pid_de_exec);
                 log_info(un_logger,"El proceso con PID = %u tiene una estimacion menor, de: %f",
-                         proceso_candidato->un_pcb->pid,
-                         proceso_candidato->un_pcb->una_estimacion);
+                         un_pid_de_exec,
+                         una_estimacion_de_exec);
                 pthread_mutex_unlock(&mutex_log);
 
                 solicitar_desalojo_a_cpu();
@@ -138,6 +154,15 @@ void *rutina_monitoreo_desalojo(void *args)
             }
         }
     }
+}
+
+bool hay_algun_proceso_ejecutando()
+{
+    pthread_mutex_lock(&mutex_proceso_exec);
+    bool una_condicion = proceso_en_exec != NULL;
+    pthread_mutex_unlock(&mutex_proceso_exec);
+
+    return una_condicion;
 }
 
 bool no_hay_procesos_en_ready()
@@ -181,7 +206,9 @@ bool hay_que_desalojar(t_proceso *proceso_candidato)
     log_info(un_logger,"El tiempo que lleva es: %f",tiempo_que_lleva);
     pthread_mutex_unlock(&mutex_log);
 
+    pthread_mutex_lock(&mutex_proceso_exec);
     double tiempo_total = proceso_en_exec->un_pcb->una_estimacion - tiempo_que_lleva;
+    pthread_mutex_unlock(&mutex_proceso_exec);
 
     if(tiempo_que_lleva <= 0)
         return false;
@@ -193,20 +220,31 @@ bool hay_que_desalojar(t_proceso *proceso_candidato)
 
 double calcular_tiempo_ejecutando()
 {
-    return difftime(tiempoF,tiempoI);
+    pthread_mutex_lock(&tiempo_inicial);
+    double tiempo_ret = difftime(tiempoF,tiempoI);
+    pthread_mutex_unlock(&tiempo_inicial);
+    return tiempo_ret;
 }
 
 void pasar_proceso_a_bloqueado()
 {
     //Esta funcion va a encargarse de pasar los procesos a bloqueado al recibir I/O
 
+    pthread_mutex_lock(&mutex_proceso_exec);
     t_proceso *proceso_a_bloquear = proceso_en_exec;
-
     proceso_en_exec = NULL;
+    pthread_mutex_unlock(&mutex_proceso_exec);
 
     pthread_mutex_lock(&proceso_a_bloquear->mutex_proceso);
+
+    pthread_cancel(*proceso_a_bloquear->hilo_suspension);
     proceso_a_bloquear->un_pcb->un_estado = BLOCKED;
+
+    pthread_create(proceso_a_bloquear->hilo_suspension, NULL,monitorear_estado_y_tiempo_pri,(void*)proceso_a_bloquear);
+    pthread_detach(*proceso_a_bloquear->hilo_suspension);
+
     time(&proceso_a_bloquear->tiempoI);
+
     pthread_mutex_unlock(&proceso_a_bloquear->mutex_proceso);
 
     pthread_mutex_lock(&mutex_procesos_en_bloq);
@@ -240,12 +278,16 @@ void gestionar_pcb()
             un_proceso_pcb = deserializar_proceso_pcb(socket_dispatch);
             pthread_mutex_unlock(&mutex_socket_dispatch);
 
+            pthread_mutex_lock(&mutex_proceso_exec);
             queue_destroy_and_destroy_elements(proceso_en_exec->un_pcb->consola->instrucciones,free);
             free(proceso_en_exec->un_pcb->consola);
             free(proceso_en_exec->un_pcb);
+            pthread_mutex_unlock(&mutex_proceso_exec);
 
+            pthread_mutex_lock(&mutex_proceso_exec);
             proceso_en_exec->un_pcb = un_proceso_pcb->pcb;
             proceso_en_exec->tiempo_bloqueo = un_proceso_pcb->tiempo_bloqueo;
+            pthread_mutex_unlock(&mutex_proceso_exec);
 
             free(un_proceso_pcb);
 
@@ -263,17 +305,23 @@ void gestionar_pcb()
             t_proceso_pcb *proceso_para_bloquear = deserializar_proceso_pcb(socket_dispatch);
             pthread_mutex_unlock(&mutex_socket_dispatch);
 
+            pthread_mutex_lock(&mutex_proceso_exec);
             queue_destroy_and_destroy_elements(proceso_en_exec->un_pcb->consola->instrucciones,free);
             free(proceso_en_exec->un_pcb->consola);
             free(proceso_en_exec->un_pcb);
+            pthread_mutex_unlock(&mutex_proceso_exec);
 
+            pthread_mutex_lock(&mutex_proceso_exec);
             proceso_en_exec->un_pcb = proceso_para_bloquear->pcb;
             proceso_en_exec->tiempo_bloqueo = proceso_para_bloquear->tiempo_bloqueo;
+            pthread_mutex_unlock(&mutex_proceso_exec);
 
             free(proceso_para_bloquear);
 
             // Esto solo deberia ejecutarse con SJF, por ahora aqui pues no afecta!!
+            pthread_mutex_lock(&mutex_proceso_exec);
             proceso_en_exec->un_pcb->una_estimacion = calcular_estimacion(tiempoF,tiempoI,proceso_en_exec);
+            pthread_mutex_unlock(&mutex_proceso_exec);
             pasar_proceso_a_bloqueado();
             break;
         case FIN_PROCESO:
@@ -285,12 +333,16 @@ void gestionar_pcb()
             un_proceso_pcb = deserializar_proceso_pcb(socket_dispatch);
             pthread_mutex_unlock(&mutex_socket_dispatch);
 
+            pthread_mutex_lock(&mutex_proceso_exec);
             queue_destroy_and_destroy_elements(proceso_en_exec->un_pcb->consola->instrucciones,free);
             free(proceso_en_exec->un_pcb->consola);
             free(proceso_en_exec->un_pcb);
+            pthread_mutex_unlock(&mutex_proceso_exec);
 
+            pthread_mutex_lock(&mutex_proceso_exec);
             proceso_en_exec->un_pcb = un_proceso_pcb->pcb;
             proceso_en_exec->tiempo_bloqueo = un_proceso_pcb->tiempo_bloqueo;
+            pthread_mutex_unlock(&mutex_proceso_exec);
 
             free(un_proceso_pcb);
 
@@ -310,7 +362,10 @@ void gestionar_pcb()
 double calcular_estimacion(time_t tiempoF, time_t tiempoI, t_proceso *un_proceso)
 {
     time(&tiempoF);
+    pthread_mutex_lock(&tiempo_inicial);
     double real_anterior = difftime(tiempoF,tiempoI);
+    pthread_mutex_unlock(&tiempo_inicial);
+
     double alpha = una_config_kernel.alfa_plani;
 
     pthread_mutex_lock(&mutex_log);

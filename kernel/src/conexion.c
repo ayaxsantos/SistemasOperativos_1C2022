@@ -104,6 +104,8 @@ void inicializar_proceso(t_com_proceso *comunicacion_proceso)
     un_proceso->un_pcb = inicializar_pcb(comunicacion_proceso);
     un_proceso->comunicacion_proceso = comunicacion_proceso;
     un_proceso->tiempo_bloqueo = UNDEFINED;
+    un_proceso->hilo_suspension = malloc(sizeof(pthread_t));
+    un_proceso->contador_suspe = 0;
     pthread_mutex_init(&un_proceso->mutex_proceso,NULL);
 
     un_proceso->mi_socket_memoria = crear_conexion(una_config_kernel.ip_memoria,una_config_kernel.puerto_memoria);

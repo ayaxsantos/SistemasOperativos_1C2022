@@ -25,7 +25,7 @@ int main(int argc, char *argv[])
     inicializar_plani_largo_plazo();
     inicializar_plani_corto_plazo();
     inicializar_gestor_io();
-    inicializar_plani_mediano_plazo();
+    //inicializar_plani_mediano_plazo();
 
     conexion();
 
@@ -95,6 +95,8 @@ void iniciar_mutex()
     pthread_mutex_init(&mutex_procesos_en_susp_ready,NULL);
     pthread_mutex_init(&mutex_procesos_en_bloq,NULL);
     pthread_mutex_init(&mutex_contador_pid,NULL);
+    pthread_mutex_init(&mutex_proceso_exec,NULL);
+    pthread_mutex_init(&tiempo_inicial,NULL);
 
     //Estos pueden estar demas...
     pthread_mutex_init(&mutex_socket_dispatch,NULL);
@@ -135,6 +137,9 @@ void liberar_mutex()
     pthread_mutex_destroy(&mutex_procesos_en_new);
     pthread_mutex_destroy(&mutex_procesos_en_ready);
     pthread_mutex_destroy(&mutex_procesos_en_susp_ready);
+    pthread_mutex_destroy(&mutex_proceso_exec);
+    pthread_mutex_destroy(&mutex_socket_dispatch);
+    pthread_mutex_destroy(&tiempo_inicial);
 }
 
 void liberar_semaforos()
