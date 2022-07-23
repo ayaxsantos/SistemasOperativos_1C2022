@@ -31,7 +31,10 @@ t_frame *realizar_primer_paso(t_tabla_pagina *tabla_1n, t_col_pagina *registro, 
             entrada_tabla_2n_s = string_itoa(posible_frame_a_reemplazar->entrada_tabla_2n);
 			t_tabla_pagina *tabla_2n_pagina_victima = (t_tabla_pagina*)dictionary_get(tabla_1n->tabla, entrada_tabla_1n_s);
 			t_col_pagina *registro_pagina_victima = (t_col_pagina*)dictionary_get(tabla_2n_pagina_victima->tabla, entrada_tabla_2n_s);
-
+            pthread_mutex_lock(&mutex_logger);
+            log_warning(logger_memoria,"Pagina victima = %d ", calcular_nro_pagina(posible_frame_a_reemplazar->entrada_tabla_1n,
+                                                                                   posible_frame_a_reemplazar->entrada_tabla_2n));
+            pthread_mutex_unlock(&mutex_logger);
             pthread_mutex_lock(&mutex_swap);
             realizar_page_fault(tabla_1n->id_tabla, calcular_nro_pagina(entrada_tabla_1n, entrada_tabla_2n),
             					frame_a_asignar->base);
@@ -76,7 +79,10 @@ t_frame *realizar_segundo_paso(t_tabla_pagina *tabla_1n, t_col_pagina *registro,
             entrada_tabla_2n_s = string_itoa(posible_frame_a_reemplazar->entrada_tabla_2n);
 			t_tabla_pagina *tabla_2n_pagina_victima = (t_tabla_pagina*)dictionary_get(tabla_1n->tabla, entrada_tabla_1n_s);
 			t_col_pagina *registro_pagina_victima = (t_col_pagina*)dictionary_get(tabla_2n_pagina_victima->tabla, entrada_tabla_2n_s);
-
+            pthread_mutex_lock(&mutex_logger);
+            log_warning(logger_memoria,"Pagina victima = %d ", calcular_nro_pagina(posible_frame_a_reemplazar->entrada_tabla_1n,
+                                                                                   posible_frame_a_reemplazar->entrada_tabla_2n));
+            pthread_mutex_unlock(&mutex_logger);
             pthread_mutex_lock(&mutex_swap);
 			escribir_pagina_en_swap(tabla_1n->id_tabla, calcular_nro_pagina(posible_frame_a_reemplazar->entrada_tabla_1n,
 			                         posible_frame_a_reemplazar->entrada_tabla_2n), frame_a_asignar->base);
