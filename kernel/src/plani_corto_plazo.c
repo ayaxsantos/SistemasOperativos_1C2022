@@ -368,9 +368,9 @@ double calcular_estimacion(time_t tiempoF, time_t tiempoI, t_proceso *un_proceso
 
     double alpha = una_config_kernel.alfa_plani;
 
-    pthread_mutex_lock(&mutex_log);
-    log_info(un_logger,"Tiempito -> Real Anterior: %lf ms",real_anterior * 1E3);
-    pthread_mutex_unlock(&mutex_log);
+    //pthread_mutex_lock(&mutex_log);
+    //log_info(un_logger,"Tiempito -> Real Anterior: %lf ms",real_anterior * 1E3);
+    //pthread_mutex_unlock(&mutex_log);
 
     double estimacion_anterior = un_proceso->un_pcb->una_estimacion;
 

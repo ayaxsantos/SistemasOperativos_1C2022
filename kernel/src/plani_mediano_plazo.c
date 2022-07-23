@@ -37,14 +37,14 @@ void *monitorear_estado_y_tiempo_pri(void *un_proceso_param)
         eliminar_operacion(operacion);
 
         pthread_mutex_lock(&mutex_log);
-        log_error(un_logger,"Envie peticion a memoria, pid %d",un_pid);
+        log_info(un_logger,"Envie peticion a memoria, pid %d",un_pid);
         pthread_mutex_unlock(&mutex_log);
 
         pthread_mutex_lock(&un_proceso->mutex_proceso);
 
-        pthread_mutex_lock(&mutex_log);
-        log_error(un_logger,"Entre a recibir datos de memoria, pid %d",un_pid);
-        pthread_mutex_unlock(&mutex_log);
+        //pthread_mutex_lock(&mutex_log);
+        //log_error(un_logger,"Entre a recibir datos de memoria, pid %d",un_pid);
+        //pthread_mutex_unlock(&mutex_log);
 
         codigo_operacion cod_op = recibir_operacion(un_proceso->mi_socket_memoria);
         pthread_mutex_unlock(&un_proceso->mutex_proceso);
