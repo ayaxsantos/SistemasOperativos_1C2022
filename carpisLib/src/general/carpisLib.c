@@ -263,7 +263,7 @@ t_tercera_solicitud *recibir_tercera_solicitud(int socket) {
 int32_t recibir_entero(int socket) {
     int size;
     void *buffer = recibir_buffer(&size, socket);
-    uint32_t tamanio;
+    int32_t tamanio;
     memcpy(&tamanio, buffer, size);
     free(buffer);
     return tamanio;

@@ -137,17 +137,30 @@ void marcar_pag_ocupada(int pid, int nro_pagina_en_memoria){
 
 /* ------ Auxiliares ------ */
 t_particion* encontrar_particion_de(int tabla_1n){
-	t_list *particiones = swap.particiones;
-    for (int i = 0; i < list_size(particiones); i++){
-    	t_particion* particion_aux = list_get(particiones,i);
+    int cantidad_de_particiones = list_size(swap.particiones);
+    for (int i = 0; i < cantidad_de_particiones; i++){
+    	t_particion* particion_aux = (t_particion *)list_get(swap.particiones,i);
         int id_tabla_1n_aux = particion_aux->fcb->id_tabla;
         if (tabla_1n == id_tabla_1n_aux){
-        	return list_get(particiones,i);
+        	return list_get(swap.particiones,i);
         }
     }
 
     return NULL;
 }
+
+int obtener_indice_particion(int tabla_1n){
+    int cantidad_de_particiones = list_size(swap.particiones);
+    for (int i = 0; i < cantidad_de_particiones; i++){
+        t_particion* particion_aux = (t_particion *)list_get(swap.particiones,i);
+        int id_tabla_1n_aux = particion_aux->fcb->id_tabla;
+        if (tabla_1n == id_tabla_1n_aux){
+            return i;
+        }
+    }
+    return UNDEFINED;
+}
+
 
 int obtener_nro_pagina_libre(t_particion* particion){
     for (int i = 0; i < list_size(particion->fcb->pags_en_archivo); i++){

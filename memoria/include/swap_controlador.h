@@ -11,6 +11,7 @@ void swapear_proceso(t_tabla_pagina *tabla_1n);
 
 /* ------ Auxiliares ------ */
 t_particion* encontrar_particion_de(int tabla_1n);
+int obtener_indice_particion(int tabla_1n);
 int obtener_nro_pagina_libre(t_particion* particion);
 int nro_pagina_en_swap(t_particion *particion, int nro_pag);
 void asignar_pagina_a(t_particion* particion, int nro_pagina);

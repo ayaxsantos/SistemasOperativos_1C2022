@@ -51,24 +51,23 @@ void iniciar_proceso(int socket_cliente) {
 }
 
 void terminar_proceso(int socket_cliente) {
-	uint32_t id_tabla = recibir_entero(socket_cliente);
+	int32_t id_tabla = recibir_entero(socket_cliente);
     pthread_mutex_lock(&mutex_logger);
     log_info(logger_memoria,"Llego un FIN_PROCESO para el proceso con id tabla primer nivel %d", id_tabla);
     pthread_mutex_unlock(&mutex_logger);
 	t_tabla_pagina* tabla_1n = list_get(tablas_primer_nivel, (int)id_tabla);
 
+    destruir_archivo((int)id_tabla);
 	liberar_tabla_principal(tabla_1n);
 
 	t_operacion *operacion = crear_operacion(FIN_PROCESO_MEMORIA);
 	setear_operacion(operacion,&id_tabla);
 	enviar_operacion(operacion,socket_cliente);
 	eliminar_operacion(operacion);
-
-	destruir_archivo((int)id_tabla);
 }
 
 void suspender_proceso(int socket_cliente) {
-	int32_t id_tabla_1n = (int32_t)recibir_entero(socket_cliente);
+	int32_t id_tabla_1n = recibir_entero(socket_cliente);
     pthread_mutex_lock(&mutex_logger);
     log_warning(logger_memoria,"Llego un SUSPENSION_PROCESO para el proceso con id tabla primer nivel %d", id_tabla_1n);
     pthread_mutex_unlock(&mutex_logger);
