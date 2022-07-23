@@ -85,6 +85,9 @@ void transicionar_proceso_a_ready(t_proceso *un_proceso)
 
 void finalizar_proceso_ejecutando()
 {
+
+    pthread_cancel(*proceso_en_exec->hilo_suspension);
+
     t_operacion *operacion = crear_operacion(FIN_PROCESO_MEMORIA);
     setear_operacion(operacion,&(proceso_en_exec->un_pcb->id_tabla_1n));
     enviar_operacion(operacion,proceso_en_exec->mi_socket_memoria);
@@ -105,10 +108,8 @@ void finalizar_proceso_ejecutando()
 
     responder_fin_proceso(proceso_en_exec->comunicacion_proceso->socket_proceso);
 
-    transicionar_proceso_a_exit();
-
     pthread_mutex_lock(&mutex_proceso_exec);
-    proceso_en_exec = NULL;
+    transicionar_proceso_a_exit();
     pthread_mutex_unlock(&mutex_proceso_exec);
 
     sem_post(&grado_multiprog_lo_permite);
@@ -123,11 +124,14 @@ void transicionar_proceso_a_exit()
     free(proceso_en_exec->un_pcb->consola);
     free(proceso_en_exec->un_pcb);
     pthread_mutex_destroy(&proceso_en_exec->comunicacion_proceso->mutex_socket_proceso);
+    pthread_mutex_destroy(&proceso_en_exec->mutex_proceso);
     free(proceso_en_exec->comunicacion_proceso->hilo_com_proceso);
     free(proceso_en_exec->comunicacion_proceso);
     free(proceso_en_exec->hilo_suspension);
 
     free(proceso_en_exec);
+
+    proceso_en_exec = NULL;
 }
 
 /////////////////////////////////////////////////

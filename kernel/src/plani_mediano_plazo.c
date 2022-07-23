@@ -8,9 +8,9 @@ void *monitorear_estado_y_tiempo_pri(void *un_proceso_param)
     //Nos habia quedado en segundos...
     usleep(una_config_kernel.tiempo_max_bloqueado * 1000000);
 
-    pthread_mutex_lock(&un_proceso->mutex_proceso);
+    pthread_mutex_lock(&(un_proceso->mutex_proceso));
     int un_pid = un_proceso->un_pcb->pid;
-    pthread_mutex_unlock(&un_proceso->mutex_proceso);
+    pthread_mutex_unlock(&(un_proceso->mutex_proceso));
 
     if(el_proceso_esta_bloqueado(un_proceso))
     {
