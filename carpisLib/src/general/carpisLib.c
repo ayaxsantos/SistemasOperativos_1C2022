@@ -176,7 +176,7 @@ t_proceso_pcb *deserializar_proceso_pcb(int socket)
     int size;
     void *buffer = recibir_buffer(&size,socket);
 
-    t_proceso_pcb *un_proceso_pcb = malloc(sizeof(un_proceso_pcb));
+    t_proceso_pcb *un_proceso_pcb = malloc(sizeof(t_proceso_pcb));
     un_proceso_pcb->pcb = deserializar_pcb(buffer);
     size-=sizeof(int);
     memcpy(&(un_proceso_pcb->tiempo_bloqueo), buffer+size, sizeof(int));
