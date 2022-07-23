@@ -106,7 +106,10 @@ void finalizar_proceso_ejecutando()
     responder_fin_proceso(proceso_en_exec->comunicacion_proceso->socket_proceso);
 
     transicionar_proceso_a_exit();
+
+    pthread_mutex_lock(&mutex_proceso_exec);
     proceso_en_exec = NULL;
+    pthread_mutex_unlock(&mutex_proceso_exec);
 
     sem_post(&grado_multiprog_lo_permite);
 }

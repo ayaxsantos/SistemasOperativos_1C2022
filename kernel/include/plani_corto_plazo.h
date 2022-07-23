@@ -26,12 +26,14 @@ void gestionar_pcb();
 
 bool hay_que_desalojar(t_proceso *);
 bool no_hay_procesos_en_ready();
+bool hay_algun_proceso_ejecutando();
 void solicitar_desalojo_a_cpu();
 double calcular_tiempo_ejecutando();
 void *rutina_monitoreo_desalojo(void *);
 void mostrar_procesos_en_ready(t_proceso *un_proceso);
 
 time_t tiempoF, tiempoI;
+pthread_mutex_t mutex_aux;
 
 //TEMPORAL, SOLO PARA FUNCION DE TEST
 int flag_interrupt;

@@ -79,6 +79,7 @@ bool el_proceso_esta_bloqueado(t_proceso *un_proceso)
     pthread_mutex_lock(&un_proceso->mutex_proceso);
     bool una_condicion = un_proceso->un_pcb->un_estado == BLOCKED;
     pthread_mutex_unlock(&un_proceso->mutex_proceso);
+
     return una_condicion;
 }
 

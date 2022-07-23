@@ -71,6 +71,8 @@ pthread_mutex_t mutex_procesos_en_susp_ready;
 pthread_mutex_t mutex_procesos_en_bloq;
 pthread_mutex_t mutex_socket_dispatch;
 pthread_mutex_t mutex_contador_pid;
+pthread_mutex_t mutex_proceso_exec;
+pthread_mutex_t tiempo_inicial;
 
 sem_t grado_multiprog_lo_permite;
 sem_t llego_un_proceso;
