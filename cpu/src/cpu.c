@@ -51,7 +51,6 @@ void *ejecutar_pcb(void *arg) {
 	while(true) {
 
 		sem_wait(&sem_busqueda_proceso_nuevo);
-        log_info(logger_cpu,"Atendiendo nuevo PCB");
         pthread_mutex_lock(&mutex_flag_interrupcion);
         hay_interrupcion = false;
         pthread_mutex_unlock(&mutex_flag_interrupcion);
@@ -60,6 +59,9 @@ void *ejecutar_pcb(void *arg) {
 			case PCB:
                 proceso_pcb = deserializar_proceso_pcb(socket_kernel_dispatch);
                 pcb = proceso_pcb->pcb;
+                pthread_mutex_lock(&mutex_logger);
+                log_warning(logger_cpu, "Atendiendo nuevo proceso con PID %d ", pcb->pid);
+                pthread_mutex_unlock(&mutex_logger);
                 sem_post(&sem_ciclo_de_instruccion);
 				break;
             case -1:
@@ -81,9 +83,9 @@ void *ciclo_de_instruccion(void *arg) {
     while (true) {
         sem_wait(&sem_ciclo_de_instruccion);
 
-        //pthread_mutex_lock(&mutex_logger);
+        pthread_mutex_lock(&mutex_logger);
         log_info(logger_cpu,"Iniciando ciclo de instruccion");
-        //pthread_mutex_unlock(&mutex_logger);
+        pthread_mutex_unlock(&mutex_logger);
 
         t_instruccion *instruccion = (t_instruccion *) queue_pop(pcb->consola->instrucciones); // FETCH
 
@@ -110,17 +112,17 @@ void *ciclo_de_instruccion(void *arg) {
 void *ejecutar_interrupcion(void *arg) {
     int cpu_interrupt = iniciar_servidor(config_cpu.ip_cpu, config_cpu.puerto_escucha_interrupt);
     socket_kernel_interrupt = esperar_cliente(cpu_interrupt);
-    //pthread_mutex_lock(&mutex_logger);
+    pthread_mutex_lock(&mutex_logger);
     log_info(logger_cpu,"Puerto de interrupcion conectado");
-    //pthread_mutex_unlock(&mutex_logger);
+    pthread_mutex_unlock(&mutex_logger);
 	while(true) {
 
 		int operacion = recibir_operacion(socket_kernel_interrupt);
 
 		if(operacion == INTERRUPCION) {
-            //pthread_mutex_lock(&mutex_logger);
+            pthread_mutex_lock(&mutex_logger);
             log_warning(logger_cpu,"Hubo una interrupcion");
-            //pthread_mutex_unlock(&mutex_logger);
+            pthread_mutex_unlock(&mutex_logger);
             pthread_mutex_lock(&mutex_flag_interrupcion);
             hay_interrupcion =  recibir_interrupcion(socket_kernel_interrupt);
             pthread_mutex_unlock(&mutex_flag_interrupcion);
@@ -142,40 +144,55 @@ void ejecutar_instruccion(t_instruccion *instruccion, uint32_t valor_a_copiar) {
 
     switch (instruccion->instruc) {
         case NO_OP:
+            pthread_mutex_lock(&mutex_logger);
             log_info(logger_cpu,"CPU ejecutando NO_OP -> PID: %d", pcb->pid);
+            pthread_mutex_unlock(&mutex_logger);
             resultado = usleep(config_cpu.retardo_noop * 1000);
-            if(resultado == -1 )
+            if(resultado == -1 ) {
+                pthread_mutex_lock(&mutex_logger);
                 log_error(logger_cpu, "Error al realizar usleep");
+                pthread_mutex_unlock(&mutex_logger);
+            }
             chequear_si_hay_interrupcion();
            break;
 
         case IO:
+            pthread_mutex_lock(&mutex_logger);
             log_info(logger_cpu,"CPU ejecutando IO -> PID %d", pcb->pid);
+            pthread_mutex_unlock(&mutex_logger);
         	proceso_pcb->tiempo_bloqueo = instruccion->parametro1;
         	operacion_a_enviar = BLOQUEO;
            break;
 
         case READ:
+            pthread_mutex_lock(&mutex_logger);
             log_info(logger_cpu,"CPU ejecutando READ en la direccion: %d", instruccion->parametro1);
         	log_info(logger_cpu, "Valor leido de memoria: %i ",obtener_dato_memoria(instruccion->parametro1));
-        	chequear_si_hay_interrupcion();
+            pthread_mutex_unlock(&mutex_logger);
+            chequear_si_hay_interrupcion();
            break;
 
         case WRITE:
+            pthread_mutex_lock(&mutex_logger);
             log_info(logger_cpu,"CPU ejecutando WRITE en la direccion: %d", instruccion->parametro1);
-        	escribir_dato_memoria(instruccion->parametro1, instruccion->parametro2);
+            pthread_mutex_unlock(&mutex_logger);
+            escribir_dato_memoria(instruccion->parametro1, instruccion->parametro2);
         	chequear_si_hay_interrupcion();
            break;
 
         case COPY:
+            pthread_mutex_lock(&mutex_logger);
             log_info(logger_cpu,"CPU ejecutando COPY en la direccion: %d con el valor de la direccion %d ", instruccion->parametro1, instruccion->parametro2);
-        	escribir_dato_memoria(instruccion->parametro1, valor_a_copiar);
+            pthread_mutex_unlock(&mutex_logger);
+            escribir_dato_memoria(instruccion->parametro1, valor_a_copiar);
         	chequear_si_hay_interrupcion();
            break;
 
         case I_EXIT:
+            pthread_mutex_lock(&mutex_logger);
             log_info(logger_cpu,"CPU ejecutando EXIT -> PID %d", pcb->pid);
-			proceso_pcb->tiempo_bloqueo = UNDEFINED;
+            pthread_mutex_unlock(&mutex_logger);
+            proceso_pcb->tiempo_bloqueo = UNDEFINED;
 			operacion_a_enviar = FIN_PROCESO;
            break;
     }
@@ -189,7 +206,9 @@ void desalojar_cpu() {
         free(proceso_pcb->pcb);
 		free(proceso_pcb);
         limpiar_tlb();
+        pthread_mutex_lock(&mutex_logger);
         log_warning(logger_cpu, "Desalojando PCB");
+        pthread_mutex_unlock(&mutex_logger);
 		sem_post(&sem_busqueda_proceso_nuevo);
 }
 
@@ -199,10 +218,13 @@ bool hay_que_desalojar_cpu() {
 
 void chequear_si_hay_interrupcion() {
 
+    pthread_mutex_lock(&mutex_flag_interrupcion);
 	if(hay_interrupcion) {
+        pthread_mutex_unlock(&mutex_flag_interrupcion);
 		sem_post(&sem_interrupt);
         sem_wait(&sem_interrupt_fin);
 	} else {
+        pthread_mutex_unlock(&mutex_flag_interrupcion);
 		sem_post(&sem_ciclo_de_instruccion);
 	}
 }
