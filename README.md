@@ -17,14 +17,12 @@ El objetivo del presente, es realizar una simulacion de un sistema distribuido, 
 ```
 
 - Ejecutar cada uno de los modulos en el siguiente orden:
-    1) - Memoria
-    2) - CPU
-    3) - Kernel
-    4) - Consola (instancias deseadas)
+    1) Memoria
+    2) CPU
+    3) Kernel
+    4) Consola (instancias deseadas)
 
-## Ejecucion de cada modulo:
-
-### Memoria:
+## Modulo MEMORIA:
 
 Recibe los pedidos para lectura/escritura en tablas de paginas o porciones del espacio de usuario de la memoria. Utiliza paginacion jerarquica de dos niveles, e implementa memoria virtual haciendo uso de paginacion bajo demanda.
 
@@ -36,9 +34,17 @@ Algoritmos de reemplazo:
 ./bin/memoria.out [archivo_de_configuracion] 
 ```
 
----
+## Modulo CPU:
 
-### Kernel:
+Interpreta y ejecuta las instrucciones del proceso correspondiente a ejecutar, simulando un ciclo de instruccion tradicional. Ademas, simula las operaciones de una MMU desponiendo de una TLB para la traduccion de direcciones logicas a fisicas. 
+
+Para ejecutar:
+
+```bash
+./bin/cpu.out [archivo_de_configuracion] 
+```
+
+## Modulo KERNEL:
 
 Encargado de realizar la planificacion de los distintos procesos que ingresan al sistema. Por tal motivo, esta compuesto de:
 - Planificador de largo plazo
@@ -51,21 +57,7 @@ Para ejecutar:
 ./bin/kernel.out [archivo_de_configuracion] 
 ```
 
----
-
-### CPU:
-
-Interpreta y ejecuta las instrucciones del proceso correspondiente a ejecutar, simulando un ciclo de instruccion tradicional. Ademas, simula las operaciones de una MMU desponiendo de una TLB para la traduccion de direcciones logicas a fisicas. 
-
-Para ejecutar:
-
-```bash
-./bin/cpu.out [archivo_de_configuracion] 
-```
-
----
-
-### Consola:
+## Modulo CONSOLA:
 
 Es el punto de entrada del sistema, parseando un archivo con codigo fuente. Las operaciones disponibles, representadas por mnemonicos, son las siguientes:
 
