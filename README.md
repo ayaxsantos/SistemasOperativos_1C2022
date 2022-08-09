@@ -2,6 +2,9 @@
 
 Grupo: CarpinchOS Reloaded
 
+[Enunciado](https://docs.google.com/document/d/17WP76Vsi6ZrYlpYT8xOPXzLf42rQgtyKsOdVkyL5Jj0) | 
+[Documento de pruebas](https://docs.google.com/document/d/1SBBTCweMCiBg6TPTt7zxdinRh4ealRasbu0bVlkty5o)
+
 ## Introduccion:
 
 Trabajo practico correspondiente a la asignatura obligatoria "Sistemas Operativos", perteneciente al tercer año de la carrera Ingenieria en Sistemas de Informacion de la UTN FRBA.
@@ -30,6 +33,8 @@ Algoritmos de reemplazo:
 - Clock
 - Clock modificado
 
+Para ejecutar:
+
 ```bash
 ./bin/memoria.out [archivo_de_configuracion] 
 ```
@@ -37,6 +42,10 @@ Algoritmos de reemplazo:
 ## Modulo CPU:
 
 Interpreta y ejecuta las instrucciones del proceso correspondiente a ejecutar, simulando un ciclo de instruccion tradicional. Ademas, simula las operaciones de una MMU desponiendo de una TLB para la traduccion de direcciones logicas a fisicas. 
+
+Algoritmos de reemplazo:
+- FIFO
+- LRU
 
 Para ejecutar:
 
