@@ -1,6 +1,6 @@
 # TP Sistemas Operativos - 1° Cuatrimestre 2022 (KISS)
 
-Grupo: CarpinchOS Reloaded
+Grupo: CarpinchOS Reloaded 😂
 
 [Enunciado](https://docs.google.com/document/d/17WP76Vsi6ZrYlpYT8xOPXzLf42rQgtyKsOdVkyL5Jj0) | 
 [Documento de pruebas](https://docs.google.com/document/d/1SBBTCweMCiBg6TPTt7zxdinRh4ealRasbu0bVlkty5o)
@@ -9,7 +9,7 @@ Grupo: CarpinchOS Reloaded
 
 Trabajo practico correspondiente a la asignatura obligatoria "Sistemas Operativos", perteneciente al tercer año de la carrera Ingenieria en Sistemas de Informacion de la UTN FRBA.
 
-El objetivo del presente, es realizar una simulacion de un sistema distribuido, implementando de forma practica diferentes conceptos y estrategias que utilizan los Sistemas Operativos. 
+El objetivo del presente, es realizar una simulacion de un sistema distribuido, implementando de forma practica diferentes conceptos y estrategias (con ciertas simplificaciones acordes al tiempo de desarrollo) que utilizan los Sistemas Operativos. 
 
 ## Despliegue:
 
